@@ -2,8 +2,8 @@
   "version": 1,
   "updated": "2026-06-20",
   "account_start_date": "2026-06-20",
-  "timezone": "America/New_York",
-  "brand_focus": "Cooking tips, recipes, and marinades with AI-styled ingredient photography. Goal: grow followers fast-but-safe by making every post highly shareable (sent to a friend) and saveable.",
+  "timezone": "Europe/Amsterdam",
+  "brand_focus": "Cooking tips, recipes, and marinades with AI-styled ingredient photography. Audience is Europe-first, US a strong second. Goal: grow followers fast-but-safe by making every post highly shareable (sent to a friend) and saveable.",
   "cadence": {
     "posts_per_week": 4,
     "max_posts_per_day": 1
@@ -11,10 +11,10 @@
   "tolerance_minutes": 90,
   "jitter_minutes": 12,
   "slots": [
-    {"weekday": 1, "hour": 12, "minute": 0, "format": "image", "theme": "marinade", "note": "Tue lunch / meal-plan window — strong food engagement day."},
-    {"weekday": 2, "hour": 12, "minute": 0, "format": "carousel", "theme": "quick-dinner", "note": "Wed midday is the single best food slot; carousel = save-bait recipe."},
-    {"weekday": 3, "hour": 9, "minute": 0, "format": "image", "theme": "technique", "note": "Thu morning — strong global slot; breakfast/meal-plan intent."},
-    {"weekday": 5, "hour": 9, "minute": 0, "format": "image", "theme": "weekend-cook", "note": "Sat brunch window — one of the few weekend slots that works for food."}
+    {"weekday": 1, "hour": 18, "minute": 30, "format": "image", "theme": "marinade", "note": "Tue 18:30 CET — EU dinner-prep window; also = ~12:30 US Eastern lunch (dual EU/US coverage)."},
+    {"weekday": 2, "hour": 12, "minute": 30, "format": "carousel", "theme": "quick-dinner", "note": "Wed lunch — Wed is the strongest food day; carousel = save-bait recipe for EU meal-planning."},
+    {"weekday": 3, "hour": 19, "minute": 0, "format": "image", "theme": "technique", "note": "Thu 19:00 CET — EU evening; also = ~13:00 US Eastern lunch (dual coverage)."},
+    {"weekday": 5, "hour": 11, "minute": 30, "format": "image", "theme": "weekend-cook", "note": "Sat late-morning — EU weekend brunch / what-to-cook intent."}
   ],
   "content_plan": {
     "marinade": "One complete marinade: ingredients with memorable ratios, what it's best on, and exactly how long to marinate (food-safe times). Built to be saved.",
@@ -25,8 +25,8 @@
     "sauce": "A versatile sauce, dressing, or glaze with ratios people can memorize.",
     "pantry": "An ingredient spotlight or a smart prep / pantry tip."
   },
-  "caption_strategy": "Open with a keyword-rich first line someone would actually search ('garlic honey chicken marinade, ready in 10 minutes') — Instagram search/SEO now reads captions. Keep the body skimmable with simple measurements. Always include one explicit beat that drives the top growth signals: 'save this for later' and/or 'send this to whoever cooks dinner'.",
+  "caption_strategy": "Open with a keyword-rich first line someone would actually search ('garlic honey chicken marinade, ready in 10 minutes') — Instagram search/SEO now reads captions. Keep the body skimmable. Because the audience is Europe-first with a strong US second, give measurements in metric (g/ml) with US cups/oz in parentheses where it helps, and keep ingredients widely available on both sides of the Atlantic. Always include one explicit beat that drives the top growth signals: 'save this for later' and/or 'send this to whoever cooks dinner'.",
   "hashtag_strategy": "Use 3-5 highly relevant hashtags, chosen fresh per post (never a reused block). Favor mid-size niche tags (~10K-500K posts) over mega-tags. Mix one or two niche-community tags, one format tag, and one topic tag matching the dish.",
-  "learnings": "COLD START (first weeks, ~0 followers, little data): the algorithm auditions every post against non-followers, so follower count is irrelevant — optimize 100% for shareability and saves. Lead with the finished dish / strongest visual. Keep captions search-friendly. Stay consistent on the 4-slot slate; don't blast volume early. As real Insights accumulate, this note gets rewritten toward what actually performs.",
+  "learnings": "COLD START (first weeks, ~0 followers, little data): the algorithm auditions every post against non-followers, so follower count is irrelevant — optimize 100% for shareability and saves. Lead with the finished dish / strongest visual. Keep captions search-friendly. Audience is Europe-first, US strong second: the evening EU slots (Tue/Thu) deliberately double as US-midday, so keep topics and ingredients trans-Atlantic. Stay consistent on the 4-slot slate; don't blast volume early. As real Insights accumulate, this note gets rewritten toward what actually performs — including shifting times if your followers skew to one region.",
   "next_review": "2026-06-27"
 }
