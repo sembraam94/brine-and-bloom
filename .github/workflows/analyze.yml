@@ -1,0 +1,69 @@
+# .github/workflows/analyze.yml
+#
+# The measure-and-adapt brain. Runs once a day: pulls the live follower count
+# and every recent post's Insights into history.json / followers.json, and once
+# a week asks Claude to rewrite strategy.json toward what's actually working.
+#
+# These daily commits are also what keep the repo "active" so GitHub never
+# auto-disables the hourly poster's schedule.
+
+name: Brine & Bloom — daily analyzer
+
+on:
+  schedule:
+    # 04:30 UTC daily — after the day's posts have had time to gather engagement.
+    - cron: "30 4 * * *"
+  workflow_dispatch:
+    inputs:
+      strategize:
+        description: "Force a strategy rewrite now (yes/no)"
+        required: false
+        default: "no"
+
+# Shares the poster's concurrency group so the two never push at the same time.
+concurrency:
+  group: ig-state
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Measure performance and adapt the strategy
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          IG_USER_ID:        ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN:   ${{ secrets.IG_ACCESS_TOKEN }}
+        run: |
+          if [ "${{ github.event.inputs.strategize }}" = "yes" ]; then
+            python analyze.py --strategize
+          else
+            python analyze.py
+          fi
+
+      - name: Commit metrics and strategy
+        run: |
+          git config user.name  "brine-and-bloom-bot"
+          git config user.email "actions@github.com"
+          git add history.json followers.json strategy.json
+          if git diff --cached --quiet; then
+            echo "Nothing changed this run."
+            exit 0
+          fi
+          git commit -m "analyze: metrics + strategy for $(date -u +%Y-%m-%d)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash && git push && exit 0
+            echo "push failed (attempt $i), retrying..."; sleep $((RANDOM % 8 + 2))
+          done
+          echo "Could not push state after retries" >&2; exit 1

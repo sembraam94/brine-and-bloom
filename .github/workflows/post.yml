@@ -1,0 +1,68 @@
+# .github/workflows/post.yml
+#
+# The autonomous poster. Runs EVERY HOUR but almost always does nothing: each
+# run just checks whether "now" is one of the slots in strategy.json and exits
+# in ~30s if not. When it IS a slot, it generates and publishes one post, then
+# commits the updated history.json back to the repo.
+#
+# Why hourly instead of a fixed daily cron: the posting schedule (which days,
+# which hours, how many per week) lives in strategy.json and is rewritten
+# automatically by the analyzer. Hourly + in-script gating lets the strategy
+# change the schedule with zero edits to this file. The committed state also
+# counts as repo activity, which stops GitHub auto-disabling the schedule.
+
+name: Brine & Bloom — hourly poster
+
+on:
+  schedule:
+    # :05 to dodge the top-of-hour load spike (scheduled runs drift/drop at :00).
+    # Use "5 6-21 * * *" instead to only check daytime hours and save Actions minutes.
+    - cron: "5 * * * *"
+  workflow_dispatch:        # manual run (used for the FORCE=1 setup test)
+
+# Serialize the poster and the analyzer so they never push to the state files at
+# the same time. cancel-in-progress:false lets an in-flight publish finish.
+concurrency:
+  group: ig-state
+  cancel-in-progress: false
+
+permissions:
+  contents: write           # needed to push the updated history.json
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Generate and publish the post (no-op if not a slot)
+        env:
+          ANTHROPIC_API_KEY:   ${{ secrets.ANTHROPIC_API_KEY }}
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          IG_USER_ID:          ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN:     ${{ secrets.IG_ACCESS_TOKEN }}
+          # DRY_RUN: "1"       # uncomment to test without publishing
+          # FORCE: "1"         # uncomment to post immediately, ignoring the schedule
+        run: python autopost.py
+
+      - name: Commit post history
+        run: |
+          git config user.name  "brine-and-bloom-bot"
+          git config user.email "actions@github.com"
+          git add history.json
+          if git diff --cached --quiet; then
+            echo "No new post this run — nothing to commit."
+            exit 0
+          fi
+          git commit -m "post: log run for $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash && git push && exit 0
+            echo "push failed (attempt $i), retrying..."; sleep $((RANDOM % 8 + 2))
+          done
+          echo "Could not push history after retries" >&2; exit 1

@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "updated": "2026-06-20",
+  "account_start_date": "2026-06-20",
+  "timezone": "America/New_York",
+  "brand_focus": "Cooking tips, recipes, and marinades with AI-styled ingredient photography. Goal: grow followers fast-but-safe by making every post highly shareable (sent to a friend) and saveable.",
+  "cadence": {
+    "posts_per_week": 4,
+    "max_posts_per_day": 1
+  },
+  "tolerance_minutes": 90,
+  "jitter_minutes": 12,
+  "slots": [
+    {"weekday": 1, "hour": 12, "minute": 0, "format": "image", "theme": "marinade", "note": "Tue lunch / meal-plan window — strong food engagement day."},
+    {"weekday": 2, "hour": 12, "minute": 0, "format": "carousel", "theme": "quick-dinner", "note": "Wed midday is the single best food slot; carousel = save-bait recipe."},
+    {"weekday": 3, "hour": 9, "minute": 0, "format": "image", "theme": "technique", "note": "Thu morning — strong global slot; breakfast/meal-plan intent."},
+    {"weekday": 5, "hour": 9, "minute": 0, "format": "image", "theme": "weekend-cook", "note": "Sat brunch window — one of the few weekend slots that works for food."}
+  ],
+  "content_plan": {
+    "marinade": "One complete marinade: ingredients with memorable ratios, what it's best on, and exactly how long to marinate (food-safe times). Built to be saved.",
+    "quick-dinner": "A genuinely fast (~30 min) weeknight recipe with a short ingredient list. As a carousel: ingredients -> key step -> finished dish. End on 'save this for a busy night'.",
+    "technique": "One practical technique or kitchen tip in a few clear steps. Make it the kind of thing people send to a friend who'd find it useful.",
+    "weekend-cook": "A slightly more ambitious recipe worth the weekend time — the 'impressive but doable' post.",
+    "flavor": "A flavor pairing or single-spice spotlight: what it tastes like and three ways to use it.",
+    "sauce": "A versatile sauce, dressing, or glaze with ratios people can memorize.",
+    "pantry": "An ingredient spotlight or a smart prep / pantry tip."
+  },
+  "caption_strategy": "Open with a keyword-rich first line someone would actually search ('garlic honey chicken marinade, ready in 10 minutes') — Instagram search/SEO now reads captions. Keep the body skimmable with simple measurements. Always include one explicit beat that drives the top growth signals: 'save this for later' and/or 'send this to whoever cooks dinner'.",
+  "hashtag_strategy": "Use 3-5 highly relevant hashtags, chosen fresh per post (never a reused block). Favor mid-size niche tags (~10K-500K posts) over mega-tags. Mix one or two niche-community tags, one format tag, and one topic tag matching the dish.",
+  "learnings": "COLD START (first weeks, ~0 followers, little data): the algorithm auditions every post against non-followers, so follower count is irrelevant — optimize 100% for shareability and saves. Lead with the finished dish / strongest visual. Keep captions search-friendly. Stay consistent on the 4-slot slate; don't blast volume early. As real Insights accumulate, this note gets rewritten toward what actually performs.",
+  "next_review": "2026-06-27"
+}
