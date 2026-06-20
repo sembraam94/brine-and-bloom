@@ -1,0 +1,7 @@
+# Keep scripts LF so the workflow shell steps run correctly on the Linux runner,
+# even if the repo is edited on Windows.
+* text=auto eol=lf
+*.py   text eol=lf
+*.yml  text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
