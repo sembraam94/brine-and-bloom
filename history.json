@@ -1,0 +1,24 @@
+{
+  "posts": [
+    {
+      "slot_key": "forced-2026-06-22-17",
+      "date_utc": "2026-06-22T15:31:54.502997+00:00",
+      "local_date": "2026-06-22",
+      "weekday": 1,
+      "slot_hour": 18,
+      "format": "image",
+      "theme": "marinade",
+      "title": "garlic-honey-soy chicken marinade",
+      "hashtags": [
+        "#chickenmarinade",
+        "#marinaderecipe",
+        "#garlicchicken",
+        "#mealpreptips",
+        "#easydinnerideas"
+      ],
+      "media_id": "18010678514876923",
+      "metrics": {},
+      "measured_at": null
+    }
+  ]
+}
