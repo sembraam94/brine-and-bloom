@@ -54,14 +54,17 @@ BRAND_NAME = "Brine & Bloom"
 # varied per-post composition is requested in call_claude() so the feed does not
 # look templated/synthetic (an Instagram automation flag — see README safety).
 STYLE_SUFFIX = (
-    "Editorial overhead flat-lay food photography. Soft, diffused natural "
-    "daylight raking in from one side. Ingredients arranged with intentional "
-    "negative space on a textured natural surface — pale linen, weathered light "
-    "wood, or matte stoneware. Warm, fresh, gently desaturated color grade. "
-    "Fresh herbs, citrus, or whole spices accenting the frame. A small ceramic "
-    "dish of marinade or oil as a recurring prop. Crisp focus, shallow depth of "
-    "field. No text, no hands, no people, no logos, no labels. "
-    "Photorealistic — looks like a genuine photograph, not a render."
+    "Appetizing, mouth-watering food photography that makes the viewer instantly "
+    "hungry — the finished, beautifully styled dish is the hero of the frame. "
+    "Fresh and vibrant, with rich texture and depth: glossy glazes, juicy "
+    "surfaces, golden edges, a little steam or a drizzle where it fits. Soft, "
+    "diffused natural daylight from one side with gentle shadows. Shot close on a "
+    "three-quarter or slightly overhead angle, shallow depth of field so the food "
+    "pops against a softly blurred warm background — pale linen, weathered wood, "
+    "or matte stoneware, with a few fresh ingredient accents (herbs, citrus, "
+    "spices). Warm, rich, natural color grade. No text, no hands, no people, no "
+    "logos, no labels. Photorealistic — a genuine, professional food photograph, "
+    "not a render."
 )
 
 # Plain-text AI disclosure appended to every caption. Satisfies the EU AI Act
@@ -297,7 +300,7 @@ Return ONLY a JSON object with exactly these keys:
   "title": "short internal label (used to avoid repeats); not shown publicly",
   "caption": "the full Instagram caption. Keyword-rich first line for search, then the tip/recipe in clean skimmable lines with simple measurements, then a clear save/share call-to-action. Do NOT put hashtags in here. Keep under 1800 characters.",
   "hashtags": ["3 to {MAX_HASHTAGS} hashtags, each starting with #. Mid-size niche tags preferred. Vary them from post to post — never reuse the same block."],
-  "image_prompts": ["{n_images} vivid prompt(s) describing the SUBJECT and COMPOSITION only — the raw ingredients / dish laid out beautifully. Vary composition between posts. Do NOT describe lighting, camera, or art style; that is added automatically."]
+  "image_prompts": ["{n_images} vivid prompt(s) describing the SUBJECT and COMPOSITION only — feature the most CRAVE-WORTHY food in today's post as the hero: for a recipe, the FINISHED, cooked-and-plated dish (the actual food — e.g. glossy glazed chicken thighs — not a pile of raw ingredients), styled to make people hungry, with the key protein/component front and center. Vary the angle and composition between posts. Do NOT describe lighting, camera, or art style; that is added automatically."]
 }}
 
 Make today genuinely different from these recent posts (different recipe/technique/ingredient):
