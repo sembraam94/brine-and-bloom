@@ -302,7 +302,7 @@ Return ONLY a JSON object with exactly these keys:
   "title": "short internal label (used to avoid repeats); not shown publicly",
   "caption": "the full Instagram caption. Keyword-rich first line for search, then the tip/recipe in clean skimmable lines with simple measurements, then a clear save/share call-to-action. Do NOT put hashtags in here. Keep under 1800 characters.",
   "hashtags": ["3 to {MAX_HASHTAGS} hashtags, each starting with #. Mid-size niche tags preferred. Vary them from post to post — never reuse the same block."],
-  "image_prompts": ["{n_images} vivid prompt(s) describing the SUBJECT and COMPOSITION only — the FINISHED, crave-worthy dish (the actual cooked/plated food, e.g. glossy glazed chicken thighs) as the HERO in the center, styled to make people hungry, WITH the recipe's key raw ingredients named specifically (e.g. garlic cloves, a dish of honey-soy, fresh ginger, herbs, citrus) arranged around it to tell the story. Vary the angle and arrangement between posts. Do NOT describe lighting, camera, or art style; that is added automatically."]
+  "image_prompts": ["{n_images} vivid prompt(s) describing the SUBJECT and COMPOSITION only — the FINISHED, crave-worthy dish (the actual cooked/plated food) as the HERO in the center, styled to make people hungry, WITH the recipe's key raw ingredients named specifically (e.g. garlic cloves, a dish of honey-soy, fresh ginger, herbs, citrus) arranged around it to tell the story. Favor approachable, appetizing plating — bite-sized or sliced pieces that show the glaze and texture, rather than large whole cuts. Vary the plating, props, and angle from post to post so the feed has rhythm while keeping one consistent look. Do NOT describe lighting, camera, or art style; that is added automatically."]
 }}
 
 Make today genuinely different from these recent posts (different recipe/technique/ingredient):
@@ -678,6 +678,8 @@ def main():
         time.sleep(wait_s)
 
     print(f"Generating {len(image_prompts)} image(s)...")
+    for i, p in enumerate(image_prompts, 1):
+        print(f"  prompt {i}: {p}")
     image_urls = generate_images(image_prompts)
     for u in image_urls:
         print(f"  image: {u}")
