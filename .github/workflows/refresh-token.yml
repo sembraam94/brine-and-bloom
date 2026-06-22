@@ -1,0 +1,56 @@
+# .github/workflows/refresh-token.yml
+#
+# Keeps the Instagram access token alive forever, hands-off. IG tokens last
+# ~60 days; this refreshes weekly (well inside the window, and past the 24h
+# minimum age) and stores the fresh token back into the IG_ACCESS_TOKEN secret.
+#
+# REQUIRES one extra secret to update the token automatically:
+#   GH_PAT = a fine-grained Personal Access Token for THIS repo with
+#            "Secrets: Read and write" permission. (The default GITHUB_TOKEN
+#            cannot write secrets, so this is needed.)
+# Without GH_PAT the refresh still runs and verifies the token, but won't store
+# it — you'd refresh manually every ~50 days instead (see README Maintenance).
+
+name: Brine & Bloom — refresh IG token
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"        # weekly, Monday 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Refresh the long-lived token
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python refresh_token.py --out=new_token.txt
+
+      - name: Store the refreshed token in the secret
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "GH_PAT not set — refresh succeeded but the new token was NOT stored."
+            echo "Add a GH_PAT secret (fine-grained PAT with Secrets: write) for hands-off"
+            echo "operation, or refresh IG_ACCESS_TOKEN manually every ~50 days."
+            rm -f new_token.txt
+            exit 0
+          fi
+          TOKEN="$(cat new_token.txt)"
+          echo "::add-mask::$TOKEN"
+          gh secret set IG_ACCESS_TOKEN --body "$TOKEN" --repo "$GITHUB_REPOSITORY"
+          rm -f new_token.txt
+          echo "IG_ACCESS_TOKEN updated for another ~60 days."

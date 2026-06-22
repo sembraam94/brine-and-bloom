@@ -65,9 +65,11 @@ analyze.py                      # the analyzer + strategist
 strategy.json                   # THE PLAYBOOK — timing, cadence, themes, learnings (auto-rewritten)
 history.json                    # post log + per-post metrics (auto-created)
 followers.json                  # daily follower count timeline (auto-created)
+refresh_token.py                # keeps the Instagram token alive (called by the workflow)
 requirements.txt                # deps: requests, tzdata
-.github/workflows/post.yml      # hourly poster
-.github/workflows/analyze.yml   # daily analyzer
+.github/workflows/post.yml          # hourly poster
+.github/workflows/analyze.yml       # daily analyzer
+.github/workflows/refresh-token.yml # weekly token refresh
 .gitignore
 README.md                       # this file
 CLAUDE.md                       # notes for Claude Code working in the repo
@@ -77,46 +79,54 @@ CLAUDE.md                       # notes for Claude Code working in the repo
 
 ## What you'll need
 
-The same **four credentials**, stored as GitHub repository secrets (never in code):
+**Three credentials**, stored as GitHub repository secrets (never in code):
 
-| Secret name           | What it is                              | Where to get it |
-|-----------------------|-----------------------------------------|-----------------|
-| `ANTHROPIC_API_KEY`   | Claude — writes posts & the strategy    | console.anthropic.com |
-| `REPLICATE_API_TOKEN` | Flux — the image generator              | replicate.com → account → API tokens |
-| `IG_USER_ID`          | Your Instagram professional account ID  | Meta setup (below) |
-| `IG_ACCESS_TOKEN`     | Long-lived token to post on your behalf | Meta setup (below) |
+| Secret name           | What it is                                 | Where to get it |
+|-----------------------|--------------------------------------------|-----------------|
+| `ANTHROPIC_API_KEY`   | Claude — writes posts & the strategy       | console.anthropic.com |
+| `REPLICATE_API_TOKEN` | Flux — the image generator                 | replicate.com → account → API tokens |
+| `IG_ACCESS_TOKEN`     | Long-lived Instagram token (publish + read)| Meta setup (below) |
 
-*(No new secrets were added for the growth/analytics features — the same token
-that publishes also reads Insights and the follower count.)*
+The same Instagram token publishes posts *and* reads Insights + follower count.
+Your account ID is **derived from the token automatically**, so there's no
+separate `IG_USER_ID` to manage (set one as a secret only if you want to override).
+
+**Optional fourth secret** for fully hands-off token upkeep:
+
+| `GH_PAT` | A fine-grained GitHub PAT for this repo with **Secrets: read & write** | github.com → Settings → Developer settings → Personal access tokens |
+
+With `GH_PAT` set, the weekly `refresh-token.yml` workflow keeps `IG_ACCESS_TOKEN`
+alive forever on its own. Without it, you refresh manually every ~50 days (see
+Maintenance).
 
 ---
 
-## Step 1 — Instagram + Meta (the fiddly part; do this first)
+## Step 1 — Instagram token (the fiddly part; do this first)
 
-Instagram only allows automated posting through Meta's official Graph API, and
-only for **professional** accounts. Personal accounts cannot post via the API.
+We use the **Instagram API with Instagram Login** (`graph.instagram.com`). It
+needs only a **professional** Instagram account — **no Facebook Page required.**
 
-1. **Make the account.** Create the Instagram account (or use a fresh one). In
-   the app: Settings → switch to a **Professional account** → choose
-   **Business**.
-2. **Link a Facebook Page.** Create a Facebook Page and connect your Instagram
-   account to it. The API requires this link even though you'll never really use
-   the Page.
-3. **Create a Meta developer app.** developers.facebook.com → My Apps → Create
-   App → add the **Instagram** product.
-4. **Get your token and ID.** In Meta's Graph API Explorer (or the Instagram
-   Platform setup flow), request these permissions and generate a token:
-   `instagram_basic`, `instagram_content_publish`, and
-   `instagram_manage_insights` (the last one is needed for the analytics loop —
-   reading post Insights). Then exchange it for a **long-lived** token (~60
-   days). Grab your Instagram account's numeric ID at the same time.
-   Meta's guide: https://developers.facebook.com/docs/instagram-platform/content-publishing/
+1. **Make the account professional.** In the Instagram app: Settings → *Account
+   type and tools* → **Switch to professional account** → **Business**. (Creator
+   also works; Business is fine.) The account must be **public**.
+2. **Create a Meta developer app.** developers.facebook.com → My Apps → Create
+   App → **"Create an app without a use case"** (or any type) → create. Then on
+   the dashboard add the **Instagram** product and open **"API setup with
+   Instagram login."**
+3. **Enable the permissions.** Under that Instagram setup, make sure these scopes
+   are added: `instagram_business_basic`, `instagram_business_content_publish`,
+   `instagram_business_manage_insights` (the last unlocks the analytics loop).
+4. **Generate the token.** In **"1. Generate access tokens"** → **Add account**
+   → log in to your Instagram account and approve → then **Generate token**. You
+   get a **long-lived (~60-day) Instagram token**. That's your `IG_ACCESS_TOKEN`.
+   Meta's guide: https://developers.facebook.com/docs/instagram-platform/instagram-api-with-instagram-login/
 
-   > **You can skip the 2–4 week "App Review."** That review is only required to
-   > post to accounts you *don't* own. For your own account, add yourself as a
-   > tester / keep the app in development mode and it works immediately.
+   > **You can skip the 2–4 week "App Review."** Keep the app in **Development
+   > mode** with yourself as admin — it works immediately for your own account.
+   > (Review is only needed to act on accounts you don't own.)
 
-Put the numeric ID in `IG_USER_ID` and the long-lived token in `IG_ACCESS_TOKEN`.
+That long-lived token is the only Instagram secret you need — the code derives
+your account ID from it. No Facebook Page, no `me/accounts`, no numeric ID to copy.
 
 ## Step 2 — Anthropic key
 
@@ -137,15 +147,17 @@ payment method. This is `REPLICATE_API_TOKEN`.
 2. Push all the files (the layout above — keep `post.yml`/`analyze.yml` under
    `.github/workflows/`).
 3. **Settings → Secrets and variables → Actions → New repository secret** → add
-   all four secrets from the table (exact, case-sensitive names).
+   the three secrets (`ANTHROPIC_API_KEY`, `REPLICATE_API_TOKEN`,
+   `IG_ACCESS_TOKEN`) with exact, case-sensitive names. Optionally add `GH_PAT`
+   for automatic token refresh.
 
 ## Step 5 — Set your audience timezone (important)
 
-Open `strategy.json` and set `"timezone"` to your **audience's** timezone (IANA
-name, e.g. `America/New_York`, `Europe/Amsterdam`, `Europe/London`). The seed
-slots are tuned for a US food audience; if your audience is European, set the
-timezone and the strategist will adjust the slot hours from there. DST is handled
-automatically — you set a timezone, not a UTC offset.
+`strategy.json` ships set to **`Europe/Amsterdam`** with evening slots tuned for a
+**Europe-first, US-second** audience (the EU evening posts also land at US-Eastern
+lunch). To target a different audience, change `"timezone"` to its IANA name (e.g.
+`America/New_York`, `Europe/London`) and the strategist adjusts the slot hours from
+there. DST is handled automatically — you set a timezone, not a UTC offset.
 
 ## Step 6 — Test before going live
 
@@ -210,11 +222,14 @@ Roughly the price of a coffee or two per month, mostly the images.
 
 ## Maintenance (the "light upkeep" part)
 
-- **Token refresh (~every 60 days).** Meta's long-lived token expires. When runs
-  start failing with an auth error (code 190), mint a fresh long-lived token
-  (Step 1) and update the `IG_ACCESS_TOKEN` secret. Because the analyzer makes
-  an authenticated call **every day**, an expired token surfaces within a day via
-  a red, emailed run — you won't silently go dark for long.
+- **Token refresh (~every 60 days) — automatable.** The Instagram token expires
+  after 60 days. The included `refresh-token.yml` workflow refreshes it weekly;
+  **if you set the optional `GH_PAT` secret, this is fully hands-off** and the
+  token never dies. Without `GH_PAT`, refresh manually before ~day 50: run the
+  **refresh IG token** workflow (or Step 1 again) and paste the new value into the
+  `IG_ACCESS_TOKEN` secret. Either way, because the analyzer makes an
+  authenticated call **every day**, an expired token surfaces within a day via a
+  red, emailed run — you won't silently go dark for long.
 - **Monitoring is automatic.** A failed run emails you and shows red in Actions.
 - **The schedule stays alive by itself.** Daily analyzer commits + per-post
   commits count as activity, so GitHub won't auto-disable the schedule.

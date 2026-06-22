@@ -16,7 +16,7 @@ Actions and does three things:
 
 So the account literally learns what works and shifts toward it.
 
-Env: ANTHROPIC_API_KEY, IG_USER_ID, IG_ACCESS_TOKEN
+Env: ANTHROPIC_API_KEY, IG_ACCESS_TOKEN  (IG_USER_ID optional — derived from token)
 Flags:
     --strategize   force a strategy rewrite now (ignore the weekly cadence)
     --no-strategize  only collect metrics, never touch strategy.json
@@ -33,7 +33,8 @@ import requests
 from autopost import (
     BRAND_NAME, GRAPH_VERSION, CLAUDE_MODEL,
     STRATEGY_FILE, HISTORY_FILE,
-    env, load_strategy, load_history, save_history, now_utc, _graph_base,
+    env, load_strategy, load_history, save_history, now_utc,
+    _graph_base, _graph_node, resolve_ig_user_id,
     MAX_HASHTAGS,
 )
 
@@ -117,7 +118,7 @@ def fetch_media_insights(media_id, token):
     the whole pull."""
     def _request(metrics):
         r = requests.get(
-            f"https://graph.facebook.com/{GRAPH_VERSION}/{media_id}/insights",
+            f"{_graph_node(media_id)}/insights",
             params={"metric": ",".join(metrics), "access_token": token},
             timeout=60,
         )
@@ -433,8 +434,8 @@ def main():
 
     strategy = load_strategy()
     history = load_history()
-    ig_id = env("IG_USER_ID")
     token = env("IG_ACCESS_TOKEN")
+    ig_id = resolve_ig_user_id(token)
 
     print(f"[{BRAND_NAME}] analyze — {now_utc().date().isoformat()}")
 

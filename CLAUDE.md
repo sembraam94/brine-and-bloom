@@ -38,9 +38,11 @@ tolerance window AND that slot isn't already in history (slot_key dedupe) AND th
 daily cap isn't hit → generate and publish, else exit 0. When posting: Claude
 (`claude-sonnet-4-6`) writes title/caption/hashtags/image_prompts → Flux
 (`black-forest-labs/flux-1.1-pro`) renders 1 image (or 2–4 for a carousel) →
-publish via Graph API (`v24.0`: create container → poll status_code=FINISHED →
-media_publish; carousels use child + parent containers) → append the post (with
-media_id) to `history.json`.
+publish via the **Instagram API with Instagram Login** (`graph.instagram.com`,
+`v23.0`: create container → poll status_code=FINISHED → media_publish; carousels
+use child + parent containers) → append the post (with media_id) to `history.json`.
+The account id is derived from the token (`resolve_ig_user_id()` → /me?fields=user_id);
+no Facebook Page is involved.
 
 **`analyze.py` — daily analyzer/strategist.** Reads the live follower count
 (`followers_count` field — works below 100 followers) into `followers.json`;
@@ -60,9 +62,11 @@ analyze.py                      # analyzer + strategist (imports config from aut
 strategy.json                   # THE PLAYBOOK: timezone, cadence, slots, content_plan, learnings
 history.json                    # auto-created: post records + per-post metrics — do NOT hand-edit
 followers.json                  # auto-created: [{date, followers, media_count}]
+refresh_token.py                # refreshes the IG token (ig_refresh_token; no app secret)
 requirements.txt                # requests, tzdata
-.github/workflows/post.yml      # hourly cron, gating, commit-back
-.github/workflows/analyze.yml   # daily cron, metrics + strategy, commit-back
+.github/workflows/post.yml          # hourly cron, gating, commit-back
+.github/workflows/analyze.yml       # daily cron, metrics + strategy, commit-back
+.github/workflows/refresh-token.yml # weekly token refresh (needs GH_PAT to store it)
 .gitignore                      # ignores .env, __pycache__/, venv/
 README.md                       # human setup walkthrough
 CLAUDE.md                       # this file
@@ -113,8 +117,9 @@ GitHub Actions repository secrets. Never hardcode, commit, print, or log values.
 |-----------------------|--------------------|-------------------------------------------|
 | `ANTHROPIC_API_KEY`   | autopost + analyze | content generation + strategy rewriting   |
 | `REPLICATE_API_TOKEN` | autopost           | image generation                          |
-| `IG_USER_ID`          | autopost + analyze | Instagram professional account ID         |
-| `IG_ACCESS_TOKEN`     | autopost + analyze | publishing + reading Insights/followers   |
+| `IG_ACCESS_TOKEN`     | autopost + analyze | long-lived IG token: publish + insights + followers |
+| `IG_USER_ID`          | optional override  | derived from the token if unset (`resolve_ig_user_id`) |
+| `GH_PAT`              | refresh workflow   | optional; PAT with Secrets:write so refresh-token.yml can store the rotated token |
 
 ## Guardrails / conventions
 
@@ -144,7 +149,7 @@ GitHub Actions repository secrets. Never hardcode, commit, print, or log values.
 2. `.gitignore` covers secrets and venv/cache.
 3. `DRY_RUN=1 FORCE=1 python autopost.py` prints a sensible caption (≤5 hashtags,
    disclosure line) + valid public image URL(s).
-4. Human added the four secrets and confirmed one manual live run posts correctly.
+4. Human added the three secrets (+ optional `GH_PAT`) and confirmed one manual live run posts correctly.
 5. `strategy.json` `timezone` is set to the audience timezone.
 
 ## Extension backlog — only if the human asks
@@ -152,7 +157,9 @@ GitHub Actions repository secrets. Never hardcode, commit, print, or log values.
 - **Reels (video)** — the #1 2026 growth lever and the biggest gap; needs a video
   generation pipeline (and ideally audio/on-screen text) + the Graph `REELS`
   media_type. Largest, highest-impact extension.
-- **Auto-refresh the Meta token** monthly so the ~60-day expiry is hands-off.
+- **Token auto-refresh** — DONE via `refresh-token.yml` + `refresh_token.py`
+  (weekly `ig_refresh_token`; needs the optional `GH_PAT` secret to store the
+  rotated token).
 - **Text-on-image recipe cards** (PIL/Pillow) for stronger save-bait carousels.
 - **Trial Reels** (publish to non-followers only) for safe A/B testing once on
   video.

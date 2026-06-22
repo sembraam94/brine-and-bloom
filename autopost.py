@@ -20,7 +20,8 @@ no, it exits 0 immediately as a cheap no-op. So cadence and timing are 100%
 controlled by strategy.json with no workflow/cron edits ever needed.
 
 Env (set as GitHub Actions secrets — see README.md):
-    ANTHROPIC_API_KEY, REPLICATE_API_TOKEN, IG_USER_ID, IG_ACCESS_TOKEN
+    ANTHROPIC_API_KEY, REPLICATE_API_TOKEN, IG_ACCESS_TOKEN
+    (IG_USER_ID is optional — derived from the token if not set.)
 
 Control env (optional):
     DRY_RUN=1   generate everything, print what it WOULD post, do not publish
@@ -83,7 +84,12 @@ MAX_CAROUSEL_IMAGES = 4        # keep carousels tight; Graph allows up to 10.
 # Models / API versions (verified current as of 2026-06; see README).
 CLAUDE_MODEL = "claude-sonnet-4-6"                  # the brain. claude-haiku-4-5 is cheaper.
 REPLICATE_MODEL = "black-forest-labs/flux-1.1-pro"  # strong food realism, public output URL
-GRAPH_VERSION = "v24.0"        # pinned; v19/v20 are sunset. Bump deliberately.
+
+# Instagram API with Instagram Login. Every call goes to graph.instagram.com and
+# is authorized by IG_ACCESS_TOKEN (a long-lived Instagram User token — no Facebook
+# Page involved). The account id is derived from the token, so IG_USER_ID is optional.
+GRAPH_HOST = "https://graph.instagram.com"
+GRAPH_VERSION = "v23.0"        # pinned; bump deliberately.
 
 
 # =============================================================================
@@ -353,8 +359,38 @@ def generate_images(prompts):
 # Step 3 — publish to Instagram (single image or carousel)
 # =============================================================================
 
+def _graph_node(node):
+    return f"{GRAPH_HOST}/{GRAPH_VERSION}/{node}"
+
+
 def _graph_base(ig_id):
-    return f"https://graph.facebook.com/{GRAPH_VERSION}/{ig_id}"
+    return _graph_node(ig_id)
+
+
+_IG_USER_ID_CACHE = None
+
+
+def resolve_ig_user_id(token):
+    """The Instagram account id used in every publish/insights call. Uses the
+    IG_USER_ID env override if set; otherwise derives it from the token via
+    /me?fields=user_id. NOTE: it must be the `user_id` field, not the app-scoped
+    `id` field — using `id` is the classic bug in this flow."""
+    global _IG_USER_ID_CACHE
+    if os.environ.get("IG_USER_ID"):
+        return os.environ["IG_USER_ID"]
+    if _IG_USER_ID_CACHE:
+        return _IG_USER_ID_CACHE
+    r = requests.get(
+        _graph_node("me"),
+        params={"fields": "user_id,username", "access_token": token},
+        timeout=60,
+    )
+    r.raise_for_status()
+    uid = r.json().get("user_id")
+    if not uid:
+        sys.exit(f"Could not resolve IG user_id from token: {r.text}")
+    _IG_USER_ID_CACHE = str(uid)
+    return _IG_USER_ID_CACHE
 
 
 def last_media(ig_id, token):
@@ -426,7 +462,7 @@ def check_publishing_quota(ig_id, token):
 
 
 def _wait_for_container(container_id, token):
-    status_url = f"https://graph.facebook.com/{GRAPH_VERSION}/{container_id}"
+    status_url = _graph_node(container_id)
     for _ in range(20):
         r = requests.get(
             status_url,
@@ -445,8 +481,8 @@ def _wait_for_container(container_id, token):
 
 
 def post_to_instagram(image_urls, caption):
-    ig_id = env("IG_USER_ID")
     token = env("IG_ACCESS_TOKEN")
+    ig_id = resolve_ig_user_id(token)
     base = _graph_base(ig_id)
 
     check_publishing_quota(ig_id, token)
@@ -545,8 +581,8 @@ def main():
     # this slot but failed to commit history.json, the live account is the truth.
     # Record it and skip rather than double-posting. (Skipped for DRY/FORCE.)
     if not dry and not force:
-        ig_id = env("IG_USER_ID")
         ig_token = env("IG_ACCESS_TOKEN")
+        ig_id = resolve_ig_user_id(ig_token)
         live, live_id = slot_already_live(slot, local_now(strategy), ig_id, ig_token)
         if live:
             print(f"Slot {key} already published on the account "
