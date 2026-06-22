@@ -14,12 +14,12 @@
 name: Brine & Bloom — hourly poster
 
 on:
-  # AUTO-SCHEDULE PAUSED until the first post is verified + the profile is set.
-  # Re-enable by uncommenting the schedule block below (cron is UTC; :05 dodges
-  # the top-of-hour load spike; "5 6-21 * * *" = daytime only, saves minutes):
-  # schedule:
-  #   - cron: "5 * * * *"
-  workflow_dispatch:        # manual run — used for the setup test + first live post
+  schedule:
+    # cron is UTC; :05 dodges the top-of-hour load spike. The poster checks every
+    # hour and only posts when strategy.json says a slot is due.
+    # ("5 6-21 * * *" would check daytime hours only, to save Actions minutes.)
+    - cron: "5 * * * *"
+  workflow_dispatch:        # manual run — also used for the first live post
     inputs:
       force:
         description: "Post now, ignoring the schedule?"
