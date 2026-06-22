@@ -34,7 +34,7 @@ from autopost import (
     BRAND_NAME, GRAPH_VERSION, CLAUDE_MODEL,
     STRATEGY_FILE, HISTORY_FILE,
     env, load_strategy, load_history, save_history, now_utc,
-    _graph_base, _graph_node, resolve_ig_user_id,
+    _graph_base, _graph_node, resolve_ig_user_id, http,
     MAX_HASHTAGS,
 )
 
@@ -70,7 +70,8 @@ MIN_POSTS_PER_WEEK = 3
 def fetch_account(ig_id, token):
     """followers_count is a FIELD on the user node — works below 100 followers,
     unlike the follower_count *insights* metric (which needs 100+)."""
-    r = requests.get(
+    r = http(
+        "GET",
         _graph_base(ig_id),
         params={"fields": "followers_count,follows_count,media_count,username",
                 "access_token": token},
@@ -117,7 +118,8 @@ def fetch_media_insights(media_id, token):
     for this media), fall back to one-by-one so a single bad metric never wipes
     the whole pull."""
     def _request(metrics):
-        r = requests.get(
+        r = http(
+            "GET",
             f"{_graph_node(media_id)}/insights",
             params={"metric": ",".join(metrics), "access_token": token},
             timeout=60,
@@ -380,7 +382,8 @@ The number of slots should equal posts_per_week."""
                        "safe.\n\n" + json.dumps(payload, ensure_ascii=False, indent=2),
         }],
     }
-    resp = requests.post(
+    resp = http(
+        "POST",
         "https://api.anthropic.com/v1/messages",
         headers={
             "x-api-key": env("ANTHROPIC_API_KEY"),

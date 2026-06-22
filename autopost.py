@@ -104,6 +104,40 @@ def env(name):
     return value
 
 
+_RETRY_STATUS = {429, 500, 502, 503, 504}
+
+
+def http(method, url, *, retries=4, backoff=3, **kwargs):
+    """requests with retry/backoff on transient failures (429 / 5xx / network
+    blips). External APIs (Replicate, Anthropic, Instagram) all throw the
+    occasional 502 etc.; for an unattended bot we want those to self-heal rather
+    than fail a whole run. Returns the final Response (caller still calls
+    raise_for_status); re-raises the last network error if all attempts fail."""
+    last_exc = None
+    for attempt in range(retries + 1):
+        try:
+            resp = requests.request(method, url, **kwargs)
+            if resp.status_code in _RETRY_STATUS and attempt < retries:
+                wait = backoff * (2 ** attempt)
+                print(f"  {resp.status_code} from {url.split('?')[0]} — "
+                      f"retry {attempt + 1}/{retries} in {wait}s")
+                time.sleep(wait)
+                continue
+            return resp
+        except (requests.ConnectionError, requests.Timeout) as e:
+            last_exc = e
+            if attempt < retries:
+                wait = backoff * (2 ** attempt)
+                print(f"  {e.__class__.__name__} on {url.split('?')[0]} — "
+                      f"retry {attempt + 1}/{retries} in {wait}s")
+                time.sleep(wait)
+                continue
+            raise
+    if last_exc:
+        raise last_exc
+    return resp
+
+
 def _load_json(path, default):
     if os.path.exists(path):
         try:
@@ -280,7 +314,8 @@ Return the JSON and nothing else — no markdown fences, no commentary."""
         }],
     }
 
-    resp = requests.post(
+    resp = http(
+        "POST",
         "https://api.anthropic.com/v1/messages",
         headers={
             "x-api-key": env("ANTHROPIC_API_KEY"),
@@ -316,7 +351,8 @@ def generate_image(subject_prompt):
     full_prompt = f"{subject_prompt}\n\n{STYLE_SUFFIX}"
     token = env("REPLICATE_API_TOKEN")
 
-    resp = requests.post(
+    resp = http(
+        "POST",
         f"https://api.replicate.com/v1/models/{REPLICATE_MODEL}/predictions",
         headers={
             "Authorization": f"Bearer {token}",
@@ -336,7 +372,8 @@ def generate_image(subject_prompt):
 
     while prediction.get("status") not in ("succeeded", "failed", "canceled"):
         time.sleep(2)
-        poll = requests.get(
+        poll = http(
+            "GET",
             prediction["urls"]["get"],
             headers={"Authorization": f"Bearer {token}"},
             timeout=60,
@@ -380,7 +417,8 @@ def resolve_ig_user_id(token):
         return os.environ["IG_USER_ID"]
     if _IG_USER_ID_CACHE:
         return _IG_USER_ID_CACHE
-    r = requests.get(
+    r = http(
+        "GET",
         _graph_node("me"),
         params={"fields": "user_id,username", "access_token": token},
         timeout=60,
@@ -401,7 +439,8 @@ def last_media(ig_id, token):
     survives the publish-succeeded-but-git-push-failed case (a real risk that
     would otherwise double-post within the tolerance window)."""
     try:
-        r = requests.get(
+        r = http(
+            "GET",
             f"{_graph_base(ig_id)}/media",
             params={"fields": "timestamp", "limit": 1, "access_token": token},
             timeout=60,
@@ -445,7 +484,8 @@ def check_publishing_quota(ig_id, token):
     """Stop early if we've hit Instagram's rolling 24h publish cap (read live;
     currently 100, but the value is account/version dependent so we never hardcode)."""
     try:
-        r = requests.get(
+        r = http(
+            "GET",
             f"{_graph_base(ig_id)}/content_publishing_limit",
             params={"fields": "config,quota_usage", "access_token": token},
             timeout=60,
@@ -464,7 +504,8 @@ def check_publishing_quota(ig_id, token):
 def _wait_for_container(container_id, token):
     status_url = _graph_node(container_id)
     for _ in range(20):
-        r = requests.get(
+        r = http(
+            "GET",
             status_url,
             params={"fields": "status_code", "access_token": token},
             timeout=60,
@@ -488,7 +529,8 @@ def post_to_instagram(image_urls, caption):
     check_publishing_quota(ig_id, token)
 
     if len(image_urls) == 1:
-        create = requests.post(
+        create = http(
+            "POST",
             f"{base}/media",
             data={"image_url": image_urls[0], "caption": caption,
                   "access_token": token},
@@ -503,7 +545,8 @@ def post_to_instagram(image_urls, caption):
         # Carousel: a child container per image, then a parent that holds them.
         child_ids = []
         for url in image_urls[:MAX_CAROUSEL_IMAGES]:
-            child = requests.post(
+            child = http(
+                "POST",
                 f"{base}/media",
                 data={"image_url": url, "is_carousel_item": "true",
                       "access_token": token},
@@ -516,7 +559,8 @@ def post_to_instagram(image_urls, caption):
             _wait_for_container(cid, token)
             child_ids.append(cid)
 
-        parent = requests.post(
+        parent = http(
+            "POST",
             f"{base}/media",
             data={"media_type": "CAROUSEL", "children": ",".join(child_ids),
                   "caption": caption, "access_token": token},
@@ -528,7 +572,8 @@ def post_to_instagram(image_urls, caption):
             sys.exit(f"No carousel parent id returned: {parent.text}")
         _wait_for_container(container_id, token)
 
-    publish = requests.post(
+    publish = http(
+        "POST",
         f"{base}/media_publish",
         data={"creation_id": container_id, "access_token": token},
         timeout=120,
