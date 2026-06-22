@@ -80,6 +80,7 @@ RECENT_TO_AVOID = 30            # how many recent titles Claude is told to avoid
 MAX_HASHTAGS = 5               # Instagram caps posts at 5 hashtags (Dec 2025).
 MAX_CAPTION_CHARS = 2200       # Instagram caption hard limit.
 MAX_CAROUSEL_IMAGES = 4        # keep carousels tight; Graph allows up to 10.
+IMAGE_TIMEOUT_S = 300          # give up on a stuck Flux render after this many seconds
 
 # Models / API versions (verified current as of 2026-06; see README).
 CLAUDE_MODEL = "claude-sonnet-4-6"                  # the brain. claude-haiku-4-5 is cheaper.
@@ -370,8 +371,14 @@ def generate_image(subject_prompt):
     resp.raise_for_status()
     prediction = resp.json()
 
+    # Hard cap so a render stuck in Replicate's queue can't hang the whole job
+    # for hours — fail fast and let the next scheduled run retry instead.
+    deadline = time.monotonic() + IMAGE_TIMEOUT_S
     while prediction.get("status") not in ("succeeded", "failed", "canceled"):
-        time.sleep(2)
+        if time.monotonic() > deadline:
+            sys.exit(f"Image generation timed out after {IMAGE_TIMEOUT_S}s "
+                     f"(Replicate slow/stuck) — skipping this run; will retry next slot.")
+        time.sleep(3)
         poll = http(
             "GET",
             prediction["urls"]["get"],
