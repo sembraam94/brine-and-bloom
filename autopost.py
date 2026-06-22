@@ -74,7 +74,7 @@ STYLE_SUFFIX = (
 # Meta's AI auto-labeling. The recipes are real — only the image is generated.
 # Set AI_DISCLOSURE="" (env) to disable, but keeping it is recommended.
 AI_DISCLOSURE = os.environ.get(
-    "AI_DISCLOSURE", "📷 AI-styled food photography · the recipe is real."
+    "AI_DISCLOSURE", "📷 AI food photography"
 )
 
 STRATEGY_FILE = "strategy.json"

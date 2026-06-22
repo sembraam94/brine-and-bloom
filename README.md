@@ -195,10 +195,11 @@ This is tuned to 2026 Instagram reality:
 - **Captions over hashtags.** Instagram caps posts at **5 hashtags** (since Dec
   2025) and now reads captions for search. Captions lead with a keyword-rich,
   searchable first line; hashtags are a light 3–5-tag supplement, varied per post.
-- **AI disclosure.** Every caption carries a short "AI-styled photography · the
-  recipe is real" line. This keeps you ahead of Meta's AI auto-labeling and
-  satisfies the EU AI Act's transparency rules (Article 50, from 2 Aug 2026).
-  The recipes are real — only the imagery is generated.
+- **AI disclosure.** Every caption carries a short "📷 AI food photography" line
+  (the `AI_DISCLOSURE` constant in `autopost.py`). This keeps you ahead of Meta's
+  AI auto-labeling and satisfies the EU AI Act's transparency rules (Article 50,
+  from 2 Aug 2026). Keep it honest — the imagery is AI-generated, so don't soften
+  it to "enhanced."
 
 > **Honest limitation:** the single biggest 2026 growth lever is **Reels**
 > (video), and this system posts **images and photo-carousels**, not video.
