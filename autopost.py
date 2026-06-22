@@ -55,16 +55,18 @@ BRAND_NAME = "Brine & Bloom"
 # look templated/synthetic (an Instagram automation flag — see README safety).
 STYLE_SUFFIX = (
     "Appetizing, mouth-watering food photography that makes the viewer instantly "
-    "hungry — the finished, beautifully styled dish is the hero of the frame. "
-    "Fresh and vibrant, with rich texture and depth: glossy glazes, juicy "
-    "surfaces, golden edges, a little steam or a drizzle where it fits. Soft, "
-    "diffused natural daylight from one side with gentle shadows. Shot close on a "
-    "three-quarter or slightly overhead angle, shallow depth of field so the food "
-    "pops against a softly blurred warm background — pale linen, weathered wood, "
-    "or matte stoneware, with a few fresh ingredient accents (herbs, citrus, "
-    "spices). Warm, rich, natural color grade. No text, no hands, no people, no "
-    "logos, no labels. Photorealistic — a genuine, professional food photograph, "
-    "not a render."
+    "hungry. The finished, beautifully styled dish is the HERO at the center of "
+    "the frame — fresh and glistening, with rich texture and depth: glossy "
+    "glazes, juicy surfaces, golden edges, a little steam or a drizzle where it "
+    "fits. Arranged AROUND the dish are the recipe's key raw ingredients, styled "
+    "naturally — a few cloves of garlic, a small dish of marinade or oil, fresh "
+    "herbs, citrus, or whole spices — telling the story of how it's made without "
+    "crowding the hero. Soft, diffused natural daylight from one side with gentle "
+    "shadows; a three-quarter or slightly overhead angle; shallow depth of field "
+    "so the dish pops while the surrounding ingredients sit softly in frame. "
+    "Textured natural surface — pale linen, weathered wood, or matte stoneware. "
+    "Warm, rich, natural color grade. No text, no hands, no people, no logos, no "
+    "labels. Photorealistic — a genuine, professional food photograph, not a render."
 )
 
 # Plain-text AI disclosure appended to every caption. Satisfies the EU AI Act
@@ -300,7 +302,7 @@ Return ONLY a JSON object with exactly these keys:
   "title": "short internal label (used to avoid repeats); not shown publicly",
   "caption": "the full Instagram caption. Keyword-rich first line for search, then the tip/recipe in clean skimmable lines with simple measurements, then a clear save/share call-to-action. Do NOT put hashtags in here. Keep under 1800 characters.",
   "hashtags": ["3 to {MAX_HASHTAGS} hashtags, each starting with #. Mid-size niche tags preferred. Vary them from post to post — never reuse the same block."],
-  "image_prompts": ["{n_images} vivid prompt(s) describing the SUBJECT and COMPOSITION only — feature the most CRAVE-WORTHY food in today's post as the hero: for a recipe, the FINISHED, cooked-and-plated dish (the actual food — e.g. glossy glazed chicken thighs — not a pile of raw ingredients), styled to make people hungry, with the key protein/component front and center. Vary the angle and composition between posts. Do NOT describe lighting, camera, or art style; that is added automatically."]
+  "image_prompts": ["{n_images} vivid prompt(s) describing the SUBJECT and COMPOSITION only — the FINISHED, crave-worthy dish (the actual cooked/plated food, e.g. glossy glazed chicken thighs) as the HERO in the center, styled to make people hungry, WITH the recipe's key raw ingredients named specifically (e.g. garlic cloves, a dish of honey-soy, fresh ginger, herbs, citrus) arranged around it to tell the story. Vary the angle and arrangement between posts. Do NOT describe lighting, camera, or art style; that is added automatically."]
 }}
 
 Make today genuinely different from these recent posts (different recipe/technique/ingredient):
