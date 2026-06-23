@@ -745,6 +745,7 @@ def main():
     if fmt_override in ("image", "carousel", "reel"):
         fmt = fmt_override
         print(f"FORMAT override: posting as {fmt}")
+    slot = {**slot, "format": fmt}   # keep call_claude + the record consistent with the effective format
     theme = slot.get("theme", "general")
     recent_titles = [p.get("title", "") for p in history["posts"][-RECENT_TO_AVOID:]]
 
