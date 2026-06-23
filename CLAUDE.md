@@ -154,9 +154,15 @@ GitHub Actions repository secrets. Never hardcode, commit, print, or log values.
 
 ## Extension backlog — only if the human asks
 
-- **Reels (video)** — the #1 2026 growth lever and the biggest gap; needs a video
-  generation pipeline (and ideally audio/on-screen text) + the Graph `REELS`
-  media_type. Largest, highest-impact extension.
+- **Reels (video)** — BUILT but intentionally DORMANT (higher per-post cost; the
+  human wants time before activating). The pipeline exists: a `reel` format animates
+  the Flux hero still via Veo (`generate_video`, `google/veo-3.1-fast`, image-to-video,
+  ~8s) and publishes a Reel (`post_reel_to_instagram`, `media_type=REELS`); Claude
+  returns a `video_prompt`. It is NOT scheduled — `strategy.json` has no reel slot, so
+  the bot never auto-posts video. Trigger only manually: Run workflow → format=`reel`
+  (or `FORMAT=reel` env). **To ACTIVATE recurring video:** add a slot with
+  `"format":"reel"` to `strategy.json` (e.g. make one weekly slot a reel). Cost ~$1/clip.
+  Do NOT activate without the human's say-so.
 - **Token auto-refresh** — DONE via `refresh-token.yml` + `refresh_token.py`
   (weekly `ig_refresh_token`; needs the optional `GH_PAT` secret to store the
   rotated token).
