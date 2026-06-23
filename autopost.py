@@ -86,10 +86,18 @@ MAX_HASHTAGS = 5               # Instagram caps posts at 5 hashtags (Dec 2025).
 MAX_CAPTION_CHARS = 2200       # Instagram caption hard limit.
 MAX_CAROUSEL_IMAGES = 4        # keep carousels tight; Graph allows up to 10.
 IMAGE_TIMEOUT_S = 300          # give up on a stuck Flux render after this many seconds
+VIDEO_TIMEOUT_S = 600          # Veo renders take longer than images; cap the wait here
 
 # Models / API versions (verified current as of 2026-06; see README).
 CLAUDE_MODEL = "claude-sonnet-4-6"                  # the brain. claude-haiku-4-5 is cheaper.
 REPLICATE_MODEL = "black-forest-labs/flux-1.1-pro"  # strong food realism, public output URL
+
+# Video (Reels): animate the Flux hero still into an ~8s appetizing clip. Veo's
+# output is a public URL we hand straight to Instagram (like the Flux images).
+VEO_MODEL = "google/veo-3.1-fast"   # image-to-video; caps at 8s/clip
+REEL_DURATION = 8                   # seconds (Veo 3.1 Fast accepts 4, 6, or 8)
+REEL_RESOLUTION = "1080p"           # 720p or 1080p
+REEL_AUDIO = True                   # let Veo add ambient audio (Reels favor sound)
 
 # Instagram API with Instagram Login. Every call goes to graph.instagram.com and
 # is authorized by IG_ACCESS_TOKEN (a long-lived Instagram User token — no Facebook
@@ -271,12 +279,27 @@ def call_claude(strategy, slot, recent_titles):
     )
 
     n_images = "2 to 4" if fmt == "carousel" else "exactly 1"
-    carousel_note = (
-        " This is a CAROUSEL: describe a short visual SEQUENCE (e.g. raw "
-        "ingredients laid out -> mid-process -> finished dish) as separate frames "
-        "that tell one story and make people swipe and save."
-        if fmt == "carousel" else
-        " This is a SINGLE image."
+    if fmt == "carousel":
+        format_note = (
+            " This is a CAROUSEL: describe a short visual SEQUENCE (e.g. raw "
+            "ingredients laid out -> mid-process -> finished dish) as separate frames "
+            "that tell one story and make people swipe and save."
+        )
+    elif fmt == "reel":
+        format_note = (
+            " This is a REEL (short ~8s video). image_prompts is ONE still (the hero "
+            "start frame); ALSO return a 'video_prompt' describing the appetizing MOTION "
+            "to animate it — subtle, realistic food motion with NO people and NO hands "
+            "(e.g. a slow camera push-in over the dish, rising steam, a glistening glaze, "
+            "a drizzle of sauce, a gentle sizzle). The recipe stays in the caption."
+        )
+    else:
+        format_note = " This is a SINGLE image."
+
+    video_prompt_spec = (
+        ',\n  "video_prompt": "REEL only: a vivid description of the ~8s MOTION to animate '
+        'the still — subtle, realistic food motion, NO people, NO hands"'
+        if fmt == "reel" else ""
     )
 
     system = f"""You are the creative director and head recipe writer for "{BRAND_NAME}",
@@ -294,7 +317,7 @@ HASHTAG STRATEGY: {hashtag_strategy}
 WHAT'S WORKING SO FAR (apply this — it is learned from real performance):
 {learnings or "No performance data yet. Optimize for shareability, saves, and search-friendly captions."}
 
-Write ONE post for today's slot. Format: {fmt}.{carousel_note}
+Write ONE post for today's slot. Format: {fmt}.{format_note}
 Today's theme: {theme} — {theme_brief}
 
 Return ONLY a JSON object with exactly these keys:
@@ -302,7 +325,7 @@ Return ONLY a JSON object with exactly these keys:
   "title": "short internal label (used to avoid repeats); not shown publicly",
   "caption": "the full Instagram caption. Keyword-rich first line for search, then the tip/recipe in clean skimmable lines with simple measurements, then a clear save/share call-to-action. Do NOT put hashtags in here. Keep under 1800 characters.",
   "hashtags": ["3 to {MAX_HASHTAGS} hashtags, each starting with #. Mid-size niche tags preferred. Vary them from post to post — never reuse the same block."],
-  "image_prompts": ["{n_images} vivid prompt(s) describing the SUBJECT and COMPOSITION only — the FINISHED, crave-worthy dish (the actual cooked/plated food) as the HERO in the center, styled to make people hungry, WITH the recipe's key raw ingredients named specifically (e.g. garlic cloves, a dish of honey-soy, fresh ginger, herbs, citrus) arranged around it to tell the story. Favor approachable, appetizing plating — bite-sized or sliced pieces that show the glaze and texture, rather than large whole cuts. Vary the plating, props, and angle from post to post so the feed has rhythm while keeping one consistent look. Do NOT describe lighting, camera, or art style; that is added automatically."]
+  "image_prompts": ["{n_images} vivid prompt(s) describing the SUBJECT and COMPOSITION only — the FINISHED, crave-worthy dish (the actual cooked/plated food) as the HERO in the center, styled to make people hungry, WITH the recipe's key raw ingredients named specifically (e.g. garlic cloves, a dish of honey-soy, fresh ginger, herbs, citrus) arranged around it to tell the story. Favor approachable, appetizing plating — bite-sized or sliced pieces that show the glaze and texture, rather than large whole cuts. Vary the plating, props, and angle from post to post so the feed has rhythm while keeping one consistent look. Do NOT describe lighting, camera, or art style; that is added automatically."]{video_prompt_spec}
 }}
 
 Make today genuinely different from these recent posts (different recipe/technique/ingredient):
@@ -402,6 +425,58 @@ def generate_image(subject_prompt):
 
 def generate_images(prompts):
     return [generate_image(p) for p in prompts]
+
+
+def generate_video(image_url, motion_prompt):
+    """Animate the styled hero still into an ~8s Reel via Veo (image-to-video).
+    The look is inherited from the start image; the prompt drives the MOTION.
+    Returns a public video URL (Replicate delivery) we hand straight to Instagram."""
+    token = env("REPLICATE_API_TOKEN")
+    full_prompt = (
+        f"{motion_prompt} Subtle, realistic motion; warm natural light; "
+        "appetizing and mouth-watering; no people, no hands; photorealistic, not a render."
+    )
+
+    resp = http(
+        "POST",
+        f"https://api.replicate.com/v1/models/{VEO_MODEL}/predictions",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        },
+        json={"input": {
+            "prompt": full_prompt,
+            "image": image_url,            # start frame (image-to-video)
+            "aspect_ratio": "9:16",        # vertical, for Reels
+            "resolution": REEL_RESOLUTION,
+            "duration": REEL_DURATION,
+            "generate_audio": REEL_AUDIO,
+        }},
+        timeout=180,
+    )
+    resp.raise_for_status()
+    prediction = resp.json()
+
+    deadline = time.monotonic() + VIDEO_TIMEOUT_S
+    while prediction.get("status") not in ("succeeded", "failed", "canceled"):
+        if time.monotonic() > deadline:
+            sys.exit(f"Video generation timed out after {VIDEO_TIMEOUT_S}s "
+                     f"(Veo slow/stuck) — skipping this run; will retry next slot.")
+        time.sleep(5)
+        poll = http(
+            "GET",
+            prediction["urls"]["get"],
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=60,
+        )
+        poll.raise_for_status()
+        prediction = poll.json()
+
+    if prediction.get("status") != "succeeded":
+        sys.exit(f"Video generation failed: {prediction.get('error')}")
+
+    output = prediction["output"]
+    return output[0] if isinstance(output, list) else output
 
 
 # =============================================================================
@@ -513,9 +588,12 @@ def check_publishing_quota(ig_id, token):
         print(f"(Could not read publishing quota, continuing: {e})")
 
 
-def _wait_for_container(container_id, token):
+def _wait_for_container(container_id, token, max_wait=120, interval=3):
+    """Poll a media container until FINISHED. Images finish almost instantly;
+    Reels need transcoding, so the reel path passes a longer max_wait/interval."""
     status_url = _graph_node(container_id)
-    for _ in range(20):
+    deadline = time.monotonic() + max_wait
+    while time.monotonic() < deadline:
         r = http(
             "GET",
             status_url,
@@ -529,7 +607,7 @@ def _wait_for_container(container_id, token):
             return
         if code in ("ERROR", "EXPIRED"):
             sys.exit(f"Instagram container {code}: {status}")
-        time.sleep(3)
+        time.sleep(interval)
     sys.exit("Instagram container never reached FINISHED (timed out).")
 
 
@@ -594,6 +672,40 @@ def post_to_instagram(image_urls, caption):
     return publish.json().get("id")
 
 
+def post_reel_to_instagram(video_url, caption):
+    """Publish a Reel: REELS container with a public video_url -> wait for
+    transcoding (longer than images) -> publish."""
+    token = env("IG_ACCESS_TOKEN")
+    ig_id = resolve_ig_user_id(token)
+    base = _graph_base(ig_id)
+
+    check_publishing_quota(ig_id, token)
+
+    create = http(
+        "POST",
+        f"{base}/media",
+        data={"media_type": "REELS", "video_url": video_url, "caption": caption,
+              "share_to_feed": "true", "access_token": token},
+        timeout=120,
+    )
+    create.raise_for_status()
+    container_id = create.json().get("id")
+    if not container_id:
+        sys.exit(f"No reel container id returned: {create.text}")
+
+    # Reels transcode server-side; give it room (poll ~every 10s up to ~7 min).
+    _wait_for_container(container_id, token, max_wait=420, interval=10)
+
+    publish = http(
+        "POST",
+        f"{base}/media_publish",
+        data={"creation_id": container_id, "access_token": token},
+        timeout=120,
+    )
+    publish.raise_for_status()
+    return publish.json().get("id")
+
+
 # =============================================================================
 # Orchestration
 # =============================================================================
@@ -629,6 +741,10 @@ def main():
         return
 
     fmt = slot.get("format", "image")
+    fmt_override = os.environ.get("FORMAT")
+    if fmt_override in ("image", "carousel", "reel"):
+        fmt = fmt_override
+        print(f"FORMAT override: posting as {fmt}")
     theme = slot.get("theme", "general")
     recent_titles = [p.get("title", "") for p in history["posts"][-RECENT_TO_AVOID:]]
 
@@ -677,22 +793,45 @@ def main():
         print(f"Jitter: sleeping {wait_s}s before publishing.")
         time.sleep(wait_s)
 
-    print(f"Generating {len(image_prompts)} image(s)...")
-    for i, p in enumerate(image_prompts, 1):
-        print(f"  prompt {i}: {p}")
-    image_urls = generate_images(image_prompts)
-    for u in image_urls:
-        print(f"  image: {u}")
+    if fmt == "reel":
+        # One styled still -> animate it into an ~8s Reel. Recipe lives in caption.
+        still_prompt = image_prompts[0]
+        motion_prompt = post.get("video_prompt") or f"Slow, appetizing motion of the {theme} dish."
+        print(f"  still prompt: {still_prompt}")
+        print(f"  motion prompt: {motion_prompt}")
+        still_url = generate_image(still_prompt)
+        print(f"  still: {still_url}")
+        print("Animating into a Reel (Veo)...")
+        video_url = generate_video(still_url, motion_prompt)
+        print(f"  video: {video_url}")
 
-    if dry:
-        print("\nDRY_RUN=1 — not publishing. This is what it WOULD post:")
-        print("-" * 60)
-        print(caption)
-        print("-" * 60)
-        return
+        if dry:
+            print("\nDRY_RUN=1 — not publishing. Video URL above; caption below:")
+            print("-" * 60)
+            print(caption)
+            print("-" * 60)
+            return
 
-    print("Publishing to Instagram...")
-    media_id = post_to_instagram(image_urls, caption)
+        print("Publishing Reel to Instagram...")
+        media_id = post_reel_to_instagram(video_url, caption)
+    else:
+        print(f"Generating {len(image_prompts)} image(s)...")
+        for i, p in enumerate(image_prompts, 1):
+            print(f"  prompt {i}: {p}")
+        image_urls = generate_images(image_prompts)
+        for u in image_urls:
+            print(f"  image: {u}")
+
+        if dry:
+            print("\nDRY_RUN=1 — not publishing. This is what it WOULD post:")
+            print("-" * 60)
+            print(caption)
+            print("-" * 60)
+            return
+
+        print("Publishing to Instagram...")
+        media_id = post_to_instagram(image_urls, caption)
+
     print(f"Published. Media ID: {media_id}")
 
     local = local_now(strategy)

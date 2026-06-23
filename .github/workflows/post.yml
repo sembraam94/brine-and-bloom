@@ -31,6 +31,11 @@ on:
         type: choice
         options: ["no", "yes"]
         default: "no"
+      format:
+        description: "Force a format (auto = use the slot's)"
+        type: choice
+        options: ["auto", "image", "carousel", "reel"]
+        default: "auto"
 
 # Serialize the poster and the analyzer so they never push to the state files at
 # the same time. cancel-in-progress:false lets an in-flight publish finish.
@@ -62,6 +67,7 @@ jobs:
           # Set from the "Run workflow" dropdown; empty on scheduled runs (normal gated behavior).
           DRY_RUN: ${{ github.event.inputs.dry_run == 'yes' && '1' || '' }}
           FORCE:   ${{ github.event.inputs.force == 'yes' && '1' || '' }}
+          FORMAT:  ${{ github.event.inputs.format != 'auto' && github.event.inputs.format || '' }}
         run: python autopost.py
 
       - name: Commit post history
