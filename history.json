@@ -17,8 +17,18 @@
         "#easydinnerideas"
       ],
       "media_id": "18010678514876923",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 0,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 0,
+        "profile_visits": 0,
+        "follows": 0
+      },
+      "measured_at": "2026-06-24T07:58:49.586019+00:00"
     }
   ]
 }
