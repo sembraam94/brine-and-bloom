@@ -8,7 +8,7 @@
     "posts_per_week": 4,
     "max_posts_per_day": 1
   },
-  "tolerance_minutes": 90,
+  "tolerance_minutes": 150,
   "jitter_minutes": 12,
   "slots": [
     {"weekday": 1, "hour": 18, "minute": 30, "format": "image", "theme": "marinade", "note": "Tue 18:30 CET — EU dinner-prep window; also = ~12:30 US Eastern lunch (dual EU/US coverage)."},

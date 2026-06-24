@@ -15,10 +15,11 @@ name: Brine & Bloom — hourly poster
 
 on:
   schedule:
-    # cron is UTC; :05 dodges the top-of-hour load spike. The poster checks every
-    # hour and only posts when strategy.json says a slot is due.
-    # ("5 6-21 * * *" would check daytime hours only, to save Actions minutes.)
-    - cron: "5 * * * *"
+    # cron is UTC; :05/:35 dodges the top-of-hour load spike. The poster checks
+    # every 30 min and only posts when strategy.json says a slot is due. Checking
+    # twice an hour (free on a public repo) + a 150-min tolerance window means a
+    # GitHub-dropped run can't cause a missed post (which happened on hourly+90min).
+    - cron: "5,35 * * * *"
   workflow_dispatch:        # manual run — also used for the first live post
     inputs:
       force:
