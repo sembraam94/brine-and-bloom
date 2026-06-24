@@ -29,6 +29,26 @@
         "follows": 0
       },
       "measured_at": "2026-06-24T07:58:49.586019+00:00"
+    },
+    {
+      "slot_key": "forced-2026-06-24-12",
+      "date_utc": "2026-06-24T10:44:49.351549+00:00",
+      "local_date": "2026-06-24",
+      "weekday": 2,
+      "slot_hour": 12,
+      "format": "image",
+      "theme": "quick-dinner",
+      "title": "quick-dinner-lemon-butter-white-bean-skillet",
+      "hashtags": [
+        "#whitebeanrecipe",
+        "#weeknightdinner",
+        "#onepanmeals",
+        "#vegetarianquick",
+        "#beansfordinner"
+      ],
+      "media_id": "17967525615092081",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
