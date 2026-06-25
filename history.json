@@ -28,7 +28,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-06-24T07:58:49.586019+00:00"
+      "measured_at": "2026-06-25T08:00:05.998715+00:00"
     },
     {
       "slot_key": "forced-2026-06-24-12",
@@ -47,8 +47,18 @@
         "#beansfordinner"
       ],
       "media_id": "17967525615092081",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 0,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 0,
+        "profile_visits": 0,
+        "follows": 0
+      },
+      "measured_at": "2026-06-25T08:00:05.998715+00:00"
     }
   ]
 }
