@@ -69,13 +69,12 @@ STYLE_SUFFIX = (
     "labels. Photorealistic — a genuine, professional food photograph, not a render."
 )
 
-# Plain-text AI disclosure appended to every caption. Satisfies the EU AI Act
-# (Article 50, transparency obligations from 2 Aug 2026) and keeps you ahead of
-# Meta's AI auto-labeling. The recipes are real — only the image is generated.
-# Set AI_DISCLOSURE="" (env) to disable, but keeping it is recommended.
-AI_DISCLOSURE = os.environ.get(
-    "AI_DISCLOSURE", "📷 AI food photography"
-)
+# AI disclosure appended to every caption. ⚠️ TEMPORARILY DISABLED (empty) to test
+# performance without it. MUST be re-enabled before 2 Aug 2026, when the EU AI Act
+# (Article 50) transparency obligations for AI-generated media take effect.
+# Re-enable by setting the default below (or the AI_DISCLOSURE env/secret) back to
+# e.g. "📷 AI food photography".
+AI_DISCLOSURE = os.environ.get("AI_DISCLOSURE", "")
 
 STRATEGY_FILE = "strategy.json"
 HISTORY_FILE = "history.json"

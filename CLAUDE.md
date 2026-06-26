@@ -133,8 +133,11 @@ GitHub Actions repository secrets. Never hardcode, commit, print, or log values.
   hashtags now).
 - **Keep post-time jitter** and varied image composition — fixed timing and
   templated images are automation flags.
-- **Keep the AI-disclosure line** (`AI_DISCLOSURE`) — Meta labeling + EU AI Act
-  (Article 50, from 2 Aug 2026).
+- **AI-disclosure line** (`AI_DISCLOSURE`) is **temporarily OFF** (empty default)
+  to A/B performance — a deliberate choice by the owner (2026-06-25). It **MUST be
+  re-enabled before 2 Aug 2026**, when the EU AI Act (Article 50) transparency
+  obligations for AI-generated media take effect. Do not silently re-enable early;
+  do not let it slip past 2 Aug 2026.
 - Recipes must be accurate and food-safe (safe marinating times/temps, no unsafe
   canning or raw-egg advice without a clear note). When unsure, be conservative.
 - Fail loudly: non-zero exits on real errors so a failed run emails the human.
@@ -177,4 +180,5 @@ GitHub Actions repository secrets. Never hardcode, commit, print, or log values.
 - Never put secrets in code, commits, logs, or URLs.
 - Never publish a live post or write a live strategy without explicit human confirmation.
 - Never ship food guidance you can't vouch for as safe.
-- Never remove the cadence cap, the hashtag cap, the jitter, or the AI disclosure.
+- Never remove the cadence cap, the hashtag cap, or the jitter. (The AI disclosure
+  is intentionally OFF until ~2 Aug 2026 — see guardrails; re-enable it by then.)
