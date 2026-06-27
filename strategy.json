@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "updated": "2026-06-20",
+  "version": 2,
+  "updated": "2026-06-27",
   "account_start_date": "2026-06-20",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Cooking tips, recipes, and marinades with AI-styled ingredient photography. Audience is Europe-first, US a strong second. Goal: grow followers fast-but-safe by making every post highly shareable (sent to a friend) and saveable.",
@@ -11,22 +11,47 @@
   "tolerance_minutes": 150,
   "jitter_minutes": 12,
   "slots": [
-    {"weekday": 1, "hour": 18, "minute": 30, "format": "image", "theme": "marinade", "note": "Tue 18:30 CET — EU dinner-prep window; also = ~12:30 US Eastern lunch (dual EU/US coverage)."},
-    {"weekday": 2, "hour": 12, "minute": 30, "format": "carousel", "theme": "quick-dinner", "note": "Wed lunch — Wed is the strongest food day; carousel = save-bait recipe for EU meal-planning."},
-    {"weekday": 3, "hour": 19, "minute": 0, "format": "image", "theme": "technique", "note": "Thu 19:00 CET — EU evening; also = ~13:00 US Eastern lunch (dual coverage)."},
-    {"weekday": 5, "hour": 11, "minute": 30, "format": "image", "theme": "weekend-cook", "note": "Sat late-morning — EU weekend brunch / what-to-cook intent."}
+    {
+      "weekday": 1,
+      "hour": 18,
+      "minute": 23,
+      "format": "carousel",
+      "theme": "marinade",
+      "note": "Tue ~18:23 CET — EU dinner-prep window / US Eastern lunch crossover. Carousel turns the marinade into step-by-step save-bait; ratios on each slide drive saves and sends."
+    },
+    {
+      "weekday": 2,
+      "hour": 12,
+      "minute": 41,
+      "format": "carousel",
+      "theme": "quick-dinner",
+      "note": "Wed ~12:41 CET — strongest food-search day; carousel recipe format maximises saves from meal-planners."
+    },
+    {
+      "weekday": 4,
+      "hour": 19,
+      "minute": 7,
+      "format": "carousel",
+      "theme": "sauce",
+      "note": "Fri ~19:07 CET — weekend-cook intent begins Friday evening. Versatile sauce carousel (ratios on screen) is highly sendable and saveable for the weekend ahead."
+    },
+    {
+      "weekday": 5,
+      "hour": 11,
+      "minute": 17,
+      "format": "image",
+      "theme": "technique",
+      "note": "Sat ~11:17 CET — weekend brunch scroll. A single striking technique visual with a search-friendly caption; simpler format tests image reach vs carousel on this slot."
+    }
   ],
   "content_plan": {
-    "marinade": "One complete marinade: ingredients with memorable ratios, what it's best on, and exactly how long to marinate (food-safe times). Built to be saved.",
-    "quick-dinner": "A genuinely fast (~30 min) weeknight recipe with a short ingredient list. As a carousel: ingredients -> key step -> finished dish. End on 'save this for a busy night'.",
-    "technique": "One practical technique or kitchen tip in a few clear steps. Make it the kind of thing people send to a friend who'd find it useful.",
-    "weekend-cook": "A slightly more ambitious recipe worth the weekend time — the 'impressive but doable' post.",
-    "flavor": "A flavor pairing or single-spice spotlight: what it tastes like and three ways to use it.",
-    "sauce": "A versatile sauce, dressing, or glaze with ratios people can memorize.",
-    "pantry": "An ingredient spotlight or a smart prep / pantry tip."
+    "marinade": "One complete marinade built for saves: lead with the ratio (e.g. 3-2-1 oil/acid/flavour), name the best proteins, give a food-safe time range, and end with a bold visual of the finished dish. Every slide should contain one piece of information worth screenshotting.",
+    "quick-dinner": "A genuinely fast (~25-30 min) weeknight recipe. Carousel arc: slide 1 = finished dish with bold outcome headline, slide 2 = short ingredient list with quantities visible, slides 3-4 = one key technique step each, final slide = 'save this for tonight' CTA. Keep ingredient count ≤7.",
+    "sauce": "A versatile sauce, dressing, or glaze with a ratio people can memorise (e.g. 2-1-1). Show it on at least two different foods. Final slide lists 3 quick uses — this drives sends ('send this to someone who always asks what to put on things').",
+    "technique": "One practical, slightly surprising kitchen technique — the kind of thing that makes someone say 'I didn't know that.' Single hero image with keyword-rich caption explaining the full technique. Designed to be sent to a friend."
   },
-  "caption_strategy": "Open with a keyword-rich first line someone would actually search ('garlic honey chicken marinade, ready in 10 minutes') — Instagram search/SEO now reads captions. Keep the body skimmable. Because the audience is Europe-first with a strong US second, give measurements in metric (g/ml) with US cups/oz in parentheses where it helps, and keep ingredients widely available on both sides of the Atlantic. Always include one explicit beat that drives the top growth signals: 'save this for later' and/or 'send this to whoever cooks dinner'.",
-  "hashtag_strategy": "Use 3-5 highly relevant hashtags, chosen fresh per post (never a reused block). Favor mid-size niche tags (~10K-500K posts) over mega-tags. Mix one or two niche-community tags, one format tag, and one topic tag matching the dish.",
-  "learnings": "COLD START (first weeks, ~0 followers, little data): the algorithm auditions every post against non-followers, so follower count is irrelevant — optimize 100% for shareability and saves. Lead with the finished dish / strongest visual. Keep captions search-friendly. Audience is Europe-first, US strong second: the evening EU slots (Tue/Thu) deliberately double as US-midday, so keep topics and ingredients trans-Atlantic. Stay consistent on the 4-slot slate; don't blast volume early. As real Insights accumulate, this note gets rewritten toward what actually performs — including shifting times if your followers skew to one region.",
-  "next_review": "2026-06-27"
+  "caption_strategy": "Write captions as search-first, value-first copy: open with the outcome or the specific dish name (e.g. 'This 3-ingredient honey-soy marinade keeps chicken thighs juicy for up to 48 hours') so the first line reads like a recipe search query and doubles as the preview text. Front-load the most useful information — ratios, times, temperatures — because that is what drives saves. Close every caption with a soft send-prompt ('send this to someone who always overcooks chicken') before any hashtags. Keep captions between 80-180 words; avoid filler phrases like 'hope you enjoy' or 'let me know in the comments.' Use line breaks generously so captions are scannable on mobile.",
+  "hashtag_strategy": "Use exactly 4-5 hashtags, placed at the end of the caption after a line break. Prioritise mid-size, recipe-specific tags (100k-2M posts) over giant generic ones: e.g. #marinaderecipe, #quickdinnerideas, #cookingforbeginners, #weeknightmeals, #saucegame. Avoid tags above 5M posts (too competitive for a new account) and below 10k (no discovery traffic). Rotate one hashtag per post to gather data on which drives non-follower reach. Never use more than 5; keyword-rich captions matter far more than hashtag volume.",
+  "learnings": "No performance data exists yet — account is 7 days old with 0 measured posts. Cold-start rules apply: (1) Every post must earn its save — include a concrete ratio, time, or step viewers will want to reference later. (2) Format-shift to carousels on 3 of 4 posts; carousels create multiple scroll interactions and stronger save signals. (3) Write captions as recipe search queries to capture keyword discovery. (4) Every post needs one explicit send-prompt. (5) Hold cadence at 4/week; do not increase until at least 2 posts show positive sends_per_reach. Reassess after first 8 posts.",
+  "next_review": "2026-07-04"
 }

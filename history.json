@@ -28,7 +28,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-06-26T08:07:33.294963+00:00"
+      "measured_at": "2026-06-27T07:35:01.779953+00:00"
     },
     {
       "slot_key": "forced-2026-06-24-12",
@@ -58,7 +58,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-06-26T08:07:33.294963+00:00"
+      "measured_at": "2026-06-27T07:35:01.779953+00:00"
     },
     {
       "slot_key": "2026-176-w3-1900",
@@ -77,8 +77,18 @@
         "#curryfromscratch"
       ],
       "media_id": "18111732925732211",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 0,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 0,
+        "profile_visits": 0,
+        "follows": 0
+      },
+      "measured_at": "2026-06-27T07:35:01.779953+00:00"
     }
   ]
 }
