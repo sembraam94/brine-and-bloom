@@ -89,6 +89,26 @@
         "follows": 0
       },
       "measured_at": "2026-06-27T07:35:01.779953+00:00"
+    },
+    {
+      "slot_key": "2026-178-w5-1117",
+      "date_utc": "2026-06-27T10:23:00.339662+00:00",
+      "local_date": "2026-06-27",
+      "weekday": 5,
+      "slot_hour": 11,
+      "format": "image",
+      "theme": "technique",
+      "title": "technique-salting-pasta-water-correctly",
+      "hashtags": [
+        "#pastacookingtips",
+        "#cookingforbeginners",
+        "#weeknightmeals",
+        "#kitchentechnique",
+        "#pastawater"
+      ],
+      "media_id": "18073664927683399",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
