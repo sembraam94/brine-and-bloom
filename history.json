@@ -139,6 +139,26 @@
       "media_id": "17928151116125927",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-182-w2-1241",
+      "date_utc": "2026-07-01T10:49:25.959670+00:00",
+      "local_date": "2026-07-01",
+      "weekday": 2,
+      "slot_hour": 12,
+      "format": "carousel",
+      "theme": "quick-dinner",
+      "title": "quick-dinner-soy-ginger-glazed-salmon-noodles",
+      "hashtags": [
+        "#salmonrecipe",
+        "#weeknightmeals",
+        "#noodlerecipes",
+        "#quickdinnerideas",
+        "#saucegame"
+      ],
+      "media_id": "17931605379341469",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
