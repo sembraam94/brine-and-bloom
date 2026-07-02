@@ -28,7 +28,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-01T08:35:24.725515+00:00"
+      "measured_at": "2026-07-02T07:50:09.792708+00:00"
     },
     {
       "slot_key": "forced-2026-06-24-12",
@@ -58,7 +58,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-01T08:35:24.725515+00:00"
+      "measured_at": "2026-07-02T07:50:09.792708+00:00"
     },
     {
       "slot_key": "2026-176-w3-1900",
@@ -88,7 +88,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-01T08:35:24.725515+00:00"
+      "measured_at": "2026-07-02T07:50:09.792708+00:00"
     },
     {
       "slot_key": "2026-178-w5-1117",
@@ -118,7 +118,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-01T08:35:24.725515+00:00"
+      "measured_at": "2026-07-02T07:50:09.792708+00:00"
     },
     {
       "slot_key": "2026-181-w1-1823",
@@ -137,8 +137,18 @@
         "#saucegame"
       ],
       "media_id": "17928151116125927",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 0,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 0,
+        "profile_visits": 0,
+        "follows": 0
+      },
+      "measured_at": "2026-07-02T07:50:09.792708+00:00"
     },
     {
       "slot_key": "2026-182-w2-1241",
@@ -157,8 +167,18 @@
         "#saucegame"
       ],
       "media_id": "17931605379341469",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 0,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 0,
+        "profile_visits": 0,
+        "follows": 0
+      },
+      "measured_at": "2026-07-02T07:50:09.792708+00:00"
     }
   ]
 }
