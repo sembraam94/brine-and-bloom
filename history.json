@@ -179,6 +179,26 @@
         "follows": 0
       },
       "measured_at": "2026-07-03T07:45:44.356534+00:00"
+    },
+    {
+      "slot_key": "2026-184-w4-1907",
+      "date_utc": "2026-07-03T18:03:10.921712+00:00",
+      "local_date": "2026-07-03",
+      "weekday": 4,
+      "slot_hour": 19,
+      "format": "carousel",
+      "theme": "sauce",
+      "title": "2-1-1-tahini-lemon-sauce-versatile",
+      "hashtags": [
+        "#tahinirecipe",
+        "#easysauceideas",
+        "#weeknightmeals",
+        "#cookingforbeginners",
+        "#grainsandbowls"
+      ],
+      "media_id": "18017735198886526",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
