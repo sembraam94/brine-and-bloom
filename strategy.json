@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "updated": "2026-06-27",
+  "version": 3,
+  "updated": "2026-07-04",
   "account_start_date": "2026-06-20",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Cooking tips, recipes, and marinades with AI-styled ingredient photography. Audience is Europe-first, US a strong second. Goal: grow followers fast-but-safe by making every post highly shareable (sent to a friend) and saveable.",
@@ -14,44 +14,44 @@
     {
       "weekday": 1,
       "hour": 18,
-      "minute": 23,
+      "minute": 37,
       "format": "carousel",
       "theme": "marinade",
-      "note": "Tue ~18:23 CET — EU dinner-prep window / US Eastern lunch crossover. Carousel turns the marinade into step-by-step save-bait; ratios on each slide drive saves and sends."
+      "note": "Tue ~18:37 CET — EU dinner-prep/US Eastern lunch crossover. Ratio-forward marinade carousel is prime save-and-send bait; unchanged strong slot from cold-start playbook."
     },
     {
-      "weekday": 2,
+      "weekday": 3,
       "hour": 12,
-      "minute": 41,
-      "format": "carousel",
-      "theme": "quick-dinner",
-      "note": "Wed ~12:41 CET — strongest food-search day; carousel recipe format maximises saves from meal-planners."
-    },
-    {
-      "weekday": 4,
-      "hour": 19,
-      "minute": 7,
+      "minute": 19,
       "format": "carousel",
       "theme": "sauce",
-      "note": "Fri ~19:07 CET — weekend-cook intent begins Friday evening. Versatile sauce carousel (ratios on screen) is highly sendable and saveable for the weekend ahead."
+      "note": "Thu ~12:19 CET — mid-week lunch scroll with weekend-cook intent building. Sauce ratio carousel tested here instead of Fri to spread reach days and capture Thu meal-planners."
     },
     {
       "weekday": 5,
-      "hour": 11,
-      "minute": 17,
-      "format": "image",
+      "hour": 10,
+      "minute": 53,
+      "format": "carousel",
+      "theme": "quick-dinner",
+      "note": "Sat ~10:53 CET — weekend morning browse; meal-planners actively saving ideas. Carousel format maximises saves from Saturday planners deciding weekend dinners."
+    },
+    {
+      "weekday": 0,
+      "hour": 19,
+      "minute": 11,
+      "format": "carousel",
       "theme": "technique",
-      "note": "Sat ~11:17 CET — weekend brunch scroll. A single striking technique visual with a search-friendly caption; simpler format tests image reach vs carousel on this slot."
+      "note": "Mon ~19:11 CET — converting technique to carousel for cold-start; multi-slide format forces higher watch-time and adds a screenshot-worthy ratio or step on each slide, improving saves vs single image."
     }
   ],
   "content_plan": {
-    "marinade": "One complete marinade built for saves: lead with the ratio (e.g. 3-2-1 oil/acid/flavour), name the best proteins, give a food-safe time range, and end with a bold visual of the finished dish. Every slide should contain one piece of information worth screenshotting.",
-    "quick-dinner": "A genuinely fast (~25-30 min) weeknight recipe. Carousel arc: slide 1 = finished dish with bold outcome headline, slide 2 = short ingredient list with quantities visible, slides 3-4 = one key technique step each, final slide = 'save this for tonight' CTA. Keep ingredient count ≤7.",
-    "sauce": "A versatile sauce, dressing, or glaze with a ratio people can memorise (e.g. 2-1-1). Show it on at least two different foods. Final slide lists 3 quick uses — this drives sends ('send this to someone who always asks what to put on things').",
-    "technique": "One practical, slightly surprising kitchen technique — the kind of thing that makes someone say 'I didn't know that.' Single hero image with keyword-rich caption explaining the full technique. Designed to be sent to a friend."
+    "marinade": "One complete marinade built around a memorable ratio (e.g. 3-2-1 oil/acid/flavour). Slide 1: bold hero shot + outcome headline naming the protein. Slide 2: ratio written large on screen — designed to be screenshotted. Slides 3-4: one technique note each (marinating time, food-safe window, what not to do). Final slide: 'Save this before you shop' CTA + send prompt ('Tag someone who needs this'). Every slide earns its place with one piece of information worth saving.",
+    "sauce": "A versatile sauce, glaze, or dressing built on a ratio people can memorise (e.g. 2-1-1 fat/acid/flavour). Slide 1: finished sauce on a beautiful surface. Slide 2: ratio written big. Slides 3-4: show it on two very different foods (e.g. grilled chicken AND roasted veg) to maximise perceived versatility and sends. Final slide: '3 ways to use this tonight' — this explicit list drives DM sends ('sending this to my partner').",
+    "quick-dinner": "A genuinely fast (≤30 min) weeknight recipe. Slide 1: finished dish with bold time claim ('Done in 25 min'). Slide 2: full ingredient list with quantities visible on screen (≤7 ingredients). Slides 3-4: one critical technique step each with a short explanatory line. Final slide: 'Save this for tonight' with day/occasion tag (e.g. 'perfect Monday reset meal'). Ingredient list on slide 2 is the primary save trigger — make quantities large and readable.",
+    "technique": "One practical, slightly surprising kitchen technique that makes someone say 'I didn't know that.' Slide 1: striking hero visual of the technique in action. Slide 2: the rule or ratio in plain language, large text, screenshot-ready. Slides 3-4: before/after or common mistake vs correct method — this contrast drives sends. Final slide: one-line summary and 'Send this to someone who does it wrong.' Carousel format replaces single image to improve watch-time signal while account is new."
   },
-  "caption_strategy": "Write captions as search-first, value-first copy: open with the outcome or the specific dish name (e.g. 'This 3-ingredient honey-soy marinade keeps chicken thighs juicy for up to 48 hours') so the first line reads like a recipe search query and doubles as the preview text. Front-load the most useful information — ratios, times, temperatures — because that is what drives saves. Close every caption with a soft send-prompt ('send this to someone who always overcooks chicken') before any hashtags. Keep captions between 80-180 words; avoid filler phrases like 'hope you enjoy' or 'let me know in the comments.' Use line breaks generously so captions are scannable on mobile.",
-  "hashtag_strategy": "Use exactly 4-5 hashtags, placed at the end of the caption after a line break. Prioritise mid-size, recipe-specific tags (100k-2M posts) over giant generic ones: e.g. #marinaderecipe, #quickdinnerideas, #cookingforbeginners, #weeknightmeals, #saucegame. Avoid tags above 5M posts (too competitive for a new account) and below 10k (no discovery traffic). Rotate one hashtag per post to gather data on which drives non-follower reach. Never use more than 5; keyword-rich captions matter far more than hashtag volume.",
-  "learnings": "No performance data exists yet — account is 7 days old with 0 measured posts. Cold-start rules apply: (1) Every post must earn its save — include a concrete ratio, time, or step viewers will want to reference later. (2) Format-shift to carousels on 3 of 4 posts; carousels create multiple scroll interactions and stronger save signals. (3) Write captions as recipe search queries to capture keyword discovery. (4) Every post needs one explicit send-prompt. (5) Hold cadence at 4/week; do not increase until at least 2 posts show positive sends_per_reach. Reassess after first 8 posts.",
-  "next_review": "2026-07-04"
+  "caption_strategy": "Open every caption with a search-keyword-rich first line that completes the post even without clicking 'more' — lead with the outcome and the key ingredient or technique (e.g. 'This 3-ingredient lemon marinade makes chicken impossible to dry out'). Follow with 2-3 lines of conversational value that expand on the ratio or technique shown in the carousel. Add one explicit send prompt ('Send this to someone who always asks what to put on chicken') and one save prompt ('Save before your next shop'). Close with a simple question to encourage comments. Keep total caption under 200 words; front-load keywords because Instagram indexes the first 125 characters for search in 2026.",
+  "hashtag_strategy": "Use exactly 4-5 hashtags, placed at the end of the caption body (not in a comment). Mix one broad food hashtag (#CookingTips or #EasyRecipes, ~50M+ posts) with two mid-tier niche tags (#MarinadeRecipe, #QuickDinner, ~1-5M posts) and one very specific long-tail tag matching the exact dish or technique (#LemonChickenMarinade, #SkilletSauce). Avoid ultra-saturated tags (#food, #foodie) — they bury new accounts. Rotate the long-tail tag every post so Instagram's keyword system indexes the account across multiple recipe searches. Hashtags are a minor lever; prioritise the keyword-rich caption over hashtag volume.",
+  "learnings": "Zero measured posts at 14 days old — operating fully on cold-start playbook. Key priorities: (1) Every post must be carousel format to maximise watch-time signal while the account has no follower base to amplify reach. (2) Put the ratio or key information visually on-screen (large text) on slide 2 — this is the primary screenshot/save trigger. (3) Include one explicit send prompt per caption; sends are the top growth signal in 2026. (4) Captions must open with search-keyword-rich sentences — Instagram surfaces new accounts via keyword search, not hashtags. (5) Hold cadence at 4 posts/week until saves and sends data arrives; do not ramp up blind.",
+  "next_review": "2026-07-11"
 }
