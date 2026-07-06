@@ -239,6 +239,26 @@
         "follows": 0
       },
       "measured_at": "2026-07-06T08:46:26.151578+00:00"
+    },
+    {
+      "slot_key": "2026-187-w0-1911",
+      "date_utc": "2026-07-06T18:32:06.372367+00:00",
+      "local_date": "2026-07-06",
+      "weekday": 0,
+      "slot_hour": 19,
+      "format": "carousel",
+      "theme": "technique",
+      "title": "technique-toasting-dry-spices-in-pan",
+      "hashtags": [
+        "#CookingTips",
+        "#SpiceBlend",
+        "#DryCooking",
+        "#ToastedSpices",
+        "#HomeCookTechnique"
+      ],
+      "media_id": "17907613896440838",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
