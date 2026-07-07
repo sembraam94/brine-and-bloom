@@ -259,6 +259,26 @@
       "media_id": "17907613896440838",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-188-w1-1837",
+      "date_utc": "2026-07-07T17:35:10.415165+00:00",
+      "local_date": "2026-07-07",
+      "weekday": 1,
+      "slot_hour": 18,
+      "format": "carousel",
+      "theme": "marinade",
+      "title": "3-1-1-red-wine-vinegar-herb-marinade-for-flank-steak",
+      "hashtags": [
+        "#CookingTips",
+        "#MarinadeRecipe",
+        "#SteakMarinade",
+        "#FlankSteakRecipe",
+        "#RedWineVinegarMarinade"
+      ],
+      "media_id": "18104143339862386",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
