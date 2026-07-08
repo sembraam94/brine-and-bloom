@@ -58,7 +58,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-07T07:58:06.296746+00:00"
+      "measured_at": "2026-07-08T07:03:30.654020+00:00"
     },
     {
       "slot_key": "2026-176-w3-1900",
@@ -88,7 +88,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-07T07:58:06.296746+00:00"
+      "measured_at": "2026-07-08T07:03:30.654020+00:00"
     },
     {
       "slot_key": "2026-178-w5-1117",
@@ -118,7 +118,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-07T07:58:06.296746+00:00"
+      "measured_at": "2026-07-08T07:03:30.654020+00:00"
     },
     {
       "slot_key": "2026-181-w1-1823",
@@ -148,7 +148,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-07T07:58:06.296746+00:00"
+      "measured_at": "2026-07-08T07:03:30.654020+00:00"
     },
     {
       "slot_key": "2026-182-w2-1241",
@@ -178,7 +178,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-07T07:58:06.296746+00:00"
+      "measured_at": "2026-07-08T07:03:30.654020+00:00"
     },
     {
       "slot_key": "2026-184-w4-1907",
@@ -208,7 +208,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-07T07:58:06.296746+00:00"
+      "measured_at": "2026-07-08T07:03:30.654020+00:00"
     },
     {
       "slot_key": "2026-185-w5-1053",
@@ -238,7 +238,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-07T07:58:06.296746+00:00"
+      "measured_at": "2026-07-08T07:03:30.654020+00:00"
     },
     {
       "slot_key": "2026-187-w0-1911",
@@ -257,8 +257,18 @@
         "#HomeCookTechnique"
       ],
       "media_id": "17907613896440838",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 0,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 0,
+        "profile_visits": 0,
+        "follows": 0
+      },
+      "measured_at": "2026-07-08T07:03:30.654020+00:00"
     },
     {
       "slot_key": "2026-188-w1-1837",
