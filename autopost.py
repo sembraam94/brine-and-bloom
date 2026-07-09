@@ -479,6 +479,80 @@ def generate_video(image_url, motion_prompt):
 
 
 # =============================================================================
+# Step 2b — strip AI-provenance metadata + re-host on R2 (optional)
+#
+# If R2 is configured, each generated image is downloaded, RE-ENCODED (which drops
+# C2PA / IPTC "digital source type" / XMP / EXIF provenance tags), uploaded to R2,
+# and Instagram is given that clean URL instead of the raw generator URL. If R2 is
+# NOT configured, images are posted straight from the generator URL (unchanged).
+# NOTE: this removes metadata-based AI signals only — Meta's pixel classifier can
+# still detect AI imagery. See README.
+# =============================================================================
+
+R2_ENV = ("R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY",
+          "R2_BUCKET", "R2_PUBLIC_BASE_URL")
+
+
+def r2_configured():
+    return all(os.environ.get(k) for k in R2_ENV)
+
+
+def _r2_client():
+    import boto3
+    return boto3.client(
+        "s3",
+        endpoint_url=f"https://{env('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com",
+        aws_access_key_id=env("R2_ACCESS_KEY_ID"),
+        aws_secret_access_key=env("R2_SECRET_ACCESS_KEY"),
+        region_name="auto",
+    )
+
+
+def strip_and_host(image_url, key):
+    """Download -> re-encode as a clean JPEG (drops provenance metadata) -> upload
+    to R2 -> return the public URL Instagram will fetch."""
+    import io
+    from PIL import Image
+    r = http("GET", image_url, timeout=120)
+    r.raise_for_status()
+    img = Image.open(io.BytesIO(r.content)).convert("RGB")
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=95)   # no exif/metadata carried over
+    _r2_client().put_object(
+        Bucket=env("R2_BUCKET"), Key=key,
+        Body=buf.getvalue(), ContentType="image/jpeg",
+    )
+    return f"{env('R2_PUBLIC_BASE_URL').rstrip('/')}/{key}"
+
+
+def delete_from_r2(keys):
+    if not keys:
+        return
+    try:
+        client, bucket = _r2_client(), env("R2_BUCKET")
+        for k in keys:
+            client.delete_object(Bucket=bucket, Key=k)
+    except Exception as e:
+        print(f"(R2 cleanup skipped: {e})")
+
+
+def prepare_image_urls(replicate_urls, slot_key):
+    """Return (public_urls, r2_keys). With R2 configured: strip metadata + re-host
+    each image (keys are deleted after publishing). Without R2: pass through."""
+    if not r2_configured():
+        return replicate_urls, []
+    print("Stripping AI-provenance metadata + re-hosting on R2...")
+    safe = "".join(c if (c.isalnum() or c in "-_") else "-" for c in str(slot_key))
+    urls, keys = [], []
+    for i, u in enumerate(replicate_urls):
+        k = f"img/{safe}-{i}.jpg"
+        urls.append(strip_and_host(u, k))
+        keys.append(k)
+        print(f"  hosted: {urls[-1]}")
+    return urls, keys
+
+
+# =============================================================================
 # Step 3 — publish to Instagram (single image or carousel)
 # =============================================================================
 
@@ -829,8 +903,10 @@ def main():
             print("-" * 60)
             return
 
+        image_urls, r2_keys = prepare_image_urls(image_urls, key)
         print("Publishing to Instagram...")
         media_id = post_to_instagram(image_urls, caption)
+        delete_from_r2(r2_keys)
 
     print(f"Published. Media ID: {media_id}")
 
