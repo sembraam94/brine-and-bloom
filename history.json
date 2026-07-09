@@ -299,6 +299,26 @@
         "follows": 0
       },
       "measured_at": "2026-07-09T07:59:24.485738+00:00"
+    },
+    {
+      "slot_key": "2026-190-w3-1219",
+      "date_utc": "2026-07-09T11:14:36.845273+00:00",
+      "local_date": "2026-07-09",
+      "weekday": 3,
+      "slot_hour": 12,
+      "format": "carousel",
+      "theme": "sauce",
+      "title": "2-1-1-miso-ginger-rice-vinegar-glaze-versatile",
+      "hashtags": [
+        "#CookingTips",
+        "#MarinadeRecipe",
+        "#MisoGlaze",
+        "#EasyWeeknightDinner",
+        "#MisoRecipe"
+      ],
+      "media_id": "18325879711287487",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
