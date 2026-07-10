@@ -108,17 +108,17 @@
       ],
       "media_id": "18073664927683399",
       "metrics": {
-        "reach": 0,
+        "reach": 1,
         "likes": 0,
         "comments": 0,
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 0,
+        "views": 2,
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-09T07:59:24.485738+00:00"
+      "measured_at": "2026-07-10T07:58:26.204370+00:00"
     },
     {
       "slot_key": "2026-181-w1-1823",
@@ -138,17 +138,17 @@
       ],
       "media_id": "17928151116125927",
       "metrics": {
-        "reach": 0,
+        "reach": 1,
         "likes": 0,
         "comments": 0,
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 0,
+        "views": 1,
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-09T07:59:24.485738+00:00"
+      "measured_at": "2026-07-10T07:58:26.204370+00:00"
     },
     {
       "slot_key": "2026-182-w2-1241",
@@ -168,17 +168,17 @@
       ],
       "media_id": "17931605379341469",
       "metrics": {
-        "reach": 0,
+        "reach": 1,
         "likes": 0,
         "comments": 0,
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 0,
+        "views": 1,
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-09T07:59:24.485738+00:00"
+      "measured_at": "2026-07-10T07:58:26.204370+00:00"
     },
     {
       "slot_key": "2026-184-w4-1907",
@@ -198,17 +198,17 @@
       ],
       "media_id": "18017735198886526",
       "metrics": {
-        "reach": 0,
+        "reach": 1,
         "likes": 0,
         "comments": 0,
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 0,
+        "views": 1,
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-09T07:59:24.485738+00:00"
+      "measured_at": "2026-07-10T07:58:26.204370+00:00"
     },
     {
       "slot_key": "2026-185-w5-1053",
@@ -228,17 +228,17 @@
       ],
       "media_id": "18084634715178673",
       "metrics": {
-        "reach": 0,
+        "reach": 1,
         "likes": 0,
         "comments": 0,
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 0,
+        "views": 1,
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-09T07:59:24.485738+00:00"
+      "measured_at": "2026-07-10T07:58:26.204370+00:00"
     },
     {
       "slot_key": "2026-187-w0-1911",
@@ -258,17 +258,17 @@
       ],
       "media_id": "17907613896440838",
       "metrics": {
-        "reach": 0,
+        "reach": 1,
         "likes": 0,
         "comments": 0,
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 0,
+        "views": 1,
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-09T07:59:24.485738+00:00"
+      "measured_at": "2026-07-10T07:58:26.204370+00:00"
     },
     {
       "slot_key": "2026-188-w1-1837",
@@ -288,17 +288,17 @@
       ],
       "media_id": "18104143339862386",
       "metrics": {
-        "reach": 0,
+        "reach": 1,
         "likes": 0,
         "comments": 0,
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 0,
+        "views": 1,
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-09T07:59:24.485738+00:00"
+      "measured_at": "2026-07-10T07:58:26.204370+00:00"
     },
     {
       "slot_key": "2026-190-w3-1219",
@@ -317,8 +317,18 @@
         "#MisoRecipe"
       ],
       "media_id": "18325879711287487",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 1,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 1,
+        "profile_visits": 0,
+        "follows": 0
+      },
+      "measured_at": "2026-07-10T07:58:26.204370+00:00"
     }
   ]
 }
