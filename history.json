@@ -329,6 +329,26 @@
         "follows": 0
       },
       "measured_at": "2026-07-11T06:35:05.808265+00:00"
+    },
+    {
+      "slot_key": "2026-192-w5-1107",
+      "date_utc": "2026-07-11T10:22:34.998652+00:00",
+      "local_date": "2026-07-11",
+      "weekday": 5,
+      "slot_hour": 11,
+      "format": "carousel",
+      "theme": "technique",
+      "title": "technique-cold-water-pasta-starch-pasta-sauce",
+      "hashtags": [
+        "#pastacookingtips",
+        "#saucetechnique",
+        "#brineandbloom",
+        "#easydinnerideas",
+        "#pastatips"
+      ],
+      "media_id": "18122467735818505",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
