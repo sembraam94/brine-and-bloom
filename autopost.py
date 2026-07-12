@@ -54,19 +54,20 @@ BRAND_NAME = "Brine & Bloom"
 # varied per-post composition is requested in call_claude() so the feed does not
 # look templated/synthetic (an Instagram automation flag — see README safety).
 STYLE_SUFFIX = (
-    "Appetizing, mouth-watering food photography that makes the viewer instantly "
-    "hungry. The finished, beautifully styled dish is the HERO at the center of "
-    "the frame — fresh and glistening, with rich texture and depth: glossy "
-    "glazes, juicy surfaces, golden edges, a little steam or a drizzle where it "
-    "fits. Arranged AROUND the dish are the recipe's key raw ingredients, styled "
-    "naturally — a few cloves of garlic, a small dish of marinade or oil, fresh "
-    "herbs, citrus, or whole spices — telling the story of how it's made without "
-    "crowding the hero. Soft, diffused natural daylight from one side with gentle "
-    "shadows; a three-quarter or slightly overhead angle; shallow depth of field "
-    "so the dish pops while the surrounding ingredients sit softly in frame. "
-    "Textured natural surface — pale linen, weathered wood, or matte stoneware. "
-    "Warm, rich, natural color grade. No text, no hands, no people, no logos, no "
-    "labels. Photorealistic — a genuine, professional food photograph, not a render."
+    "A real, candid food photograph that looks like a person actually took it — "
+    "NOT an AI render, NOT a glossy 3D image. The finished dish is the hero in the "
+    "center, appetizing and fresh, with the recipe's key raw ingredients arranged "
+    "naturally around it (a few garlic cloves, a small dish of marinade or oil, "
+    "fresh herbs, citrus, whole spices) to tell the story. Real-food imperfections "
+    "make it believable: a few stray crumbs, an uneven edge, a small sauce smudge "
+    "on the plate, natural steam — nothing looks staged-perfect or plastic. "
+    "Soft, slightly uneven natural window light with realistic soft shadows; a "
+    "three-quarter or gently overhead angle; shallow depth of field. Textured "
+    "natural surface — pale linen, weathered wood, or matte stoneware. Shot on a "
+    "full-frame DSLR with a 50mm lens; fine natural film grain; true, honest "
+    "colours (NOT over-saturated, NOT over-glossy, no CGI sheen). No text, no "
+    "hands, no people, no logos, no labels. Indistinguishable from a genuine, "
+    "everyday food photo."
 )
 
 # AI disclosure appended to every caption. ⚠️ TEMPORARILY DISABLED (empty) to test
@@ -89,7 +90,7 @@ VIDEO_TIMEOUT_S = 600          # Veo renders take longer than images; cap the wa
 
 # Models / API versions (verified current as of 2026-06; see README).
 CLAUDE_MODEL = "claude-sonnet-4-6"                  # the brain. claude-haiku-4-5 is cheaper.
-REPLICATE_MODEL = "black-forest-labs/flux-1.1-pro"  # strong food realism, public output URL
+REPLICATE_MODEL = "black-forest-labs/flux-1.1-pro-ultra"  # Ultra + raw = natural, less "AI" look
 
 # Video (Reels): animate the Flux hero still into an ~8s appetizing clip. Veo's
 # output is a public URL we hand straight to Instagram (like the Flux images).
@@ -389,6 +390,7 @@ def generate_image(subject_prompt):
         },
         json={"input": {
             "prompt": full_prompt,
+            "raw": True,                # Ultra "raw" mode: natural textures, less synthetic
             "aspect_ratio": "1:1",      # square flat-lay; "4:5" is taller/leggier
             "output_format": "jpg",     # Instagram requires JPEG
             "safety_tolerance": 2,
