@@ -359,6 +359,26 @@
         "follows": 0
       },
       "measured_at": "2026-07-12T07:06:41.785193+00:00"
+    },
+    {
+      "slot_key": "forced-2026-07-12-12",
+      "date_utc": "2026-07-12T10:02:15.576503+00:00",
+      "local_date": "2026-07-12",
+      "weekday": 1,
+      "slot_hour": 18,
+      "format": "carousel",
+      "theme": "marinade",
+      "title": "4-2-1-yogurt-spice-marinade-for-chicken-or-lamb",
+      "hashtags": [
+        "#marinaderecipe",
+        "#grillingideas",
+        "#yogurtmarinade",
+        "#chickenmarinade",
+        "#easydinnerideas"
+      ],
+      "media_id": "18055585253532694",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
