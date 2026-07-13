@@ -37,6 +37,11 @@ on:
         type: choice
         options: ["auto", "image", "carousel", "reel"]
         default: "auto"
+      sample:
+        description: "Sample mode: generate + host to R2 (persistent link), do NOT post"
+        type: choice
+        options: ["no", "yes"]
+        default: "no"
 
 # Serialize the poster and the analyzer so they never push to the state files at
 # the same time. cancel-in-progress:false lets an in-flight publish finish.
@@ -75,6 +80,7 @@ jobs:
           DRY_RUN: ${{ github.event.inputs.dry_run == 'yes' && '1' || '' }}
           FORCE:   ${{ github.event.inputs.force == 'yes' && '1' || '' }}
           FORMAT:  ${{ github.event.inputs.format != 'auto' && github.event.inputs.format || '' }}
+          SAMPLE:  ${{ github.event.inputs.sample == 'yes' && '1' || '' }}
         run: python autopost.py
 
       - name: Commit post history

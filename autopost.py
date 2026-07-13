@@ -898,6 +898,13 @@ def main():
         for u in image_urls:
             print(f"  image: {u}")
 
+        if os.environ.get("SAMPLE") == "1":
+            # Host the preview on R2 (persistent URL) instead of the expiring
+            # generator URL, and do NOT post or record anything.
+            prepare_image_urls(image_urls, "sample-" + key)
+            print("\nSAMPLE — hosted on R2 above (persistent, not posted).")
+            return
+
         if dry:
             print("\nDRY_RUN=1 — not publishing. This is what it WOULD post:")
             print("-" * 60)
