@@ -148,7 +148,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-12T07:06:41.785193+00:00"
+      "measured_at": "2026-07-13T07:47:48.572843+00:00"
     },
     {
       "slot_key": "2026-182-w2-1241",
@@ -178,7 +178,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-12T07:06:41.785193+00:00"
+      "measured_at": "2026-07-13T07:47:48.572843+00:00"
     },
     {
       "slot_key": "2026-184-w4-1907",
@@ -208,7 +208,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-12T07:06:41.785193+00:00"
+      "measured_at": "2026-07-13T07:47:48.572843+00:00"
     },
     {
       "slot_key": "2026-185-w5-1053",
@@ -238,7 +238,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-12T07:06:41.785193+00:00"
+      "measured_at": "2026-07-13T07:47:48.572843+00:00"
     },
     {
       "slot_key": "2026-187-w0-1911",
@@ -268,7 +268,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-12T07:06:41.785193+00:00"
+      "measured_at": "2026-07-13T07:47:48.572843+00:00"
     },
     {
       "slot_key": "2026-188-w1-1837",
@@ -298,7 +298,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-12T07:06:41.785193+00:00"
+      "measured_at": "2026-07-13T07:47:48.572843+00:00"
     },
     {
       "slot_key": "2026-190-w3-1219",
@@ -328,7 +328,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-12T07:06:41.785193+00:00"
+      "measured_at": "2026-07-13T07:47:48.572843+00:00"
     },
     {
       "slot_key": "2026-192-w5-1107",
@@ -358,7 +358,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-12T07:06:41.785193+00:00"
+      "measured_at": "2026-07-13T07:47:48.572843+00:00"
     },
     {
       "slot_key": "forced-2026-07-12-12",
@@ -377,8 +377,18 @@
         "#easydinnerideas"
       ],
       "media_id": "18055585253532694",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 1,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 1,
+        "profile_visits": 0,
+        "follows": 0
+      },
+      "measured_at": "2026-07-13T07:47:48.572843+00:00"
     }
   ]
 }
