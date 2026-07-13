@@ -42,6 +42,10 @@ on:
         type: choice
         options: ["no", "yes"]
         default: "no"
+      sample_model:
+        description: "Try a different image model for the sample (e.g. google/imagen-4-ultra); blank = default"
+        required: false
+        default: ""
 
 # Serialize the poster and the analyzer so they never push to the state files at
 # the same time. cancel-in-progress:false lets an in-flight publish finish.
@@ -81,6 +85,7 @@ jobs:
           FORCE:   ${{ github.event.inputs.force == 'yes' && '1' || '' }}
           FORMAT:  ${{ github.event.inputs.format != 'auto' && github.event.inputs.format || '' }}
           SAMPLE:  ${{ github.event.inputs.sample == 'yes' && '1' || '' }}
+          SAMPLE_MODEL: ${{ github.event.inputs.sample_model }}
         run: python autopost.py
 
       - name: Commit post history

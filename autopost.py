@@ -376,25 +376,33 @@ Return the JSON and nothing else — no markdown fences, no commentary."""
 # Step 2 — render the image(s) (Flux via Replicate; returns public URLs)
 # =============================================================================
 
+def _image_input(model, full_prompt):
+    """Model-appropriate input dict (Flux and Imagen take different params)."""
+    if "imagen" in model:
+        return {"prompt": full_prompt, "aspect_ratio": "1:1",
+                "output_format": "jpg", "safety_filter_level": "block_only_high"}
+    inp = {"prompt": full_prompt, "aspect_ratio": "1:1",   # "4:5" = taller
+           "output_format": "jpg", "safety_tolerance": 2}
+    if "ultra" in model:
+        inp["raw"] = True              # Flux Ultra raw mode: natural, less synthetic
+    return inp
+
+
 def generate_image(subject_prompt):
+    # SAMPLE_MODEL lets a sample run try a different model without changing the default.
+    model = os.environ.get("SAMPLE_MODEL") or REPLICATE_MODEL
     full_prompt = f"{subject_prompt}\n\n{STYLE_SUFFIX}"
     token = env("REPLICATE_API_TOKEN")
 
     resp = http(
         "POST",
-        f"https://api.replicate.com/v1/models/{REPLICATE_MODEL}/predictions",
+        f"https://api.replicate.com/v1/models/{model}/predictions",
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
             "Prefer": "wait",
         },
-        json={"input": {
-            "prompt": full_prompt,
-            "raw": True,                # Ultra "raw" mode: natural textures, less synthetic
-            "aspect_ratio": "1:1",      # square flat-lay; "4:5" is taller/leggier
-            "output_format": "jpg",     # Instagram requires JPEG
-            "safety_tolerance": 2,
-        }},
+        json={"input": _image_input(model, full_prompt)},
         timeout=180,
     )
     resp.raise_for_status()
