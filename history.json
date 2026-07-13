@@ -389,6 +389,25 @@
         "follows": 0
       },
       "measured_at": "2026-07-13T07:47:48.572843+00:00"
+    },
+    {
+      "slot_key": "2026-194-w0-1934",
+      "date_utc": "2026-07-13T18:24:14.130555+00:00",
+      "local_date": "2026-07-13",
+      "weekday": 0,
+      "slot_hour": 19,
+      "format": "carousel",
+      "theme": "quick-dinner",
+      "title": "quick-dinner-smashed-cucumber-ground-turkey-rice-bowl",
+      "hashtags": [
+        "#groundturkeyrecipes",
+        "#weeknightdinnerideas",
+        "#ricebowlrecipe",
+        "#brineandbloom"
+      ],
+      "media_id": "18170340997440435",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
