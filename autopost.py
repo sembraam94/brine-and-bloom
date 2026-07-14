@@ -102,8 +102,8 @@ REPLICATE_MODEL = "black-forest-labs/flux-1.1-pro-ultra"  # Ultra + raw = natura
 # Reels are now "AI chef" narrated slideshows: Flux stills + minimax TTS voiceover,
 # assembled with ffmpeg (Ken Burns), hosted on R2, published as a Reel.
 TTS_MODEL = "minimax/speech-2.8-hd"                       # #1-benchmark natural TTS
-# Livelier options: Lively_Girl, Casual_Guy, Young_Knight. Empty env -> default.
-CHEF_VOICE_ID = os.environ.get("CHEF_VOICE_ID") or "Casual_Guy"
+# Chosen voice. Alternatives to audition: Casual_Guy, Lively_Girl, Young_Knight. Empty env -> default.
+CHEF_VOICE_ID = os.environ.get("CHEF_VOICE_ID") or "English_Trustworth_Man"
 REEL_FPS = 30
 
 # Legacy Veo image-to-video path (kept for the optional motion-clip style; unused
