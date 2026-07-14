@@ -105,7 +105,7 @@ TTS_MODEL = "minimax/speech-2.8-hd"                       # #1-benchmark natural
 # Chosen voice. Alternatives to audition: Casual_Guy, Lively_Girl, Young_Knight. Empty env -> default.
 CHEF_VOICE_ID = os.environ.get("CHEF_VOICE_ID") or "English_Trustworth_Man"
 REEL_FPS = 30
-REEL_MASCOT = os.environ.get("REEL_MASCOT", "assets/ai_chef.jpg")  # corner overlay; skipped if missing
+REEL_MASCOT = os.environ.get("REEL_MASCOT", "assets/ai_chef_badge.png")  # corner overlay; skipped if missing
 
 # Legacy Veo image-to-video path (kept for the optional motion-clip style; unused
 # by the default reel flow, which is the narrated slideshow above).
@@ -733,8 +733,8 @@ def build_reel(image_paths, audio_path, out_path, caption_text=None, mascot_path
             cur = "vs"
 
     if mascot_idx is not None:
-        fc += (f"[{mascot_idx}:v]scale=300:-1[mask];"
-               f"[{cur}][mask]overlay=x=W-w-40:y=64[vm];")
+        fc += (f"[{mascot_idx}:v]scale=-1:420[mask];"
+               f"[{cur}][mask]overlay=x=28:y=H-h-260[vm];")   # bottom-left
         cur = "vm"
 
     fc = fc.rstrip(";")
