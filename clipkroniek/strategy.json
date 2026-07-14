@@ -13,6 +13,7 @@
   "hard_view_floor": 10,
   "min_duration_s": 5,
   "max_duration_s": 60,
+  "burn_hook": false,
   "regions": {
     "western": ["en"],
     "asian": ["ko", "ja", "zh", "zh-cn", "zh-tw", "zh-hk", "th", "id", "vi", "ms", "tl"]

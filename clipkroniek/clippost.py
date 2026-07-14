@@ -355,7 +355,7 @@ def _clean_drawtext(s):
 def reformat_reel(in_path, out_path, hook_text, max_s=60):
     """Blurred 9:16 fill + centered gameplay + a bold hook banner near the top."""
     _ensure_tool("ffmpeg")
-    hook = _clean_drawtext(hook_text)
+    hook = _clean_drawtext(hook_text) if hook_text else ""
     font = _font()
     fill = (
         f"[0:v]scale={REEL_W}:{REEL_H}:force_original_aspect_ratio=increase,"
@@ -363,7 +363,7 @@ def reformat_reel(in_path, out_path, hook_text, max_s=60):
         f"[0:v]scale={REEL_W}:-2:force_original_aspect_ratio=decrease[fg];"
         f"[bg][fg]overlay=(W-w)/2:(H-h)/2[base]"
     )
-    if font:                              # burn the hook banner only if a font exists
+    if font and hook:                     # burn the hook banner only if enabled + a font exists
         vf = (fill + ";"
               f"[base]drawtext=fontfile='{font}':text='{hook}':fontcolor=white:"
               f"fontsize=68:borderw=6:bordercolor=black@0.9:x=(w-text_w)/2:y=190:"
@@ -393,15 +393,19 @@ def call_claude(clip, slot, strategy):
     pool = " ".join(GAME_HASHTAGS.get(slot["game"], []))
     system = (
         "You write for 'Clipkroniek', an Instagram page that reposts the best "
-        "gaming clips WITH creator credit. Given ONE Twitch clip, return a JSON "
-        "object ONLY (no prose, no markdown):\n"
+        "gaming clips WITH creator credit. You get ONE clip's METADATA (title, "
+        "game, streamer) but you CANNOT watch the video. Return a JSON object "
+        "ONLY (no prose, no markdown):\n"
         '{"hook": "...", "caption": "...", "hashtags": ["#..."]}\n'
-        "- hook: a 3-5 word on-screen teaser in UPPERCASE, ASCII letters/spaces "
-        "only, no emoji, that makes people stop scrolling "
-        "(e.g. 'HE NEVER SAW IT COMING').\n"
-        "- caption: 1-2 short punchy lines. Open with a curiosity/hype hook, name "
-        "the game plainly (for search). English. NO hashtags and NO @credit inside "
-        "the caption (both are appended separately).\n"
+        "CRITICAL: because you can't see the clip, NEVER invent or assert specific "
+        "events, outcomes, kill counts, or who-did-what — you will be wrong. Stay "
+        "intriguing but GENERAL.\n"
+        "- caption: 1-2 short punchy lines. A general curiosity/hype line that "
+        "names the game plainly (for search). English. NO hashtags and NO @credit "
+        "inside (both are appended separately).\n"
+        "- hook: a SHORT 2-4 word UPPERCASE on-screen teaser that is true for ANY "
+        "clip (e.g. 'WAIT FOR IT', 'CAUGHT ON STREAM', 'GTA RP MOMENT'), ASCII "
+        "only, no specific claims. (Often unused, but keep it safe/generic.)\n"
         f"- hashtags: 4-5 niche tags for this game, lowercase, like: {pool}. "
         "No mega-generic tags (#gaming, #viral, #fyp)."
     )
@@ -596,8 +600,9 @@ def main():
 
     ai = call_claude(clip, slot, strategy)
     caption, tags = assemble_caption(ai, clip, slot, strategy)
-    hook = ai.get("hook") or (clip.get("title") or "")[:24]
-    print(f"Hook: {hook!r}")
+    burn = bool(strategy.get("burn_hook", False))
+    hook = (ai.get("hook") or "").strip() if burn else ""
+    print(f"Hook overlay: {hook!r}" + ("" if burn else " (burn_hook off — clean video, no text)"))
     print("Caption:\n" + caption)
 
     if discover_only:
