@@ -300,20 +300,24 @@ def call_claude(strategy, slot, recent_titles):
         )
     elif fmt == "reel":
         format_note = (
-            " This is a REEL narrated by a FUN, ENERGETIC, QUIRKY \"AI chef\" character. "
-            "image_prompts is ONE hero food still (text-free). ALSO return a "
-            "'voiceover_script': ~20-25 seconds of SPOKEN words (about 55-70 words) — the "
-            "AI chef's punchy, playful narration of the recipe. Lead with a hook, say the "
-            "key steps/ratio out loud, end with a quick 'save this / follow your AI chef' "
-            "CTA. Just the spoken words — no stage directions, no emojis, no scene labels."
+            " This is a REEL narrated by a FUN, ENERGETIC, PERSONABLE \"AI chef\" character "
+            "talking to camera like a creator. image_prompts is ONE hero food still "
+            "(text-free). ALSO return a 'voiceover_script': ~25-30 seconds of SPOKEN words "
+            "(about 65-85 words). OPEN with a warm, friendly personal greeting that "
+            "introduces the chef and today's dish (vary the wording each time — e.g. 'Hey "
+            "everyone, your AI chef here! Today we're making ...'), THEN walk through the "
+            "recipe/ratio out loud with personality, and END with a save + 'follow your AI "
+            "chef' CTA. Warm and conversational. Just the spoken words — no stage "
+            "directions, no emojis, no scene labels."
         )
     else:
         format_note = " This is a SINGLE image."
 
     video_prompt_spec = (
-        ',\n  "voiceover_script": "REEL only: ~55-70 words of SPOKEN narration for the fun '
-        'quirky AI chef — hook, then the key steps/ratio out loud, then a save/follow CTA; '
-        'spoken words only, no stage directions or emojis"'
+        ',\n  "voiceover_script": "REEL only: ~65-85 words of SPOKEN narration for the fun, '
+        'personable AI chef — OPEN with a warm greeting introducing yourself and the dish, '
+        'then the recipe/ratio with personality, then a save/follow CTA; spoken words only, '
+        'no stage directions or emojis"'
         if fmt == "reel" else ""
     )
 
