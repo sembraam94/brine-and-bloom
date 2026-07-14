@@ -751,33 +751,36 @@ def build_reel(image_paths, audio_path, out_path, caption_text=None, mascot_path
 
 
 def compose_badge(char_path, out_path):
-    """Composite a transparent character into a circular badge with the head
-    'popping out' above the top of the circle. Returns out_path (transparent PNG)."""
+    """Circular badge with the character standing IN FRONT of it: the disc is a
+    background, the whole character (hat, head, torso — nothing clipped by the
+    circle) sits on top, trimmed only at the bottom so it looks like he's popping
+    out of the badge. Returns out_path (transparent PNG)."""
     from PIL import Image, ImageDraw
     char = Image.open(char_path).convert("RGBA")
     bb = char.getbbox()
     if bb:
         char = char.crop(bb)
     cw, ch = char.size
-    W = 640
+    W = 620
     char = char.resize((W, max(1, int(ch * W / cw))))
     cw, ch = char.size
-    D = cw                       # badge diameter
-    head = int(ch * 0.16)        # head height poking above the circle
-    ring = 14
-    top = head
-    cx, cy = cw // 2, top + D // 2
-    Hh = top + D + ring + 8
+    D = int(cw * 1.02)              # disc roughly the character's width
+    ring = 16
+    circle_top = int(ch * 0.30)     # head + hat sit above the disc's top edge
+    cx = cw // 2
+    cy = circle_top + D // 2
+    clip_y = cy + int(D * 0.14)      # trim the character here; disc's lower arc shows below
+    Hh = max(ch, circle_top + D) + ring + 8
     canvas = Image.new("RGBA", (cw, Hh), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(canvas)
-    draw.ellipse([cx - D // 2 - ring, cy - D // 2 - ring,
-                  cx + D // 2 + ring, cy + D // 2 + ring], fill=(244, 235, 221, 255))  # cream ring
-    draw.ellipse([cx - D // 2, cy - D // 2, cx + D // 2, cy + D // 2],
-                 fill=(95, 107, 65, 255))                                              # olive disc
+    dr = ImageDraw.Draw(canvas)
+    # 1) disc + ring in the BACKGROUND
+    dr.ellipse([cx - D // 2 - ring, cy - D // 2 - ring,
+                cx + D // 2 + ring, cy + D // 2 + ring], fill=(244, 235, 221, 255))  # cream ring
+    dr.ellipse([cx - D // 2, cy - D // 2, cx + D // 2, cy + D // 2],
+               fill=(95, 107, 65, 255))                                             # olive disc
+    # 2) whole character ON TOP, trimmed only below clip_y (not clipped to the circle)
     mask = Image.new("L", (cw, Hh), 0)
-    md = ImageDraw.Draw(mask)
-    md.ellipse([cx - D // 2, cy - D // 2, cx + D // 2, cy + D // 2], fill=255)  # inside the disc
-    md.rectangle([0, 0, cw, top], fill=255)                                     # + above it (head)
+    ImageDraw.Draw(mask).rectangle([0, 0, cw, clip_y], fill=255)
     layer = Image.new("RGBA", (cw, Hh), (0, 0, 0, 0))
     layer.alpha_composite(char, (0, 0))
     r, g, b, a = layer.split()
