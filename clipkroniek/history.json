@@ -1,0 +1,34 @@
+{
+  "posts": [
+    {
+      "slot_key": "2026-07-14-w1-18-forced",
+      "date_utc": "2026-07-14T19:55:03.872294+00:00",
+      "local_date": "2026-07-14",
+      "weekday": 1,
+      "slot_hour": 18,
+      "game": "gta",
+      "region": "western",
+      "source": "twitch",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "SplendidFamousTrayPeteZaroll-YYbaZbrrhxwmTJsH",
+      "clip_url": "https://www.twitch.tv/myles_away/clip/SplendidFamousTrayPeteZaroll-YYbaZbrrhxwmTJsH",
+      "broadcaster": "Myles_Away",
+      "creator": "Kemli",
+      "language": "en",
+      "clip_views": 2192,
+      "title": "LSIA Ladder push at holdout !",
+      "hook": "",
+      "hashtags": [
+        "#gtav",
+        "#gtaonline",
+        "#gtaclips",
+        "#gta5clips",
+        "#gtamoments"
+      ],
+      "media_id": "18115638742902051",
+      "metrics": {},
+      "measured_at": null
+    }
+  ]
+}
