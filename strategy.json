@@ -1,6 +1,6 @@
 {
-  "version": 4,
-  "updated": "2026-07-11",
+  "version": 5,
+  "updated": "2026-07-14",
   "account_start_date": "2026-06-20",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Cooking tips, recipes, and marinades with AI-styled ingredient photography. Audience is Europe-first, US a strong second. Goal: grow followers fast-but-safe by making every post highly shareable (sent to a friend) and saveable.",
@@ -12,46 +12,45 @@
   "jitter_minutes": 12,
   "slots": [
     {
-      "weekday": 1,
-      "hour": 18,
-      "minute": 22,
-      "format": "carousel",
-      "theme": "marinade",
-      "note": "Tue ~18:22 CET — w1-18 is the joint top-reach slot (avg 2.5); marinade has consistently matched that reach ceiling. Retaining and shifting minute slightly to avoid robotic pattern."
-    },
-    {
       "weekday": 3,
       "hour": 12,
-      "minute": 41,
+      "minute": 17,
       "format": "carousel",
       "theme": "sauce",
-      "note": "Thu ~12:41 CET — w3-12 is the single highest-reach slot recorded (avg 3.0); sauce also tied for top theme reach (2.5). Pairing best slot with best theme. Minute shifted from prior 19."
+      "note": "Thu ~12:17 CET — w3-12 is the single highest-reach slot (avg 3.0); sauce is the top-reach theme (avg 2.5). Best slot + best theme retained. Minute shifted from 41 for jitter."
+    },
+    {
+      "weekday": 1,
+      "hour": 18,
+      "minute": 37,
+      "format": "carousel",
+      "theme": "marinade",
+      "note": "Tue ~18:37 CET — w1-18 is second-best slot (avg 2.3); marinade is second-best theme (avg 2.3). Strong pairing retained. Minute shifted from 22."
     },
     {
       "weekday": 5,
       "hour": 11,
-      "minute": 7,
+      "minute": 53,
       "format": "carousel",
       "theme": "technique",
-      "note": "Sat ~11:07 CET — replacing the low-reach w5-10 slot (avg 1.0) with a slightly later Saturday morning window. Technique swapped in here to test whether the theme performs better outside Mon evening."
+      "note": "Sat ~11:53 CET — w5-11 avg reach 2.0, on par with most slots. Technique (avg 2.0) tested here; 3 posts now give enough signal to keep but not elevate yet. Minute shifted for jitter."
     },
     {
       "weekday": 0,
       "hour": 19,
-      "minute": 34,
+      "minute": 14,
       "format": "carousel",
-      "theme": "quick-dinner",
-      "note": "Mon ~19:34 CET — w0-19 held avg reach of 2.0, on par with most slots. Quick-dinner moved here from Saturday where it posted the weakest reach (1.5). Minute adjusted from 11."
+      "theme": "sauce",
+      "note": "Mon ~19:14 CET — w0-19 avg reach 2.0 is solid. Doubling sauce (top theme) to gather more signal on its save/send potential across a second slot and day. Quick-dinner retired: 2 posts, weakest reach (1.5), no engagement lift."
     }
   ],
   "content_plan": {
-    "marinade": "One complete marinade built around a memorable, visual ratio (e.g. 3-2-1 oil/acid/flavour). Slide 1: bold hero shot of the finished protein with an outcome headline. Slide 2: ratio written in large, high-contrast text — screenshot-ready. Slides 3-4: one technique note each (marinating time window, a common mistake, food-safety tip). Final slide: explicit save CTA ('Save before you shop') plus a send prompt ('Tag the person who always over-marinates'). Every slide must earn its place with one discrete piece of information worth keeping.",
-    "sauce": "A versatile sauce, glaze, or dressing built on a memorisable ratio (e.g. 2-1-1 fat/acid/flavour). Slide 1: finished sauce on a clean, beautiful surface with a one-line descriptor in the caption overlay. Slide 2: ratio in bold, readable type. Slides 3-4: show the same sauce on two very different foods (e.g. grilled fish AND roasted veg) to maximise perceived versatility and DM sends. Final slide: '3 ways to use this tonight' — the explicit numbered list is the primary send trigger.",
-    "technique": "One practical, slightly surprising kitchen technique that makes someone say 'I didn't know that.' Slide 1: striking visual of the technique in action. Slide 2: the rule or ratio in plain language, large text, built to be screenshotted. Slides 3-4: before/after or common mistake vs correct method — contrast drives sends. Final slide: one-line plain-English summary and a send prompt ('Send this to someone who does it wrong'). Keep each slide to a single idea; resist adding extra steps.",
-    "quick-dinner": "A genuinely fast (≤30 min) weeknight recipe. Slide 1: finished dish with a bold time claim visible in the image ('Done in 25 min'). Slide 2: full ingredient list with quantities large enough to read without zooming (≤7 ingredients) — this is the primary save trigger. Slides 3-4: one critical technique step each with a short explanatory line. Final slide: 'Save this for tonight' with a specific occasion anchor (e.g. 'perfect reset after a long Monday'). Quantities on slide 2 must be large and unambiguous."
+    "sauce": "A versatile sauce, glaze, or dressing built on a memorisable ratio (e.g. 2-1-1 fat/acid/flavour). Slide 1: hero shot of finished sauce on a clean, beautiful surface — no text, numbers, or labels on the image. Slide 2: another beauty angle showing the sauce in context (spooned over protein, pooling on a board). Slides 3-4: show the same sauce applied to two very different foods (e.g. grilled fish AND roasted veg) to maximise perceived versatility and DM sends. Final slide: close-up texture shot. ALL ratio, quantities, and '3 ways to use this tonight' content go in the caption only — never on the image.",
+    "marinade": "One complete marinade built around a memorable ratio (e.g. 3-2-1 oil/acid/flavour). Slide 1: bold hero shot of the finished marinated protein — no text on image. Slide 2: ingredients laid flat on a clean surface in an aesthetically arranged flat-lay, nothing labelled. Slides 3-4: process shots — protein submerged, colour change after marinating — purely visual, no overlaid text. Final slide: finished dish plated beautifully. ALL ratios, marinating times, technique notes, save CTAs, and send prompts go in the caption only.",
+    "technique": "One practical, slightly surprising kitchen technique that produces a visible, striking result. Slide 1: dramatic outcome shot — the 'after' at its most visually compelling, no text. Slide 2: close-up of the key action (knife angle, fold, sear surface) — purely photographic. Slides 3-4: side-by-side or sequential shots showing contrast (wrong vs right result) using only visual difference, no labels or text overlaid. Final slide: clean beauty shot of the finished result. ALL explanatory language, the rule being demonstrated, and send prompts go in the caption only."
   },
-  "caption_strategy": "All captions should open with a search-friendly hook in plain language (no emojis in the first line) that names the dish, technique, or ratio explicitly — e.g. 'A 3-2-1 marinade ratio that works on any protein.' This helps keyword indexing at a stage when the account has no algorithmic history. Follow with one or two sentences of context or a problem the viewer has ('You probably over-marinate without knowing it'). Close with a direct, low-friction CTA: either a save prompt or a send prompt, not both — pick the one that fits the slide content. Keep total caption length to 80-120 words. Avoid vague lifestyle language; every sentence should deliver information or utility.",
-  "hashtag_strategy": "Use exactly 4-5 hashtags per post. Avoid mega-tags (over 5 M posts) entirely — they provide zero discoverability for a brand-new account. Target two mid-size niche tags (200 K–1 M posts, e.g. #marinaderecipe, #saucetips), one smaller community tag (under 200 K, e.g. #brineandbloom or a dish-specific tag), and one broad-but-relevant food keyword tag (1–3 M, e.g. #easydinnerideas). Place hashtags at the end of the caption rather than in a comment — early caption keyword density matters more right now than hashtag hiding.",
-  "learnings": "All performance metrics are effectively zero across all 8 posts and all themes — reach is 1-3 (likely followers only, not non-follower distribution), sends and saves are 0. This is a cold-start signal problem, not a content quality problem: the algorithm has no engagement history to distribute from. Priority actions: (1) The w3-12 slot produced the highest raw reach (3.0) — protect it. (2) w5-10 produced the lowest reach (1.0) — dropped. (3) Hold cadence at 4/week; do not increase until at least one post records a non-zero saves_per_reach or sends_per_reach. (4) Focus captions on keyword searchability above all else.",
-  "next_review": "2026-07-18"
+  "caption_strategy": "Every caption should open with a search-friendly first line that names the dish, technique, or sauce plainly (e.g. 'Lemon-herb chicken marinade — 3-2-1 ratio') so it surfaces in Instagram keyword search. Follow with the full ratio or recipe in scannable lines, because text-heavy save-bait in the caption is the primary mechanism for saves and sends on a young account with tiny reach. Include one explicit send hook mid-caption ('Send this to whoever always over-marinades') and close with a save prompt ('Save before you need it'). Write in a warm, confident, slightly conversational tone — one person sharing a trick they genuinely love. Keep total caption under 220 words; front-load all useful information before the hashtags.",
+  "hashtag_strategy": "Use 3–5 hashtags maximum, placed at the very end of the caption after a line break. Prioritise mid-size niche tags (300k–3M posts) that exactly match the content: e.g. #marinaderecipe, #saucefromscratch, #cookingtechnique, #weeknightcooking, #flavourtips. Avoid mega-generic tags (#food, #recipe) — they bury young accounts instantly. Rotate one slot to a smaller hyper-niche tag (<150k posts, e.g. #brineandbloom or #acidbalance) to build a findable owned space. Do not repeat the same set across consecutive posts; vary at least two tags each time to probe which clusters drive non-follower reach.",
+  "learnings": "All engagement metrics (sends, saves, follows) are zero across 10 posts — reach numbers are tiny (1–3 people), almost certainly friends or staff, not real algorithmic distribution. No theme or slot has proven superiority on the signals that matter. Quick-dinner is retired on weakest reach. Sauce leads on reach and gets a second weekly slot to test saves/sends more quickly. The priority for the next cycle is proving save-bait and send-bait caption mechanics work at all before scaling cadence. Hold at 4 posts/week; do not ramp until at least one post shows saves_per_reach > 0.",
+  "next_review": "2026-07-21"
 }
