@@ -14,7 +14,12 @@ Degrades gracefully — any failure returns [] and the caller simply doesn't rot
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
 # Sonnet 4.6 supports the dynamic-filtering web-search tool (no beta header).
 SCAN_MODEL = "claude-sonnet-4-6"
-WEB_SEARCH_TOOL = {"type": "web_search_20260209", "name": "web_search", "max_uses": 6}
+WEB_SEARCH_TOOL = {"type": "web_search_20260209", "name": "web_search", "max_uses": 4}
+
+# A web-search turn legitimately runs for minutes; give it one long attempt and do
+# NOT let the shared http() retry it (a retry re-runs every search — slow + costly).
+SCAN_TIMEOUT = 280
+SCAN_RETRIES = 0
 
 _HEADERS = {
     "anthropic-version": "2023-06-01",
@@ -88,7 +93,8 @@ def scan_games(anthropic_key, http, active_names, benched_names):
     }
     headers = dict(_HEADERS, **{"x-api-key": anthropic_key})
     try:
-        resp = http("POST", ANTHROPIC_URL, headers=headers, json=body, timeout=180)
+        resp = http("POST", ANTHROPIC_URL, headers=headers, json=body,
+                    timeout=SCAN_TIMEOUT, retries=SCAN_RETRIES)
         resp.raise_for_status()
         data = resp.json()
     except Exception as e:
@@ -103,7 +109,8 @@ def scan_games(anthropic_key, http, active_names, benched_names):
                 {"role": "user", "content": user},
                 {"role": "assistant", "content": data.get("content", [])},
             ]
-            resp = http("POST", ANTHROPIC_URL, headers=headers, json=body2, timeout=180)
+            resp = http("POST", ANTHROPIC_URL, headers=headers, json=body2,
+                        timeout=SCAN_TIMEOUT, retries=SCAN_RETRIES)
             resp.raise_for_status()
             data = resp.json()
         except Exception as e:
