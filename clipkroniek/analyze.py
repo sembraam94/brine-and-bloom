@@ -323,11 +323,13 @@ def rotate_games(strategy, history, dry):
     is_release = rank(top)[0] > 0
     elig = [g for g in active if npost.get(g, 0) >= min_posts]
     worst = min(elig, key=lambda g: sc[g]) if elig else None
+    share = False   # share = give the new game SOME slots (don't fully drop a game)
 
     if worst is None:
         if is_release and len(active) < max_active:
-            worst = _most_slotted(strategy, active)   # share slots, don't drop on perf
-            reason = f"launch wave: add {top['key']}, sharing slots from {worst}"
+            worst = _most_slotted(strategy, active)
+            share = True   # no perf data yet: ride the launch wave without dropping a proven game
+            reason = f"launch wave (no data yet): give {top['key']} some of {worst}'s slots"
         else:
             print("  [rotation] not enough per-game data to judge yet -> holding.")
             return False
@@ -339,23 +341,23 @@ def rotate_games(strategy, history, dry):
         print(f"  [rotation] top momentum {top.get('momentum')} < {add_mom} -> holding.")
         return False
 
-    if len([g for g in active if g != worst]) < min_active - 1:
+    if not share and len([g for g in active if g != worst]) < min_active - 1:
         print("  [rotation] would drop below min_active -> holding.")
         return False
 
     add_key, add_name = top["key"], top["twitch_name"]
+    worst_slots = [s for s in strategy.get("slots", []) if s.get("game") == worst]
+    targets = worst_slots[: max(1, len(worst_slots) // 2)] if share else worst_slots
+    for s in targets:
+        s["game"] = add_key
+        s["note"] = (f"{s.get('region', 'western')} {add_key} "
+                     f"(rotated in {now_utc().date().isoformat()}: "
+                     f"{str(top.get('why', ''))[:50]})")
     registry[add_key] = add_name
-    moved = 0
-    for s in strategy.get("slots", []):
-        if s.get("game") == worst:
-            s["game"] = add_key
-            s["note"] = (f"{s.get('region', 'western')} {add_key} "
-                         f"(rotated in {now_utc().date().isoformat()}: "
-                         f"{str(top.get('why', ''))[:50]})")
-            moved += 1
     strategy["games"] = registry
-    print(f"  [rotation] {'DRY-RUN ' if dry else ''}SWAP -> {reason}; "
-          f"reassigned {moved} slot(s) {worst} -> {add_key} ({add_name})")
+    print(f"  [rotation] {'DRY-RUN ' if dry else ''}{'SHARE' if share else 'SWAP'} -> "
+          f"{reason}; reassigned {len(targets)}/{len(worst_slots)} slot(s) "
+          f"{worst} -> {add_key} ({add_name})")
     return True
 
 
