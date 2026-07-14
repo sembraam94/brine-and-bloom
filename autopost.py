@@ -105,6 +105,7 @@ TTS_MODEL = "minimax/speech-2.8-hd"                       # #1-benchmark natural
 # Chosen voice. Alternatives to audition: Casual_Guy, Lively_Girl, Young_Knight. Empty env -> default.
 CHEF_VOICE_ID = os.environ.get("CHEF_VOICE_ID") or "English_Trustworth_Man"
 REEL_FPS = 30
+REEL_MASCOT = os.environ.get("REEL_MASCOT", "assets/ai_chef.jpg")  # corner overlay; skipped if missing
 
 # Legacy Veo image-to-video path (kept for the optional motion-clip style; unused
 # by the default reel flow, which is the narrated slideshow above).
@@ -292,7 +293,7 @@ def call_claude(strategy, slot, recent_titles):
         "tags, varied every single post (never a reused block).",
     )
 
-    n_images = "2 to 4" if fmt == "carousel" else "exactly 1"
+    n_images = "3 to 4" if fmt in ("carousel", "reel") else "exactly 1"
     if fmt == "carousel":
         format_note = (
             " This is a CAROUSEL: describe a short visual SEQUENCE (e.g. raw "
@@ -302,8 +303,9 @@ def call_claude(strategy, slot, recent_titles):
     elif fmt == "reel":
         format_note = (
             " This is a REEL narrated by a FUN, ENERGETIC, PERSONABLE \"AI chef\" character "
-            "talking to camera like a creator. image_prompts is ONE hero food still "
-            "(text-free). ALSO return a 'voiceover_script': ~25-30 seconds of SPOKEN words "
+            "talking to camera like a creator. image_prompts is 3-4 text-free food stills "
+            "that tell the recipe visually (hero dish + a couple of ingredient/step shots). "
+            "ALSO return a 'voiceover_script': ~25-30 seconds of SPOKEN words "
             "(about 65-85 words). OPEN with a warm, friendly personal greeting that "
             "introduces the chef and today's dish (vary the wording each time — e.g. 'Hey "
             "everyone, your AI chef here! Today we're making ...'), THEN walk through the "
@@ -408,10 +410,11 @@ def _image_input(model, full_prompt):
     return inp
 
 
-def generate_image(subject_prompt):
+def generate_image(subject_prompt, use_style=True):
     # SAMPLE_MODEL lets a sample run try a different model without changing the default.
+    # use_style=False generates a raw prompt (e.g. the mascot) without the food STYLE_SUFFIX.
     model = os.environ.get("SAMPLE_MODEL") or REPLICATE_MODEL
-    full_prompt = f"{subject_prompt}\n\n{STYLE_SUFFIX}"
+    full_prompt = f"{subject_prompt}\n\n{STYLE_SUFFIX}" if use_style else subject_prompt
     token = env("REPLICATE_API_TOKEN")
 
     resp = http(
@@ -649,24 +652,90 @@ def _ensure_ffmpeg():
     subprocess.run(["sudo", "apt-get", "install", "-y", "-qq", "ffmpeg"], check=True)
 
 
-def build_reel(image_path, audio_path, out_path):
-    """Assemble a 1080x1920 H.264/AAC Reel: one hero still with a slow Ken Burns
-    zoom, its length matched to the narration. Returns out_path."""
+def _srt_ts(s):
+    ms = int(round(s * 1000))
+    h, ms = divmod(ms, 3600000)
+    m, ms = divmod(ms, 60000)
+    sec, ms = divmod(ms, 1000)
+    return f"{h:02d}:{m:02d}:{sec:02d},{ms:03d}"
+
+
+def write_srt(script, duration, path):
+    """Split the narration into short phrases timed proportionally across the
+    audio (so captions roughly track the speech). Returns path or None."""
+    import re
+    chunks = []
+    for sent in re.split(r"(?<=[.!?])\s+", script.strip()):
+        words = sent.split()
+        for i in range(0, len(words), 6):
+            c = " ".join(words[i:i + 6]).strip()
+            if c:
+                chunks.append(c)
+    if not chunks:
+        return None
+    total = sum(len(c) for c in chunks) or 1
+    t, out = 0.0, []
+    for i, c in enumerate(chunks, 1):
+        seg = duration * (len(c) / total)
+        out.append(f"{i}\n{_srt_ts(t)} --> {_srt_ts(t + seg)}\n{c}\n")
+        t += seg
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(out))
+    return path
+
+
+def build_reel(image_paths, audio_path, out_path, caption_text=None, mascot_path=None):
+    """1080x1920 H.264/AAC Reel: N stills with Ken Burns motion, length matched to
+    the narration, optional burned-in captions and an AI-chef mascot overlay."""
     _ensure_ffmpeg()
+    tmp = tempfile.gettempdir()
     dur = float(subprocess.check_output(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration",
          "-of", "default=noprint_wrappers=1:nokey=1", audio_path]).strip())
-    dframes = int(math.ceil(dur * REEL_FPS)) + 1
-    vf = (
-        "[0:v]scale=2160:3840:force_original_aspect_ratio=increase:flags=lanczos,"
-        "crop=2160:3840,setsar=1,"
-        f"zoompan=z='min(zoom+0.0006,1.18)':x='iw/2-(iw/zoom/2)':"
-        f"y='ih/2-(ih/zoom/2)':d={dframes}:s=1080x1920:fps={REEL_FPS},"
-        "format=yuv420p[vout]"
-    )
+    n = len(image_paths)
+    dframes = int(math.ceil(dur / n * REEL_FPS)) + 1
+    W, H, SUP = 1080, 1920, 2
+    BW, BH = W * SUP, H * SUP
+
+    inputs = []
+    for p in image_paths:
+        inputs += ["-i", p]
+    inputs += ["-i", audio_path]
+    mascot_idx = None
+    if mascot_path and os.path.exists(mascot_path):
+        inputs += ["-i", mascot_path]
+        mascot_idx = n + 1
+
+    fc, cc = "", ""
+    for i in range(n):
+        z = ("z='min(zoom+0.0009,1.20)'" if i % 2 == 0
+             else "z='if(eq(on,0),1.20,max(1.0,zoom-0.0009))'")
+        fc += (f"[{i}:v]scale={BW}:{BH}:force_original_aspect_ratio=increase:flags=lanczos,"
+               f"crop={BW}:{BH},setsar=1,"
+               f"zoompan={z}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
+               f"d={dframes}:s={W}x{H}:fps={REEL_FPS},format=yuv420p,setsar=1[v{i}];")
+        cc += f"[v{i}]"
+    fc += f"{cc}concat=n={n}:v=1:a=0[vc];"
+    cur = "vc"
+
+    if caption_text:
+        srt = write_srt(caption_text, dur, os.path.join(tmp, "bb_subs.srt"))
+        if srt:
+            style = ("Alignment=2,FontName=DejaVu Sans,Fontsize=15,Bold=1,"
+                     "PrimaryColour=&H00FFFFFF,BorderStyle=3,BackColour=&H99000000,"
+                     "Outline=1,Shadow=0,MarginV=170")
+            fc += f"[{cur}]subtitles=filename='{srt}':force_style='{style}'[vs];"
+            cur = "vs"
+
+    if mascot_idx is not None:
+        fc += (f"[{mascot_idx}:v]scale=300:-1[mask];"
+               f"[{cur}][mask]overlay=x=W-w-40:y=64[vm];")
+        cur = "vm"
+
+    fc = fc.rstrip(";")
     subprocess.run([
-        "ffmpeg", "-y", "-i", image_path, "-i", audio_path,
-        "-filter_complex", vf, "-map", "[vout]", "-map", "1:a",
+        "ffmpeg", "-y", *inputs, "-filter_complex", fc,
+        "-map", f"[{cur}]", "-map", f"{n}:a",
         "-r", str(REEL_FPS), "-c:v", "libx264", "-profile:v", "high",
         "-pix_fmt", "yuv420p", "-crf", "20", "-maxrate", "8M", "-bufsize", "12M",
         "-g", "60", "-x264-params", "keyint=60:min-keyint=60:scenecut=0",
@@ -919,6 +988,20 @@ def build_caption(post):
 
 
 def main():
+    # RAW_PROMPT: one-off asset generation (e.g. the AI-chef mascot) — no Claude,
+    # no food style, just the given prompt -> hosted on R2. For SAMPLE/asset use.
+    raw = os.environ.get("RAW_PROMPT")
+    if raw:
+        if not r2_configured():
+            sys.exit("RAW_PROMPT asset generation needs R2 configured.")
+        print(f"RAW asset gen: {raw[:70]}")
+        url = generate_image(raw, use_style=False)
+        tmp = tempfile.gettempdir()
+        path = _download(url, os.path.join(tmp, "bb_asset.jpg"))
+        hosted = host_file_r2(path, "asset-" + _safe_key(raw[:24]) + ".jpg", "image/jpeg")
+        print(f"asset hosted: {hosted}")
+        return
+
     strategy = load_strategy()
     history = load_history()
     dry = os.environ.get("DRY_RUN") == "1"
@@ -975,8 +1058,8 @@ def main():
     image_prompts = [p for p in post.get("image_prompts", []) if isinstance(p, str)]
     if not image_prompts:
         sys.exit("Claude returned no image_prompts.")
-    if fmt != "carousel":
-        image_prompts = image_prompts[:1]
+    if fmt == "image":
+        image_prompts = image_prompts[:1]   # carousel + reel keep multiple stills
 
     caption, hashtags = build_caption(post)
     print(f"Title: {title}")
@@ -992,24 +1075,29 @@ def main():
         time.sleep(wait_s)
 
     if fmt == "reel":
-        # AI-chef narrated Reel: a hero still + minimax TTS voiceover, assembled
-        # with ffmpeg (Ken Burns), hosted on R2, published as a Reel.
+        # AI-chef narrated Reel: 3-4 stills + minimax TTS voiceover, assembled with
+        # ffmpeg (Ken Burns slideshow + burned-in captions + optional mascot),
+        # hosted on R2, published as a Reel.
         if not r2_configured():
             sys.exit("Reels need R2 configured (the video host) — set the R2 secrets.")
-        still_prompt = image_prompts[0]
         script = (post.get("voiceover_script") or "").strip()
         if not script:
             sys.exit("Claude returned no voiceover_script for the reel.")
-        print(f"  still prompt: {still_prompt}")
+        still_prompts = image_prompts[:4]
         print(f"  script ({len(script.split())} words): {script}")
-        still_url = generate_image(still_prompt)
-        print(f"  still: {still_url}")
+        for i, p in enumerate(still_prompts, 1):
+            print(f"  still {i}: {p}")
         tmp = tempfile.gettempdir()
-        still_path = _download(still_url, os.path.join(tmp, "bb_still.jpg"))
+        still_paths = []
+        for i, p in enumerate(still_prompts):
+            u = generate_image(p)
+            still_paths.append(_download(u, os.path.join(tmp, f"bb_still{i}.jpg")))
         print("Generating AI-chef narration (minimax TTS)...")
         audio_path = generate_narration(script, os.path.join(tmp, "bb_narration.mp3"))
-        print("Assembling the Reel with ffmpeg...")
-        mp4 = build_reel(still_path, audio_path, os.path.join(tmp, "bb_reel.mp4"))
+        print("Assembling the Reel with ffmpeg (Ken Burns + captions)...")
+        mascot = REEL_MASCOT if os.path.exists(REEL_MASCOT) else None
+        mp4 = build_reel(still_paths, audio_path, os.path.join(tmp, "bb_reel.mp4"),
+                         caption_text=script, mascot_path=mascot)
 
         persist = dry or os.environ.get("SAMPLE") == "1"
         vsuffix = "-" + _safe_key(CHEF_VOICE_ID) if persist else ""   # distinct sample per voice

@@ -50,6 +50,10 @@ on:
         description: "AI-chef TTS voice (e.g. Casual_Guy, Lively_Girl, Young_Knight); blank = default"
         required: false
         default: ""
+      raw_prompt:
+        description: "Generate a one-off asset (e.g. the AI-chef mascot) from this exact prompt, host on R2; no post"
+        required: false
+        default: ""
 
 # Serialize the poster and the analyzer so they never push to the state files at
 # the same time. cancel-in-progress:false lets an in-flight publish finish.
@@ -91,6 +95,7 @@ jobs:
           SAMPLE:  ${{ github.event.inputs.sample == 'yes' && '1' || '' }}
           SAMPLE_MODEL: ${{ github.event.inputs.sample_model }}
           CHEF_VOICE_ID: ${{ github.event.inputs.voice_id }}
+          RAW_PROMPT: ${{ github.event.inputs.raw_prompt }}
         run: python autopost.py
 
       - name: Commit post history
