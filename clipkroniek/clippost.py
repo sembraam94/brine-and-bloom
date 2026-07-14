@@ -49,6 +49,7 @@ except ImportError:                      # pragma: no cover (Python < 3.9)
     ZoneInfo = None
 
 import twitch
+import reddit
 
 # =============================================================================
 # CONFIG — brand/knobs live here; timing/cadence/mix live in strategy.json.
@@ -250,14 +251,18 @@ def _region_langs(strategy, region):
     return set(strategy.get("regions", {}).get(region, ["en"]))
 
 
-def discover_clip(strategy, slot, history):
-    """Best not-yet-posted clip for this slot's game + region, ranked by views."""
+def _reddit_ua():
+    return (os.environ.get("REDDIT_USER_AGENT")
+            or "web:clipkroniek:1.0 (by /u/clipkroniek)")
+
+
+def _discover_twitch(strategy, slot, posted_ids):
+    """Candidate list from Twitch: right game, region (by clip language), length,
+    not already posted."""
     cid = env("TWITCH_CLIENT_ID")
     secret = env("TWITCH_CLIENT_SECRET")
     token = twitch.get_app_token(cid, secret, http)
-
-    game_key = slot["game"]
-    game_name = strategy["games"][game_key]
+    game_name = strategy["games"][slot["game"]]
     game_id = twitch.resolve_game_id(game_name, cid, token, http)
 
     hours = int(strategy.get("recency_hours", 24))
@@ -268,14 +273,8 @@ def discover_clip(strategy, slot, history):
                                     ended.strftime(fmt), cid, token, http, pages=4)
 
     langs = _region_langs(strategy, slot["region"])
-    min_v = int(strategy.get("min_view_count", 50))
-    hard_floor = int(strategy.get("hard_view_floor", 10))
     min_d = float(strategy.get("min_duration_s", 5))
     max_d = float(strategy.get("max_duration_s", 60))
-    posted_ids = {p.get("clip_id") for p in history.get("posts", [])}
-
-    # Base filter: right region (by clip language), right length, not already
-    # posted. (The view floor is applied afterwards as a soft preference.)
     base = []
     for cl in clips:
         if cl.get("id") in posted_ids:
@@ -285,22 +284,59 @@ def discover_clip(strategy, slot, history):
         dur = cl.get("duration")
         if dur is not None and (float(dur) < min_d or float(dur) > max_d):
             continue
+        cl["source"] = "twitch"
         base.append(cl)
-    base.sort(key=lambda cl: int(cl.get("view_count") or 0), reverse=True)
+    label = (f"{game_name} {slot['region']}={sorted(langs)} last {hours}h "
+             f"({len(clips)} pulled)")
+    return base, label
 
-    # Prefer clips above the target view floor; if none in this window, fall back
-    # to the best available (down to a tiny hard floor) so the slot still posts.
-    # Consistency matters more than squeezing view count — Twitch clip views run
-    # low; the real virality happens on IG after reposting.
+
+def _discover_reddit(strategy, slot, posted_ids):
+    """Candidate list from Reddit: top-of-day v.redd.it clips across the game's
+    subreddits (community-upvoted). Reddit is English/Western by nature."""
+    subs = strategy.get("reddit_subreddits", {}).get(slot["game"], [])
+    if not subs:
+        return [], f"no subreddits configured for {slot['game']}"
+    hours = int(strategy.get("recency_hours", 24))
+    min_d = float(strategy.get("min_duration_s", 5))
+    max_d = float(strategy.get("max_duration_s", 60))
+    cutoff = (now_utc() - datetime.timedelta(hours=hours)).timestamp()
+    ua = _reddit_ua()
+    token = reddit.get_app_token(env("REDDIT_CLIENT_ID"),
+                                 env("REDDIT_CLIENT_SECRET"), ua, http)
+    posts = reddit.get_top_video_posts(subs, token, ua, http,
+                                       min_d=min_d, max_d=max_d, cutoff_ts=cutoff)
+    base = [p for p in posts if p.get("id") not in posted_ids]
+    label = f"{slot['game']} r/{'+r/'.join(subs)} top<{hours}h ({len(posts)} videos)"
+    return base, label
+
+
+def discover_clip(strategy, slot, history):
+    """Best not-yet-posted clip for this slot, from its source (twitch|reddit),
+    ranked by view_count (Twitch views / Reddit upvotes)."""
+    posted_ids = {p.get("clip_id") for p in history.get("posts", [])}
+    min_v = int(strategy.get("min_view_count", 50))
+    hard_floor = int(strategy.get("hard_view_floor", 10))
+    source = slot.get("source", "twitch")
+
+    if source == "reddit":
+        base, label = _discover_reddit(strategy, slot, posted_ids)
+    else:
+        base, label = _discover_twitch(strategy, slot, posted_ids)
+
+    base.sort(key=lambda cl: int(cl.get("view_count") or 0), reverse=True)
+    # Prefer clips above the target floor; else fall back to the best available
+    # so the slot still posts (consistency > squeezing the count).
     preferred = [cl for cl in base if int(cl.get("view_count") or 0) >= min_v]
     fallback = [cl for cl in base if int(cl.get("view_count") or 0) >= hard_floor]
     pool = preferred or fallback
-    print(f"  discovery: {len(clips)} in {hours}h for {game_name}; "
-          f"{len(base)} match {slot['region']}={sorted(langs)}/"
-          f"{min_d:.0f}-{max_d:.0f}s/new; {len(preferred)} >= {min_v} views"
-          + ("" if preferred else
-             f"; none over floor -> best-available (>= {hard_floor})"))
-    return pool[0] if pool else None
+    print(f"  discovery[{source}]: {label}; {len(base)} candidates, "
+          f"{len(preferred)} >= {min_v}"
+          + ("" if preferred else f" -> best-available (>= {hard_floor})"))
+    best = pool[0] if pool else None
+    if best:
+        best.setdefault("source", source)
+    return best
 
 
 # =============================================================================
@@ -444,11 +480,14 @@ def call_claude(clip, slot, strategy):
 
 def assemble_caption(ai, clip, slot, strategy):
     body = (ai.get("caption") or clip.get("title") or "").strip()
-    broadcaster = clip.get("broadcaster_name")
-    clipper = clip.get("creator_name")
-    credit = f"🎥 clip: {broadcaster}" if broadcaster else ""
-    if clipper and clipper != broadcaster:
-        credit += f" (clipped by {clipper})"
+    if clip.get("source") == "reddit":
+        credit = f"🎥 via r/{clip.get('subreddit')} · u/{clip.get('author')}"
+    else:
+        broadcaster = clip.get("broadcaster_name")
+        clipper = clip.get("creator_name")
+        credit = f"🎥 clip: {broadcaster}" if broadcaster else ""
+        if clipper and clipper != broadcaster:
+            credit += f" (clipped by {clipper})"
     cta = strategy.get("cta", "Follow for daily clips")
     tags = [h for h in (ai.get("hashtags") or []) if isinstance(h, str)][:MAX_HASHTAGS]
     if not tags:
@@ -588,7 +627,10 @@ def main():
         slot["game"] = os.environ["SLOT_GAME"]
     if os.environ.get("SLOT_REGION"):
         slot["region"] = os.environ["SLOT_REGION"]
-    print(f"[{BRAND_NAME}] slot {key} — game={slot['game']} region={slot['region']}")
+    if os.environ.get("SLOT_SOURCE"):
+        slot["source"] = os.environ["SLOT_SOURCE"]
+    print(f"[{BRAND_NAME}] slot {key} — game={slot['game']} "
+          f"region={slot['region']} source={slot.get('source', 'twitch')}")
 
     clip = discover_clip(strategy, slot, history)
     if clip is None:
@@ -646,6 +688,9 @@ def main():
         "slot_hour": int(slot["hour"]),
         "game": slot["game"],
         "region": slot["region"],
+        "source": clip.get("source", slot.get("source", "twitch")),
+        "subreddit": clip.get("subreddit"),
+        "author": clip.get("author"),
         "clip_id": clip["id"],
         "clip_url": clip.get("url"),
         "broadcaster": clip.get("broadcaster_name"),

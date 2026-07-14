@@ -22,14 +22,18 @@
     "gta": "Grand Theft Auto V",
     "valorant": "VALORANT"
   },
+  "reddit_subreddits": {
+    "gta": ["gtaonline", "nopixel"],
+    "valorant": ["ValorantClips", "VALORANT"]
+  },
   "slots": [
-    { "weekday": 0, "hour": 19, "minute": 12, "game": "gta", "region": "western", "note": "Mon prime EU evening / US midday - GTA western" },
-    { "weekday": 1, "hour": 18, "minute": 37, "game": "valorant", "region": "western", "note": "Tue - VALORANT western" },
-    { "weekday": 2, "hour": 20, "minute": 8, "game": "gta", "region": "asian", "note": "Wed - GTA Asian-source A/B probe" },
-    { "weekday": 3, "hour": 19, "minute": 41, "game": "valorant", "region": "western", "note": "Thu - VALORANT western" },
-    { "weekday": 4, "hour": 18, "minute": 23, "game": "gta", "region": "western", "note": "Fri - GTA western" },
-    { "weekday": 5, "hour": 20, "minute": 15, "game": "valorant", "region": "asian", "note": "Sat - VALORANT Asian-source A/B probe" },
-    { "weekday": 6, "hour": 19, "minute": 3, "game": "gta", "region": "western", "note": "Sun - GTA western" }
+    { "weekday": 0, "hour": 19, "minute": 12, "game": "gta", "region": "western", "source": "twitch", "note": "Mon - GTA western (Twitch)" },
+    { "weekday": 1, "hour": 18, "minute": 37, "game": "valorant", "region": "western", "source": "reddit", "note": "Tue - VALORANT western (Reddit r/ValorantClips - rescues the weak Twitch VALORANT-en lane)" },
+    { "weekday": 2, "hour": 20, "minute": 8, "game": "gta", "region": "asian", "source": "twitch", "note": "Wed - GTA Asian-source A/B probe (Twitch)" },
+    { "weekday": 3, "hour": 19, "minute": 41, "game": "valorant", "region": "western", "source": "twitch", "note": "Thu - VALORANT western (Twitch) - source A/B vs Tue Reddit" },
+    { "weekday": 4, "hour": 18, "minute": 23, "game": "gta", "region": "western", "source": "reddit", "note": "Fri - GTA western (Reddit r/gtaonline+nopixel) - source A/B vs Twitch GTA days" },
+    { "weekday": 5, "hour": 20, "minute": 15, "game": "valorant", "region": "asian", "source": "twitch", "note": "Sat - VALORANT Asian-source A/B probe (Twitch)" },
+    { "weekday": 6, "hour": 19, "minute": 3, "game": "gta", "region": "western", "source": "twitch", "note": "Sun - GTA western (Twitch)" }
   ],
   "caption_strategy": "Lead with a curiosity/hype hook that makes a non-follower stop. Name the game plainly for search. Keep it 1-2 short lines. Always credit the streamer/clipper. End with the follow CTA. No generic mega-tags.",
   "hashtag_strategy": "4-5 niche tags matching the game (e.g. #gtarp #gta6 #nopixel for GTA; #valorant #valorantclips for VALORANT). Vary two per post. Avoid #gaming/#viral mega-tags.",

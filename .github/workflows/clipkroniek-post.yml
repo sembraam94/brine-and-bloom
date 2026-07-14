@@ -36,6 +36,10 @@ on:
         description: "Override region (blank = slot's): western | asian"
         required: false
         default: ""
+      slot_source:
+        description: "Override source (blank = slot's): twitch | reddit"
+        required: false
+        default: ""
 
 concurrency:
   group: ck-state
@@ -65,6 +69,9 @@ jobs:
           IG_ACCESS_TOKEN:      ${{ secrets.CK_IG_ACCESS_TOKEN }}
           TWITCH_CLIENT_ID:     ${{ secrets.TWITCH_CLIENT_ID }}
           TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          REDDIT_CLIENT_ID:     ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USER_AGENT:    ${{ secrets.REDDIT_USER_AGENT }}
           R2_ACCOUNT_ID:        ${{ secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID:     ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -75,6 +82,7 @@ jobs:
           DISCOVER_ONLY: ${{ github.event.inputs.discover_only == 'yes' && '1' || '' }}
           SLOT_GAME:     ${{ github.event.inputs.slot_game }}
           SLOT_REGION:   ${{ github.event.inputs.slot_region }}
+          SLOT_SOURCE:   ${{ github.event.inputs.slot_source }}
         run: python clippost.py
 
       - name: Commit post history

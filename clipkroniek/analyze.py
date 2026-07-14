@@ -136,7 +136,9 @@ def ab_readout(history):
         reach = m.get("reach") or 0
         if not reach:
             continue
+        src = p.get("source", "twitch")
         keys = [f"region:{p.get('region')}", f"game:{p.get('game')}",
+                f"source:{src}", f"{src}|{p.get('game')}",
                 f"{p.get('region')}|{p.get('game')}"]
         for k in keys:
             groups.setdefault(k, []).append((reach, m))
