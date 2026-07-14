@@ -1,0 +1,68 @@
+# Clipkroniek — daily analyzer/strategist (same repo as Brine & Bloom).
+# Pulls follower count + per-Reel insights, prints the region/game A/B readout,
+# and weekly refreshes clipkroniek/strategy.json learnings.
+#
+# Schedule COMMENTED OUT until the poster is live; enable alongside the poster.
+
+name: Clipkroniek — daily analyzer
+
+on:
+  # schedule:
+  #   - cron: "25 6 * * *"    # ENABLE alongside the poster
+  workflow_dispatch:
+    inputs:
+      strategize:
+        description: "Force a learnings refresh now?"
+        type: choice
+        options: ["no", "yes"]
+        default: "no"
+      dry_run:
+        description: "Measure + print only, write nothing?"
+        type: choice
+        options: ["no", "yes"]
+        default: "no"
+
+concurrency:
+  group: ck-state
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        working-directory: clipkroniek
+        run: pip install -r requirements.txt
+
+      - name: Measure + adapt
+        working-directory: clipkroniek
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          IG_ACCESS_TOKEN:   ${{ secrets.CK_IG_ACCESS_TOKEN }}
+          DRY_RUN: ${{ github.event.inputs.dry_run == 'yes' && '1' || '' }}
+        run: python analyze.py ${{ github.event.inputs.strategize == 'yes' && '--strategize' || '' }}
+
+      - name: Commit metrics + strategy
+        run: |
+          git config user.name  "clipkroniek-bot"
+          git config user.email "actions@github.com"
+          git add clipkroniek/
+          if git diff --cached --quiet; then
+            echo "Nothing changed — nothing to commit."
+            exit 0
+          fi
+          git commit -m "clipkroniek analyze: $(date -u +%Y-%m-%d)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash && git push && exit 0
+            echo "push failed (attempt $i), retrying..."; sleep $((RANDOM % 8 + 2))
+          done
+          echo "Could not push after retries" >&2; exit 1

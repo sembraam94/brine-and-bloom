@@ -3,6 +3,9 @@
 .env.*
 *.local
 
+# Clip video files (staged to R2, then deleted — never committed)
+*.mp4
+
 # Python
 __pycache__/
 *.pyc

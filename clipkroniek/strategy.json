@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "updated": "2026-07-14",
+  "account_start_date": "2025-10-10",
+  "timezone": "Europe/Amsterdam",
+  "brand_focus": "Daily reposts of the best FRESH GTA V and VALORANT clips (with creator credit). Western/English-first audience; running a geo A/B (Western vs Asian-language source clips) to learn which converts. Optimize for reach and shares.",
+  "cta": "Follow @clipkroniek for daily clips 🎮",
+  "cadence": { "posts_per_week": 7, "max_posts_per_day": 1 },
+  "tolerance_minutes": 150,
+  "jitter_minutes": 10,
+  "recency_hours": 24,
+  "min_view_count": 50,
+  "hard_view_floor": 10,
+  "min_duration_s": 5,
+  "max_duration_s": 60,
+  "regions": {
+    "western": ["en"],
+    "asian": ["ko", "ja", "zh", "zh-cn", "zh-tw", "zh-hk", "th", "id", "vi", "ms", "tl"]
+  },
+  "games": {
+    "gta": "Grand Theft Auto V",
+    "valorant": "VALORANT"
+  },
+  "slots": [
+    { "weekday": 0, "hour": 19, "minute": 12, "game": "gta", "region": "western", "note": "Mon prime EU evening / US midday - GTA western" },
+    { "weekday": 1, "hour": 18, "minute": 37, "game": "valorant", "region": "western", "note": "Tue - VALORANT western" },
+    { "weekday": 2, "hour": 20, "minute": 8, "game": "gta", "region": "asian", "note": "Wed - GTA Asian-source A/B probe" },
+    { "weekday": 3, "hour": 19, "minute": 41, "game": "valorant", "region": "western", "note": "Thu - VALORANT western" },
+    { "weekday": 4, "hour": 18, "minute": 23, "game": "gta", "region": "western", "note": "Fri - GTA western" },
+    { "weekday": 5, "hour": 20, "minute": 15, "game": "valorant", "region": "asian", "note": "Sat - VALORANT Asian-source A/B probe" },
+    { "weekday": 6, "hour": 19, "minute": 3, "game": "gta", "region": "western", "note": "Sun - GTA western" }
+  ],
+  "caption_strategy": "Lead with a curiosity/hype hook that makes a non-follower stop. Name the game plainly for search. Keep it 1-2 short lines. Always credit the streamer/clipper. End with the follow CTA. No generic mega-tags.",
+  "hashtag_strategy": "4-5 niche tags matching the game (e.g. #gtarp #gta6 #nopixel for GTA; #valorant #valorantclips for VALORANT). Vary two per post. Avoid #gaming/#viral mega-tags.",
+  "learnings": "Fresh account revival (Direction A). Prior run: 332K reach on reposts but ~0 follows (reach-without-identity). This cycle: consistency (never go dark), tight GTA+VALORANT niche, Western-first with a 2x/week Asian-source A/B probe. Watch follows_per_reach and shares_per_reach by region+game; retire the weaker region/game once signal is clear.",
+  "next_review": "2026-07-21"
+}
