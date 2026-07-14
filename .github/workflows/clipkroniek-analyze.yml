@@ -7,8 +7,8 @@
 name: Clipkroniek — daily analyzer
 
 on:
-  # schedule:
-  #   - cron: "25 6 * * *"    # ENABLE alongside the poster
+  schedule:
+    - cron: "25 6 * * *"    # daily metrics + weekly learnings refresh
   workflow_dispatch:
     inputs:
       strategize:

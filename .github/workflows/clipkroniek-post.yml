@@ -9,8 +9,8 @@
 name: Clipkroniek — clip poster
 
 on:
-  # schedule:
-  #   - cron: "7,37 * * * *"   # ENABLE after the first validated live post
+  schedule:
+    - cron: "7,37 * * * *"   # every 30 min; gates on strategy.json slots
   workflow_dispatch:
     inputs:
       force:
