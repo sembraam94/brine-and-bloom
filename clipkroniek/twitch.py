@@ -73,3 +73,30 @@ def get_recent_clips(game_id, started_at, ended_at, client_id, token, http,
         if not cursor:
             break
     return out
+
+
+def resolve_user_ids(logins, client_id, token, http):
+    """Map streamer logins -> user ids (batched, up to 100 per request)."""
+    out = {}
+    logins = [l.strip().lower() for l in logins if l and l.strip()]
+    for i in range(0, len(logins), 100):
+        chunk = logins[i:i + 100]
+        params = [("login", l) for l in chunk]
+        r = http("GET", f"{HELIX}/users", params=params,
+                 headers=_headers(client_id, token), timeout=30)
+        r.raise_for_status()
+        for u in r.json().get("data", []):
+            out[u["login"].lower()] = u["id"]
+    return out
+
+
+def get_broadcaster_clips(broadcaster_id, started_at, ended_at, client_id, token,
+                          http, first=50):
+    """A single broadcaster's clips in [started_at, ended_at]. NOTE: returns clips
+    for ANY game the broadcaster played — filter by clip['game_id'] downstream."""
+    r = http("GET", f"{HELIX}/clips",
+             params={"broadcaster_id": broadcaster_id, "started_at": started_at,
+                     "ended_at": ended_at, "first": first},
+             headers=_headers(client_id, token), timeout=30)
+    r.raise_for_status()
+    return r.json().get("data", [])

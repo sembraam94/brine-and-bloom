@@ -137,8 +137,9 @@ def ab_readout(history):
         if not reach:
             continue
         src = p.get("source", "twitch")
+        cur = "curated" if p.get("curated") else "general"
         keys = [f"region:{p.get('region')}", f"game:{p.get('game')}",
-                f"source:{src}", f"{src}|{p.get('game')}",
+                f"source:{src}", f"curation:{cur}", f"{src}|{p.get('game')}",
                 f"{p.get('region')}|{p.get('game')}"]
         for k in keys:
             groups.setdefault(k, []).append((reach, m))

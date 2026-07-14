@@ -256,9 +256,18 @@ def _reddit_ua():
             or "web:clipkroniek:1.0 (by /u/clipkroniek)")
 
 
+def _curated_logins(strategy, slot):
+    """Curated streamer list for this slot's game. Only for Western slots — the
+    lists are English-speaking streamers; Asian probes stay on top-by-views."""
+    if slot.get("region") != "western":
+        return []
+    return strategy.get("curated_streamers", {}).get(slot["game"], [])
+
+
 def _discover_twitch(strategy, slot, posted_ids):
-    """Candidate list from Twitch: right game, region (by clip language), length,
-    not already posted."""
+    """Twitch candidates = game-wide top clips MERGED with clips from a curated
+    streamer allowlist (game-filtered). Curated clips are tagged is_curated so the
+    ranker can prefer them. Filters: region (clip language), length, not-posted."""
     cid = env("TWITCH_CLIENT_ID")
     secret = env("TWITCH_CLIENT_SECRET")
     token = twitch.get_app_token(cid, secret, http)
@@ -269,25 +278,52 @@ def _discover_twitch(strategy, slot, posted_ids):
     ended = now_utc()
     started = ended - datetime.timedelta(hours=hours)
     fmt = "%Y-%m-%dT%H:%M:%SZ"
-    clips = twitch.get_recent_clips(game_id, started.strftime(fmt),
-                                    ended.strftime(fmt), cid, token, http, pages=4)
+    s_iso, e_iso = started.strftime(fmt), ended.strftime(fmt)
 
     langs = _region_langs(strategy, slot["region"])
     min_d = float(strategy.get("min_duration_s", 5))
     max_d = float(strategy.get("max_duration_s", 60))
-    base = []
-    for cl in clips:
+
+    def _ok(cl):
         if cl.get("id") in posted_ids:
-            continue
+            return False
         if (cl.get("language") or "en") not in langs:
-            continue
+            return False
         dur = cl.get("duration")
         if dur is not None and (float(dur) < min_d or float(dur) > max_d):
+            return False
+        return True
+
+    # 1) general game-wide top clips
+    general = twitch.get_recent_clips(game_id, s_iso, e_iso, cid, token, http, pages=4)
+
+    # 2) curated streamers' clips (filtered to THIS game — a broadcaster's clips
+    #    endpoint returns clips for whatever they played)
+    logins = _curated_logins(strategy, slot)
+    curated = []
+    if logins:
+        try:
+            ids = twitch.resolve_user_ids(logins, cid, token, http)
+            for login, bid in ids.items():
+                for cl in twitch.get_broadcaster_clips(bid, s_iso, e_iso, cid, token, http):
+                    if str(cl.get("game_id")) == str(game_id):
+                        curated.append(cl)
+        except Exception as e:
+            print(f"    (curated pull partial/failed: {e})")
+    curated_ids = {c.get("id") for c in curated}
+
+    merged = {}
+    for cl in general + curated:
+        if not _ok(cl):
             continue
         cl["source"] = "twitch"
-        base.append(cl)
+        cl["is_curated"] = cl.get("id") in curated_ids
+        merged[cl["id"]] = cl
+    base = list(merged.values())
+    n_cur = sum(1 for c in base if c.get("is_curated"))
     label = (f"{game_name} {slot['region']}={sorted(langs)} last {hours}h "
-             f"({len(clips)} pulled)")
+             f"(general {len(general)} + {len(logins)} streamers -> "
+             f"{len(base)} candidates, {n_cur} curated)")
     return base, label
 
 
@@ -324,18 +360,27 @@ def discover_clip(strategy, slot, history):
     else:
         base, label = _discover_twitch(strategy, slot, posted_ids)
 
-    base.sort(key=lambda cl: int(cl.get("view_count") or 0), reverse=True)
-    # Prefer clips above the target floor; else fall back to the best available
-    # so the slot still posts (consistency > squeezing the count).
-    preferred = [cl for cl in base if int(cl.get("view_count") or 0) >= min_v]
-    fallback = [cl for cl in base if int(cl.get("view_count") or 0) >= hard_floor]
+    # Effective score = raw views, boosted for curated-streamer clips so they win
+    # unless a general clip is genuinely bigger (preference, not blind override).
+    boost = float(strategy.get("curated_boost", 3.0))
+
+    def eff(cl):
+        v = int(cl.get("view_count") or 0)
+        return v * boost if cl.get("is_curated") else v
+
+    base.sort(key=eff, reverse=True)
+    preferred = [cl for cl in base if eff(cl) >= min_v]
+    fallback = [cl for cl in base if eff(cl) >= hard_floor]
     pool = preferred or fallback
     print(f"  discovery[{source}]: {label}; {len(base)} candidates, "
-          f"{len(preferred)} >= {min_v}"
+          f"{len(preferred)} >= {min_v} (eff, curated x{boost:g})"
           + ("" if preferred else f" -> best-available (>= {hard_floor})"))
     best = pool[0] if pool else None
     if best:
         best.setdefault("source", source)
+        tag = "CURATED " if best.get("is_curated") else ""
+        print(f"  -> {tag}{best.get('view_count')} views | "
+              f"{best.get('broadcaster_name')} | {(best.get('title') or '')[:50]}")
     return best
 
 
@@ -708,6 +753,7 @@ def main():
         "game": slot["game"],
         "region": slot["region"],
         "source": clip.get("source", slot.get("source", "twitch")),
+        "curated": bool(clip.get("is_curated")),
         "subreddit": clip.get("subreddit"),
         "author": clip.get("author"),
         "clip_id": clip["id"],

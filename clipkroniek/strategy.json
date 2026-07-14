@@ -26,6 +26,11 @@
     "gta": ["gtaonline", "nopixel"],
     "valorant": ["ValorantClips", "VALORANT"]
   },
+  "curated_streamers": {
+    "gta": ["buddha", "ramee", "penta", "koil", "summit1g", "xqc", "lirik", "mrmoosetv", "aria", "hutchmf"],
+    "valorant": ["tenz", "tarik", "shroud", "kyedae", "aceu", "subroza", "wardell", "sinatraa", "valkyrae", "fns"]
+  },
+  "curated_boost": 3.0,
   "slots": [
     { "weekday": 0, "hour": 19, "minute": 12, "game": "gta", "region": "western", "source": "twitch", "note": "Mon - GTA western (Twitch)" },
     { "weekday": 1, "hour": 18, "minute": 37, "game": "valorant", "region": "western", "source": "twitch", "note": "Tue - VALORANT western (Twitch)" },
