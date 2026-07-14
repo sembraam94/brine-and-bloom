@@ -28,10 +28,10 @@
   },
   "slots": [
     { "weekday": 0, "hour": 19, "minute": 12, "game": "gta", "region": "western", "source": "twitch", "note": "Mon - GTA western (Twitch)" },
-    { "weekday": 1, "hour": 18, "minute": 37, "game": "valorant", "region": "western", "source": "reddit", "note": "Tue - VALORANT western (Reddit r/ValorantClips - rescues the weak Twitch VALORANT-en lane)" },
+    { "weekday": 1, "hour": 18, "minute": 37, "game": "valorant", "region": "western", "source": "twitch", "note": "Tue - VALORANT western (Twitch)" },
     { "weekday": 2, "hour": 20, "minute": 8, "game": "gta", "region": "asian", "source": "twitch", "note": "Wed - GTA Asian-source A/B probe (Twitch)" },
-    { "weekday": 3, "hour": 19, "minute": 41, "game": "valorant", "region": "western", "source": "twitch", "note": "Thu - VALORANT western (Twitch) - source A/B vs Tue Reddit" },
-    { "weekday": 4, "hour": 18, "minute": 23, "game": "gta", "region": "western", "source": "reddit", "note": "Fri - GTA western (Reddit r/gtaonline+nopixel) - source A/B vs Twitch GTA days" },
+    { "weekday": 3, "hour": 19, "minute": 41, "game": "valorant", "region": "western", "source": "twitch", "note": "Thu - VALORANT western (Twitch)" },
+    { "weekday": 4, "hour": 18, "minute": 23, "game": "gta", "region": "western", "source": "twitch", "note": "Fri - GTA western (Twitch)" },
     { "weekday": 5, "hour": 20, "minute": 15, "game": "valorant", "region": "asian", "source": "twitch", "note": "Sat - VALORANT Asian-source A/B probe (Twitch)" },
     { "weekday": 6, "hour": 19, "minute": 3, "game": "gta", "region": "western", "source": "twitch", "note": "Sun - GTA western (Twitch)" }
   ],
