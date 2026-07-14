@@ -340,6 +340,10 @@ SAFETY ENVELOPE you MUST stay within for a {age_days}-day-old account:
   flat or engagement dropped, hold or REDUCE cadence. Never jump cadence aggressively.
 
 Decision rules:
+- HARD IMAGE CONSTRAINT: NEVER write content_plan or caption instructions that put text,
+  ratios, numbers, quantities, or writing ON the image or "on screen"/"on the slide" — the
+  image generator garbles any text into gibberish. Images are pure text-free food photography;
+  ALL textual info (ratios, quantities, steps) belongs in the CAPTION only.
 - Re-weight themes toward the top performers (by sends+saves per reach); retire themes in the
   bottom that have ≥3 posts and weak numbers.
 - Keep/duplicate the best-performing posting slots (weekday+hour); drop the worst.

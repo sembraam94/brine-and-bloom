@@ -66,8 +66,11 @@ STYLE_SUFFIX = (
     "natural surface — pale linen, weathered wood, or matte stoneware. Shot on a "
     "full-frame DSLR with a 50mm lens; fine natural film grain; true, honest "
     "colours (NOT over-saturated, NOT over-glossy, no CGI sheen). No text, no "
-    "hands, no people, no logos, no labels. Indistinguishable from a genuine, "
-    "everyday food photo."
+    "CRITICAL — the frame must be 100% TEXT-FREE: absolutely no text, letters, "
+    "numbers, words, writing, captions, labels, signage, menus, or packaging text "
+    "anywhere; every jar, bowl, bottle and surface is plain and unlabeled (any "
+    "rendered text comes out as garbled gibberish, so there must be none). No "
+    "hands, no people, no logos. Indistinguishable from a genuine, everyday food photo."
 )
 
 # AI disclosure appended to every caption. ⚠️ TEMPORARILY DISABLED (empty) to test
@@ -325,7 +328,7 @@ Return ONLY a JSON object with exactly these keys:
   "title": "short internal label (used to avoid repeats); not shown publicly",
   "caption": "the full Instagram caption. Keyword-rich first line for search, then the tip/recipe in clean skimmable lines with simple measurements, then a clear save/share call-to-action. Do NOT put hashtags in here. Keep under 1800 characters.",
   "hashtags": ["3 to {MAX_HASHTAGS} hashtags, each starting with #. Mid-size niche tags preferred. Vary them from post to post — never reuse the same block."],
-  "image_prompts": ["{n_images} vivid prompt(s) describing the SUBJECT and COMPOSITION only — the FINISHED, crave-worthy dish (the actual cooked/plated food) as the HERO in the center, styled to make people hungry, WITH the recipe's key raw ingredients named specifically (e.g. garlic cloves, a dish of honey-soy, fresh ginger, herbs, citrus) arranged around it to tell the story. Favor approachable, appetizing plating — bite-sized or sliced pieces that show the glaze and texture, rather than large whole cuts. Vary the plating, props, and angle from post to post so the feed has rhythm while keeping one consistent look. Do NOT describe lighting, camera, or art style; that is added automatically."]{video_prompt_spec}
+  "image_prompts": ["{n_images} vivid prompt(s) describing the SUBJECT and COMPOSITION only — the FINISHED, crave-worthy dish (the actual cooked/plated food) as the HERO in the center, styled to make people hungry, WITH the recipe's key raw ingredients named specifically (e.g. garlic cloves, a dish of honey-soy, fresh ginger, herbs, citrus) arranged around it to tell the story. Favor approachable, appetizing plating — bite-sized or sliced pieces that show the glaze and texture, rather than large whole cuts. Vary the plating, props, and angle from post to post so the feed has rhythm while keeping one consistent look. CRITICAL: NEVER describe or include any text, numbers, ratios, measurements, labels, signs, packaging, or writing in the image — the photo is pure text-free food photography and the model garbles any text. ALL recipe info (ratios, quantities, steps) goes ONLY in the caption, never on the image. Do NOT describe lighting, camera, or art style; that is added automatically."]{video_prompt_spec}
 }}
 
 Make today genuinely different from these recent posts (different recipe/technique/ingredient):
