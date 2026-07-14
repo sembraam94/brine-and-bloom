@@ -24,6 +24,8 @@ import json
 import datetime
 import requests
 
+import twitch
+import newsscan
 from clippost import (
     BRAND_NAME, CLAUDE_MODEL, STRATEGY_FILE,
     env, http, now_utc, load_strategy, load_history, save_history,
@@ -196,6 +198,161 @@ def call_strategist(strategy, readout, followers):
                    if b.get("type") == "text").strip()
 
 
+# =============================================================================
+# Adaptive game rotation
+# =============================================================================
+def _game_score(rows):
+    """Score one game's measured posts. Goal is FOLLOWS; shares are the strongest
+    reach signal; avg reach is a tiebreak. Returns (score, n_measured)."""
+    n = len(rows)
+    R = sum((m.get("reach") or 0) for m in rows)
+    if not n or not R:
+        return 0.0, n
+    fo = sum((m.get("follows") or 0) for m in rows)
+    sh = sum((m.get("shares") or 0) for m in rows)
+    score = (fo / R) * 10000 + (sh / R) * 1000 + (R / n) * 0.001
+    return score, n
+
+
+def _active_games(strategy):
+    return sorted({s.get("game") for s in strategy.get("slots", []) if s.get("game")})
+
+
+def _most_slotted(strategy, games):
+    counts = {}
+    for s in strategy.get("slots", []):
+        g = s.get("game")
+        if g in games:
+            counts[g] = counts.get(g, 0) + 1
+    return max(counts, key=counts.get) if counts else (games[0] if games else None)
+
+
+def _news_candidates(strategy, active):
+    """News-scan candidates, Twitch-validated, not already active."""
+    registry = strategy.get("games", {})
+    try:
+        key = env("ANTHROPIC_API_KEY")
+    except SystemExit:
+        return []
+    benched = [registry[g] for g in registry if g not in active]
+    raw = newsscan.scan_games(key, http, [registry[g] for g in active], benched)
+
+    cid = os.environ.get("TWITCH_CLIENT_ID")
+    secret = os.environ.get("TWITCH_CLIENT_SECRET")
+    tok = [None]
+
+    def resolves(name):
+        if not (cid and secret):
+            return True  # can't validate without creds -> trust the scanner
+        try:
+            if tok[0] is None:
+                tok[0] = twitch.get_app_token(cid, secret, http)
+            twitch.resolve_game_id(name, cid, tok[0], http)
+            return True
+        except Exception:
+            return False
+
+    out, seen = [], set(active)
+    for c in raw:
+        if not isinstance(c, dict):
+            continue
+        k = (c.get("key") or "").strip().lower().replace(" ", "_")
+        name = (c.get("twitch_name") or "").strip()
+        if not k or not name or k in seen:
+            continue
+        if not resolves(name):
+            print(f"    (candidate {k} '{name}' not found on Twitch; skipping)")
+            continue
+        c["key"], c["twitch_name"] = k, name
+        out.append(c)
+        seen.add(k)
+    return out
+
+
+def rotate_games(strategy, history, dry):
+    """Weekly: swap the worst-performing active game's slots for the best news
+    candidate (launch-wave releases jump the queue). One swap per cycle. Mutates
+    `strategy` in place; returns True if it changed anything."""
+    cfg = strategy.get("game_rotation", {}) or {}
+    if not cfg.get("enabled", True):
+        print("  [rotation] disabled in strategy.json")
+        return False
+    min_active = int(cfg.get("min_active", 2))
+    min_posts = int(cfg.get("min_posts_to_judge", 4))
+    add_mom = int(cfg.get("add_momentum", 65))
+    max_active = int(cfg.get("max_active", 3))
+
+    registry = dict(strategy.get("games", {}))
+    active = _active_games(strategy)
+
+    rows = {}
+    for p in history.get("posts", []):
+        m = p.get("metrics") or {}
+        if m.get("reach"):
+            rows.setdefault(p.get("game"), []).append(m)
+    sc, npost = {}, {}
+    for g in active:
+        s, n = _game_score(rows.get(g, []))
+        sc[g], npost[g] = s, n
+
+    cands = _news_candidates(strategy, active)
+
+    def rank(c):
+        rel = (2 if c.get("release_window") == "imminent"
+               else 1 if (c.get("is_new_release") or c.get("release_window") == "recent")
+               else 0)
+        return (rel, int(c.get("momentum") or 0))
+
+    cands.sort(key=rank, reverse=True)
+    print(f"  [rotation] active={active} benched={[g for g in registry if g not in active]}")
+    for g in active:
+        print(f"    {g}: measured={npost[g]} score={sc[g]:.4f}")
+    print(f"  [rotation] candidates={[(c['key'], rank(c)) for c in cands[:5]]}")
+
+    if not cands:
+        print("  [rotation] no valid candidates -> holding.")
+        return False
+
+    top = cands[0]
+    is_release = rank(top)[0] > 0
+    elig = [g for g in active if npost.get(g, 0) >= min_posts]
+    worst = min(elig, key=lambda g: sc[g]) if elig else None
+
+    if worst is None:
+        if is_release and len(active) < max_active:
+            worst = _most_slotted(strategy, active)   # share slots, don't drop on perf
+            reason = f"launch wave: add {top['key']}, sharing slots from {worst}"
+        else:
+            print("  [rotation] not enough per-game data to judge yet -> holding.")
+            return False
+    elif is_release:
+        reason = f"launch wave: {top['key']} replaces worst active {worst}"
+    elif int(top.get("momentum") or 0) >= add_mom:
+        reason = f"perf swap: {worst} (worst) -> {top['key']} (momentum {top.get('momentum')})"
+    else:
+        print(f"  [rotation] top momentum {top.get('momentum')} < {add_mom} -> holding.")
+        return False
+
+    if len([g for g in active if g != worst]) < min_active - 1:
+        print("  [rotation] would drop below min_active -> holding.")
+        return False
+
+    add_key, add_name = top["key"], top["twitch_name"]
+    registry[add_key] = add_name
+    moved = 0
+    for s in strategy.get("slots", []):
+        if s.get("game") == worst:
+            s["game"] = add_key
+            s["note"] = (f"{s.get('region', 'western')} {add_key} "
+                         f"(rotated in {now_utc().date().isoformat()}: "
+                         f"{str(top.get('why', ''))[:50]})")
+            moved += 1
+    strategy["games"] = registry
+    print(f"  [rotation] {'DRY-RUN ' if dry else ''}SWAP -> {reason}; "
+          f"reassigned {moved} slot(s) {worst} -> {add_key} ({add_name})")
+    return True
+
+
 def main():
     forced = "--strategize" in sys.argv
     never = "--no-strategize" in sys.argv
@@ -235,26 +392,30 @@ def main():
         print(f"\nStrategy review not due yet (next: {strategy.get('next_review')}).")
         return
 
+    print("\nReviewing strategy (games + learnings)...")
+    # Adaptive game rotation first (may reassign slots to a trending/new game),
+    # then refresh the caption/selection learnings. Both mutate `strategy`.
+    rotate_games(strategy, history, dry)
+
     try:
-        learnings = call_strategist(strategy, readout, followers)
+        strategy["learnings"] = call_strategist(strategy, readout, followers)
     except Exception as e:
         print(f"Strategist call failed, keeping current learnings: {e}")
-        return
 
-    strategy["learnings"] = learnings
     strategy["updated"] = now_utc().date().isoformat()
     strategy["next_review"] = (now_utc().date()
                                + datetime.timedelta(days=REVIEW_EVERY_DAYS)).isoformat()
     strategy["version"] = int(strategy.get("version", 1)) + 1
 
     if dry:
-        print("\nDRY_RUN=1 — proposed learnings (not written):\n" + learnings)
+        print(f"\nDRY_RUN=1 — proposed strategy v{strategy['version']} NOT written "
+              f"(learnings + any rotation above were simulated).")
         return
 
     with open(STRATEGY_FILE, "w", encoding="utf-8") as f:
         json.dump(strategy, f, indent=2, ensure_ascii=False)
-    print(f"\nstrategy.json updated -> v{strategy['version']}. "
-          f"Next review {strategy['next_review']}.")
+    print(f"\nstrategy.json updated -> v{strategy['version']} "
+          f"(games: {list(strategy.get('games', {}))}). Next review {strategy['next_review']}.")
 
 
 if __name__ == "__main__":

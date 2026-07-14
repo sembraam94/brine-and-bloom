@@ -46,8 +46,10 @@ jobs:
       - name: Measure + adapt
         working-directory: clipkroniek
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          IG_ACCESS_TOKEN:   ${{ secrets.CK_IG_ACCESS_TOKEN }}
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
+          IG_ACCESS_TOKEN:      ${{ secrets.CK_IG_ACCESS_TOKEN }}
+          TWITCH_CLIENT_ID:     ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
           DRY_RUN: ${{ github.event.inputs.dry_run == 'yes' && '1' || '' }}
         run: python analyze.py ${{ github.event.inputs.strategize == 'yes' && '--strategize' || '' }}
 
