@@ -787,16 +787,23 @@ def compose_badge(char_path, out_path):
     return out_path
 
 
-def build_badge(src_path="assets/ai_chef.jpg"):
-    """Remove the mascot background, build the 'head popping out of a circle'
-    badge, and host a preview on R2."""
-    src_url = host_file_r2(src_path, "tmp-mascot-src.jpg", "image/jpeg")
-    token = env("REPLICATE_API_TOKEN")
+BG_REMOVAL_MODEL = "men1scus/birefnet"   # SOTA transparent-cutout; community model
+
+
+def _replicate_predict(model, inp, token):
+    """Run a community Replicate model via the versioned /v1/predictions endpoint
+    (the /models/{model}/predictions shortcut only works for official models)."""
+    mr = http("GET", f"https://api.replicate.com/v1/models/{model}",
+              headers={"Authorization": f"Bearer {token}"}, timeout=60)
+    mr.raise_for_status()
+    version = (mr.json().get("latest_version") or {}).get("id")
+    if not version:
+        sys.exit(f"No version found for {model}")
     resp = http(
-        "POST", "https://api.replicate.com/v1/models/cjwbw/rembg/predictions",
+        "POST", "https://api.replicate.com/v1/predictions",
         headers={"Authorization": f"Bearer {token}",
                  "Content-Type": "application/json", "Prefer": "wait"},
-        json={"input": {"image": src_url}}, timeout=180,
+        json={"version": version, "input": inp}, timeout=300,
     )
     resp.raise_for_status()
     data = resp.json()
@@ -807,11 +814,19 @@ def build_badge(src_path="assets/ai_chef.jpg"):
         pr.raise_for_status()
         data = pr.json()
     if data.get("status") != "succeeded":
-        sys.exit(f"Background removal failed: {data.get('error')}")
-    out = data.get("output")
+        sys.exit(f"{model} failed: {data.get('error')}")
+    return data.get("output")
+
+
+def build_badge(src_path="assets/ai_chef.jpg"):
+    """Remove the mascot background, build the 'head popping out of a circle'
+    badge, and host a preview on R2."""
+    src_url = host_file_r2(src_path, "tmp-mascot-src.jpg", "image/jpeg")
+    token = env("REPLICATE_API_TOKEN")
+    out = _replicate_predict(BG_REMOVAL_MODEL, {"image": src_url}, token)
     png_url = out if isinstance(out, str) else (out[0] if isinstance(out, list) and out else None)
     if not png_url:
-        sys.exit(f"No rembg output: {out}")
+        sys.exit(f"No bg-removal output: {out}")
     tmp = tempfile.gettempdir()
     char = _download(png_url, os.path.join(tmp, "bb_char.png"))
     badge = compose_badge(char, os.path.join(tmp, "bb_badge.png"))
