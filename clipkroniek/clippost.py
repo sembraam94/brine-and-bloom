@@ -270,9 +270,12 @@ def _curated_logins(strategy, slot):
 
 
 def _discover_twitch(strategy, slot, posted_ids):
-    """Twitch candidates = game-wide top clips MERGED with clips from a curated
-    streamer allowlist (game-filtered). Curated clips are tagged is_curated so the
-    ranker can prefer them. Filters: region (clip language), length, not-posted."""
+    """Twitch candidates = the game-wide top clips, with clips from curated-roster
+    broadcasters tagged is_curated (so the ranker can boost them). Efficient at any
+    roster size: no per-streamer queries — resolve the roster to broadcaster ids
+    once, then flag matching clips in the pool. Filters: region (clip language),
+    length, not-posted. `discover_pages` controls pool depth (deeper = more chance
+    to catch a curated streamer's lower-view clip)."""
     cid = env("TWITCH_CLIENT_ID")
     secret = env("TWITCH_CLIENT_SECRET")
     token = twitch.get_app_token(cid, secret, http)
@@ -284,50 +287,39 @@ def _discover_twitch(strategy, slot, posted_ids):
     started = ended - datetime.timedelta(hours=hours)
     fmt = "%Y-%m-%dT%H:%M:%SZ"
     s_iso, e_iso = started.strftime(fmt), ended.strftime(fmt)
+    pages = int(strategy.get("discover_pages", 8))
+
+    clips = twitch.get_recent_clips(game_id, s_iso, e_iso, cid, token, http, pages=pages)
+
+    # Resolve the curated roster to broadcaster ids once (Western slots only), then
+    # flag any pool clip whose broadcaster is on the roster.
+    curated_ids = set()
+    logins = _curated_logins(strategy, slot)
+    if logins:
+        try:
+            curated_ids = {str(v) for v in
+                           twitch.resolve_user_ids(logins, cid, token, http).values()}
+        except Exception as e:
+            print(f"    (curated roster resolve failed: {e})")
 
     langs = _region_langs(strategy, slot["region"])
     min_d = float(strategy.get("min_duration_s", 5))
     max_d = float(strategy.get("max_duration_s", 60))
-
-    def _ok(cl):
+    base = []
+    for cl in clips:
         if cl.get("id") in posted_ids:
-            return False
+            continue
         if (cl.get("language") or "en") not in langs:
-            return False
+            continue
         dur = cl.get("duration")
         if dur is not None and (float(dur) < min_d or float(dur) > max_d):
-            return False
-        return True
-
-    # 1) general game-wide top clips
-    general = twitch.get_recent_clips(game_id, s_iso, e_iso, cid, token, http, pages=4)
-
-    # 2) curated streamers' clips (filtered to THIS game — a broadcaster's clips
-    #    endpoint returns clips for whatever they played)
-    logins = _curated_logins(strategy, slot)
-    curated = []
-    if logins:
-        try:
-            ids = twitch.resolve_user_ids(logins, cid, token, http)
-            for login, bid in ids.items():
-                for cl in twitch.get_broadcaster_clips(bid, s_iso, e_iso, cid, token, http):
-                    if str(cl.get("game_id")) == str(game_id):
-                        curated.append(cl)
-        except Exception as e:
-            print(f"    (curated pull partial/failed: {e})")
-    curated_ids = {c.get("id") for c in curated}
-
-    merged = {}
-    for cl in general + curated:
-        if not _ok(cl):
             continue
         cl["source"] = "twitch"
-        cl["is_curated"] = cl.get("id") in curated_ids
-        merged[cl["id"]] = cl
-    base = list(merged.values())
+        cl["is_curated"] = str(cl.get("broadcaster_id")) in curated_ids
+        base.append(cl)
     n_cur = sum(1 for c in base if c.get("is_curated"))
     label = (f"{game_name} {slot['region']}={sorted(langs)} last {hours}h "
-             f"(general {len(general)} + {len(logins)} streamers -> "
+             f"({len(clips)} clips/{pages}pg; roster {len(logins)} -> "
              f"{len(base)} candidates, {n_cur} curated)")
     return base, label
 
