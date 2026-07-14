@@ -32,8 +32,12 @@ import os
 import sys
 import json
 import time
+import math
 import random
+import shutil
+import tempfile
 import datetime
+import subprocess
 import requests
 
 try:
@@ -73,12 +77,12 @@ STYLE_SUFFIX = (
     "hands, no people, no logos. Indistinguishable from a genuine, everyday food photo."
 )
 
-# AI disclosure appended to every caption. ⚠️ TEMPORARILY DISABLED (empty) to test
-# performance without it. MUST be re-enabled before 2 Aug 2026, when the EU AI Act
-# (Article 50) transparency obligations for AI-generated media take effect.
-# Re-enable by setting the default below (or the AI_DISCLOSURE env/secret) back to
-# e.g. "📷 AI food photography".
-AI_DISCLOSURE = os.environ.get("AI_DISCLOSURE", "")
+# AI disclosure appended to every caption — now ON as BRANDING (the account is
+# openly an "AI chef"). Satisfies the EU AI Act (Article 50, from 2 Aug 2026) at
+# zero reach cost. Framed as a feature, not a warning.
+AI_DISCLOSURE = os.environ.get(
+    "AI_DISCLOSURE", "🤖 Recipes dreamed up & plated by your AI chef"
+)
 
 STRATEGY_FILE = "strategy.json"
 HISTORY_FILE = "history.json"
@@ -95,12 +99,18 @@ VIDEO_TIMEOUT_S = 600          # Veo renders take longer than images; cap the wa
 CLAUDE_MODEL = "claude-sonnet-4-6"                  # the brain. claude-haiku-4-5 is cheaper.
 REPLICATE_MODEL = "black-forest-labs/flux-1.1-pro-ultra"  # Ultra + raw = natural, less "AI" look
 
-# Video (Reels): animate the Flux hero still into an ~8s appetizing clip. Veo's
-# output is a public URL we hand straight to Instagram (like the Flux images).
-VEO_MODEL = "google/veo-3.1-fast"   # image-to-video; caps at 8s/clip
-REEL_DURATION = 8                   # seconds (Veo 3.1 Fast accepts 4, 6, or 8)
-REEL_RESOLUTION = "1080p"           # 720p or 1080p
-REEL_AUDIO = True                   # let Veo add ambient audio (Reels favor sound)
+# Reels are now "AI chef" narrated slideshows: Flux stills + minimax TTS voiceover,
+# assembled with ffmpeg (Ken Burns), hosted on R2, published as a Reel.
+TTS_MODEL = "minimax/speech-2.8-hd"                       # #1-benchmark natural TTS
+CHEF_VOICE_ID = os.environ.get("CHEF_VOICE_ID", "English_Trustworth_Man")  # swap/clone later
+REEL_FPS = 30
+
+# Legacy Veo image-to-video path (kept for the optional motion-clip style; unused
+# by the default reel flow, which is the narrated slideshow above).
+VEO_MODEL = "google/veo-3.1-fast"
+REEL_DURATION = 8
+REEL_RESOLUTION = "1080p"
+REEL_AUDIO = True
 
 # Instagram API with Instagram Login. Every call goes to graph.instagram.com and
 # is authorized by IG_ACCESS_TOKEN (a long-lived Instagram User token — no Facebook
@@ -290,18 +300,20 @@ def call_claude(strategy, slot, recent_titles):
         )
     elif fmt == "reel":
         format_note = (
-            " This is a REEL (short ~8s video). image_prompts is ONE still (the hero "
-            "start frame); ALSO return a 'video_prompt' describing the appetizing MOTION "
-            "to animate it — subtle, realistic food motion with NO people and NO hands "
-            "(e.g. a slow camera push-in over the dish, rising steam, a glistening glaze, "
-            "a drizzle of sauce, a gentle sizzle). The recipe stays in the caption."
+            " This is a REEL narrated by a FUN, ENERGETIC, QUIRKY \"AI chef\" character. "
+            "image_prompts is ONE hero food still (text-free). ALSO return a "
+            "'voiceover_script': ~20-25 seconds of SPOKEN words (about 55-70 words) — the "
+            "AI chef's punchy, playful narration of the recipe. Lead with a hook, say the "
+            "key steps/ratio out loud, end with a quick 'save this / follow your AI chef' "
+            "CTA. Just the spoken words — no stage directions, no emojis, no scene labels."
         )
     else:
         format_note = " This is a SINGLE image."
 
     video_prompt_spec = (
-        ',\n  "video_prompt": "REEL only: a vivid description of the ~8s MOTION to animate '
-        'the still — subtle, realistic food motion, NO people, NO hands"'
+        ',\n  "voiceover_script": "REEL only: ~55-70 words of SPOKEN narration for the fun '
+        'quirky AI chef — hook, then the key steps/ratio out loud, then a save/follow CTA; '
+        'spoken words only, no stage directions or emojis"'
         if fmt == "reel" else ""
     )
 
@@ -563,6 +575,100 @@ def prepare_image_urls(replicate_urls, slot_key):
         keys.append(k)
         print(f"  hosted: {urls[-1]}")
     return urls, keys
+
+
+# =============================================================================
+# Step 2c — AI chef reel: minimax TTS narration + ffmpeg slideshow
+# =============================================================================
+
+def _safe_key(s):
+    return "".join(c if (c.isalnum() or c in "-_") else "-" for c in str(s))
+
+
+def _download(url, path):
+    r = http("GET", url, timeout=180)
+    r.raise_for_status()
+    with open(path, "wb") as f:
+        f.write(r.content)
+    return path
+
+
+def host_file_r2(local_path, key, content_type):
+    """Upload any local file to R2 and return its public URL."""
+    with open(local_path, "rb") as f:
+        _r2_client().put_object(Bucket=env("R2_BUCKET"), Key=key,
+                                Body=f.read(), ContentType=content_type)
+    return f"{env('R2_PUBLIC_BASE_URL').rstrip('/')}/{key}"
+
+
+def generate_narration(script, out_path):
+    """minimax TTS -> download the mp3 to out_path. Returns out_path."""
+    token = env("REPLICATE_API_TOKEN")
+    resp = http(
+        "POST",
+        f"https://api.replicate.com/v1/models/{TTS_MODEL}/predictions",
+        headers={"Authorization": f"Bearer {token}",
+                 "Content-Type": "application/json", "Prefer": "wait"},
+        json={"input": {
+            "text": script, "voice_id": CHEF_VOICE_ID, "emotion": "happy",
+            "speed": 1.05, "volume": 1.4, "audio_format": "mp3",
+            "sample_rate": 44100, "bitrate": 256000, "channel": "mono",
+            "english_normalization": True, "language_boost": "English",
+        }},
+        timeout=300,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    while data.get("status") not in ("succeeded", "failed", "canceled"):
+        time.sleep(3)
+        p = http("GET", data["urls"]["get"],
+                 headers={"Authorization": f"Bearer {token}"}, timeout=60)
+        p.raise_for_status()
+        data = p.json()
+    if data.get("status") != "succeeded":
+        sys.exit(f"Narration (TTS) failed: {data.get('error')}")
+    out = data.get("output")
+    audio_url = (out if isinstance(out, str)
+                 else out[0] if isinstance(out, list) and out
+                 else out.get("audio") if isinstance(out, dict) else None)
+    if not audio_url:
+        sys.exit(f"No audio URL in TTS output: {out}")
+    return _download(audio_url, out_path)
+
+
+def _ensure_ffmpeg():
+    if shutil.which("ffmpeg"):
+        return
+    print("Installing ffmpeg...")
+    subprocess.run(["sudo", "apt-get", "update", "-qq"], check=True)
+    subprocess.run(["sudo", "apt-get", "install", "-y", "-qq", "ffmpeg"], check=True)
+
+
+def build_reel(image_path, audio_path, out_path):
+    """Assemble a 1080x1920 H.264/AAC Reel: one hero still with a slow Ken Burns
+    zoom, its length matched to the narration. Returns out_path."""
+    _ensure_ffmpeg()
+    dur = float(subprocess.check_output(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+         "-of", "default=noprint_wrappers=1:nokey=1", audio_path]).strip())
+    dframes = int(math.ceil(dur * REEL_FPS)) + 1
+    vf = (
+        "[0:v]scale=2160:3840:force_original_aspect_ratio=increase:flags=lanczos,"
+        "crop=2160:3840,setsar=1,"
+        f"zoompan=z='min(zoom+0.0006,1.18)':x='iw/2-(iw/zoom/2)':"
+        f"y='ih/2-(ih/zoom/2)':d={dframes}:s=1080x1920:fps={REEL_FPS},"
+        "format=yuv420p[vout]"
+    )
+    subprocess.run([
+        "ffmpeg", "-y", "-i", image_path, "-i", audio_path,
+        "-filter_complex", vf, "-map", "[vout]", "-map", "1:a",
+        "-r", str(REEL_FPS), "-c:v", "libx264", "-profile:v", "high",
+        "-pix_fmt", "yuv420p", "-crf", "20", "-maxrate", "8M", "-bufsize", "12M",
+        "-g", "60", "-x264-params", "keyint=60:min-keyint=60:scenecut=0",
+        "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",
+        "-movflags", "+faststart", "-shortest", out_path,
+    ], check=True)
+    return out_path
 
 
 # =============================================================================
@@ -881,26 +987,35 @@ def main():
         time.sleep(wait_s)
 
     if fmt == "reel":
-        # One styled still -> animate it into an ~8s Reel. Recipe lives in caption.
+        # AI-chef narrated Reel: a hero still + minimax TTS voiceover, assembled
+        # with ffmpeg (Ken Burns), hosted on R2, published as a Reel.
+        if not r2_configured():
+            sys.exit("Reels need R2 configured (the video host) — set the R2 secrets.")
         still_prompt = image_prompts[0]
-        motion_prompt = post.get("video_prompt") or f"Slow, appetizing motion of the {theme} dish."
+        script = (post.get("voiceover_script") or "").strip()
+        if not script:
+            sys.exit("Claude returned no voiceover_script for the reel.")
         print(f"  still prompt: {still_prompt}")
-        print(f"  motion prompt: {motion_prompt}")
+        print(f"  script ({len(script.split())} words): {script}")
         still_url = generate_image(still_prompt)
         print(f"  still: {still_url}")
-        print("Animating into a Reel (Veo)...")
-        video_url = generate_video(still_url, motion_prompt)
-        print(f"  video: {video_url}")
+        tmp = tempfile.gettempdir()
+        still_path = _download(still_url, os.path.join(tmp, "bb_still.jpg"))
+        print("Generating AI-chef narration (minimax TTS)...")
+        audio_path = generate_narration(script, os.path.join(tmp, "bb_narration.mp3"))
+        print("Assembling the Reel with ffmpeg...")
+        mp4 = build_reel(still_path, audio_path, os.path.join(tmp, "bb_reel.mp4"))
 
-        if dry:
-            print("\nDRY_RUN=1 — not publishing. Video URL above; caption below:")
-            print("-" * 60)
-            print(caption)
-            print("-" * 60)
+        persist = dry or os.environ.get("SAMPLE") == "1"
+        vkey = ("sample-reel-" if persist else "reel-") + _safe_key(key) + ".mp4"
+        video_url = host_file_r2(mp4, vkey, "video/mp4")
+        print(f"  reel video: {video_url}")
+        if persist:
+            print("\n(dry/sample) — Reel hosted on R2 above, not posted.")
             return
-
         print("Publishing Reel to Instagram...")
         media_id = post_reel_to_instagram(video_url, caption)
+        delete_from_r2([vkey])
     else:
         print(f"Generating {len(image_prompts)} image(s)...")
         for i, p in enumerate(image_prompts, 1):
