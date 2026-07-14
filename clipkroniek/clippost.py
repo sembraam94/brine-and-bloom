@@ -369,16 +369,35 @@ def _font():
 
 def download_clip(clip, out_path):
     _ensure_tool("yt-dlp")
-    cmd = [sys.executable, "-m", "yt_dlp", "-q", "--no-warnings", "--no-playlist",
-           "-f", "mp4/bestvideo+bestaudio/best", "--merge-output-format", "mp4",
-           "-o", out_path, clip["url"]]
-    subprocess.run(cmd, check=True, timeout=300)
+    # Twitch's private GQL intermittently returns a bad shape -> yt-dlp raises
+    # KeyError('data'). It's usually transient, so retry with backoff and also try
+    # the canonical clips.twitch.tv/<slug> URL form (Reddit clips use one url only).
+    urls = [clip["url"]]
+    slug = clip.get("id")
+    if clip.get("source", "twitch") == "twitch" and slug:
+        alt_url = f"https://clips.twitch.tv/{slug}"
+        if alt_url not in urls:
+            urls.append(alt_url)
+    base = [sys.executable, "-m", "yt_dlp", "-q", "--no-warnings", "--no-playlist",
+            "--retries", "5", "--extractor-retries", "5", "--fragment-retries", "5",
+            "-f", "mp4/bestvideo+bestaudio/best", "--merge-output-format", "mp4",
+            "-o", out_path]
+    last = ""
+    for attempt in range(3):
+        url = urls[attempt % len(urls)]
+        proc = subprocess.run(base + [url], timeout=300, stderr=subprocess.PIPE)
+        if proc.returncode == 0 and (os.path.exists(out_path)
+                                     or glob.glob(out_path.rsplit(".", 1)[0] + ".*")):
+            break
+        last = proc.stderr.decode("utf-8", "replace")[-400:]
+        print(f"  yt-dlp attempt {attempt + 1}/3 failed ({url}); retrying...")
+        time.sleep(6 * (attempt + 1))
     if not os.path.exists(out_path):
         alt = glob.glob(out_path.rsplit(".", 1)[0] + ".*")
         if alt:
             os.replace(alt[0], out_path)
     if not os.path.exists(out_path):
-        sys.exit("yt-dlp produced no output file")
+        sys.exit(f"yt-dlp failed to download after retries:\n{last}")
     return out_path
 
 
