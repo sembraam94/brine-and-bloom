@@ -102,7 +102,8 @@ REPLICATE_MODEL = "black-forest-labs/flux-1.1-pro-ultra"  # Ultra + raw = natura
 # Reels are now "AI chef" narrated slideshows: Flux stills + minimax TTS voiceover,
 # assembled with ffmpeg (Ken Burns), hosted on R2, published as a Reel.
 TTS_MODEL = "minimax/speech-2.8-hd"                       # #1-benchmark natural TTS
-CHEF_VOICE_ID = os.environ.get("CHEF_VOICE_ID", "English_Trustworth_Man")  # swap/clone later
+# Livelier options: Lively_Girl, Casual_Guy, Young_Knight. Empty env -> default.
+CHEF_VOICE_ID = os.environ.get("CHEF_VOICE_ID") or "Casual_Guy"
 REEL_FPS = 30
 
 # Legacy Veo image-to-video path (kept for the optional motion-clip style; unused
@@ -1011,7 +1012,8 @@ def main():
         mp4 = build_reel(still_path, audio_path, os.path.join(tmp, "bb_reel.mp4"))
 
         persist = dry or os.environ.get("SAMPLE") == "1"
-        vkey = ("sample-reel-" if persist else "reel-") + _safe_key(key) + ".mp4"
+        vsuffix = "-" + _safe_key(CHEF_VOICE_ID) if persist else ""   # distinct sample per voice
+        vkey = ("sample-reel-" if persist else "reel-") + _safe_key(key) + vsuffix + ".mp4"
         video_url = host_file_r2(mp4, vkey, "video/mp4")
         print(f"  reel video: {video_url}")
         if persist:

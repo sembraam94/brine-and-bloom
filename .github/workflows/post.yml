@@ -46,6 +46,10 @@ on:
         description: "Try a different image model for the sample (e.g. google/imagen-4-ultra); blank = default"
         required: false
         default: ""
+      voice_id:
+        description: "AI-chef TTS voice (e.g. Casual_Guy, Lively_Girl, Young_Knight); blank = default"
+        required: false
+        default: ""
 
 # Serialize the poster and the analyzer so they never push to the state files at
 # the same time. cancel-in-progress:false lets an in-flight publish finish.
@@ -86,6 +90,7 @@ jobs:
           FORMAT:  ${{ github.event.inputs.format != 'auto' && github.event.inputs.format || '' }}
           SAMPLE:  ${{ github.event.inputs.sample == 'yes' && '1' || '' }}
           SAMPLE_MODEL: ${{ github.event.inputs.sample_model }}
+          CHEF_VOICE_ID: ${{ github.event.inputs.voice_id }}
         run: python autopost.py
 
       - name: Commit post history
