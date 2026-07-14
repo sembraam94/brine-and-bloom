@@ -614,7 +614,13 @@ def main():
     print(f"Built reel: {reel} ({os.path.getsize(reel) // 1024} KB)")
 
     if dry:
-        print("\nDRY_RUN=1 — built the reel but not hosting or publishing.")
+        print("\nDRY_RUN=1 — built the reel; not publishing.")
+        if r2_configured():
+            pkey = f"previews/{_safe_key(clip['id'])}.mp4"
+            purl = host_file_r2(reel, pkey, "video/mp4")
+            print(f"Preview (hosted, NOT posted): {purl}")
+        else:
+            print("(R2 not configured — no preview URL; file is on the runner only.)")
         return
 
     if not r2_configured():
