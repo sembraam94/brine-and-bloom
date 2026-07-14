@@ -764,13 +764,17 @@ def compose_badge(char_path, out_path):
     W = 620
     char = char.resize((W, max(1, int(ch * W / cw))))
     cw, ch = char.size
-    D = int(cw * 1.02)              # disc roughly the character's width
     ring = 16
-    circle_top = int(ch * 0.30)     # head + hat sit above the disc's top edge
+    D = int(cw * 1.30)              # badge diameter (wider than the body)
+    circle_bottom = ch             # badge bottom at the character's feet -> body fills to the arc
+    circle_top = circle_bottom - D
+    min_top = int(ch * 0.18)       # keep the head + hat clear above the badge
+    if circle_top < min_top:
+        circle_top = min_top
+        D = circle_bottom - circle_top
     cx = cw // 2
     cy = circle_top + D // 2
-    clip_y = cy + int(D * 0.14)      # trim the character here; disc's lower arc shows below
-    Hh = max(ch, circle_top + D) + ring + 8
+    Hh = circle_bottom + ring + 8
     canvas = Image.new("RGBA", (cw, Hh), (0, 0, 0, 0))
     dr = ImageDraw.Draw(canvas)
     # 1) disc + ring in the BACKGROUND
@@ -778,9 +782,13 @@ def compose_badge(char_path, out_path):
                 cx + D // 2 + ring, cy + D // 2 + ring], fill=(244, 235, 221, 255))  # cream ring
     dr.ellipse([cx - D // 2, cy - D // 2, cx + D // 2, cy + D // 2],
                fill=(95, 107, 65, 255))                                             # olive disc
-    # 2) whole character ON TOP, trimmed only below clip_y (not clipped to the circle)
+    # 2) character ON TOP: full width above the circle centre (head/hat/torso in front,
+    #    NOT clipped by the circle), then clipped to the circle below the centre so the
+    #    lower body follows the arc and fills down to the bottom edge (no hard flat cut).
     mask = Image.new("L", (cw, Hh), 0)
-    ImageDraw.Draw(mask).rectangle([0, 0, cw, clip_y], fill=255)
+    md = ImageDraw.Draw(mask)
+    md.rectangle([0, 0, cw, cy], fill=255)
+    md.ellipse([cx - D // 2, cy - D // 2, cx + D // 2, cy + D // 2], fill=255)
     layer = Image.new("RGBA", (cw, Hh), (0, 0, 0, 0))
     layer.alpha_composite(char, (0, 0))
     r, g, b, a = layer.split()
