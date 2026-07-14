@@ -257,11 +257,16 @@ def _reddit_ua():
 
 
 def _curated_logins(strategy, slot):
-    """Curated streamer list for this slot's game. Only for Western slots — the
-    lists are English-speaking streamers; Asian probes stay on top-by-views."""
+    """Game-agnostic curated streamer roster. Their clips are game-filtered in
+    _discover_twitch, so ANY listed streamer who happened to play this slot's game
+    gets picked up automatically — no per-game lists. Western slots only (the list
+    is English-speaking; the Asian probes stay on top-by-views)."""
     if slot.get("region") != "western":
         return []
-    return strategy.get("curated_streamers", {}).get(slot["game"], [])
+    cur = strategy.get("curated_streamers", [])
+    if isinstance(cur, dict):                     # back-compat: flatten an old per-game map
+        cur = [s for lst in cur.values() for s in lst]
+    return list(cur)
 
 
 def _discover_twitch(strategy, slot, posted_ids):

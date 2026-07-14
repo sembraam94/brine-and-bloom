@@ -26,10 +26,15 @@
     "gta": ["gtaonline", "nopixel"],
     "valorant": ["ValorantClips", "VALORANT"]
   },
-  "curated_streamers": {
-    "gta": ["buddha", "ramee", "penta", "koil", "summit1g", "xqc", "lirik", "mrmoosetv", "aria", "hutchmf"],
-    "valorant": ["tenz", "tarik", "shroud", "kyedae", "aceu", "subroza", "wardell", "sinatraa", "valkyrae", "fns"]
-  },
+  "curated_streamers": [
+    "tenz", "tarik", "shroud", "kyedae", "aceu", "sinatraa", "wardell", "subroza",
+    "zellsis", "marved", "sacy", "boaster", "derke", "aspas", "less", "cned",
+    "anthonyz", "ramee", "penta", "koil", "summit1g", "lirik", "mrmoosetv", "aria",
+    "hutchmf", "x2twins", "ssaab", "mendo", "whippy", "ming", "sodapoppin",
+    "xqc", "pokimane", "ludwig", "sykkuno", "disguisedtoast", "valkyrae",
+    "moistcr1tikal", "nmplol", "mizkif", "ninja", "timthetatman",
+    "symfuhny", "fuslie", "quarterjade", "hasanabi", "castro_1021"
+  ],
   "curated_boost": 3.0,
   "slots": [
     { "weekday": 0, "hour": 19, "minute": 12, "game": "gta", "region": "western", "source": "twitch", "note": "Mon - GTA western (Twitch)" },
