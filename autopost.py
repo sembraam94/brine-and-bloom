@@ -302,25 +302,30 @@ def call_claude(strategy, slot, recent_titles):
         )
     elif fmt == "reel":
         format_note = (
-            " This is a REEL narrated by a FUN, ENERGETIC, PERSONABLE \"AI chef\" character "
-            "talking to camera like a creator. image_prompts is 3-4 text-free food stills "
-            "that tell the recipe visually (hero dish + a couple of ingredient/step shots). "
-            "ALSO return a 'voiceover_script': ~25-30 seconds of SPOKEN words "
-            "(about 65-85 words). OPEN with a warm, friendly personal greeting that "
-            "introduces the chef and today's dish (vary the wording each time — e.g. 'Hey "
-            "everyone, your AI chef here! Today we're making ...'), THEN walk through the "
-            "recipe/ratio out loud with personality, and END with a save + 'follow your AI "
-            "chef' CTA. Warm and conversational. Just the spoken words — no stage "
-            "directions, no emojis, no scene labels."
+            " This is a REEL narrated by a FUN, PERSONABLE, SELF-AWARE \"AI chef\" character "
+            "talking to camera like a creator who KNOWS it's an AI and leans into it. "
+            "image_prompts is 3-4 text-free food stills that tell the recipe visually (hero "
+            "dish + a couple of ingredient/step shots). ALSO return a 'voiceover_script': "
+            "~28-32 seconds of SPOKEN words (about 75-95 words). OPEN with a warm personal "
+            "greeting introducing the chef + today's dish (vary it — e.g. 'Hey everyone, your "
+            "AI chef here! Today we're making ...'). Walk through the recipe/ratio with "
+            "personality, and weave in ONE small, witty SELF-AWARE meta-joke about being an "
+            "AI (vary it every time — e.g. 'and yes, these are images, not video — rendering "
+            "video is absurdly expensive and I'm trying to save some drinking water here', or "
+            "a quip about being an AI that can't actually taste-test, or running hot on the "
+            "GPUs). Keep the joke light and quick — one per reel, never forced, never at the "
+            "recipe's expense. END with a save + 'follow your AI chef' CTA. Just the spoken "
+            "words — no stage directions, no emojis, no scene labels."
         )
     else:
         format_note = " This is a SINGLE image."
 
     video_prompt_spec = (
-        ',\n  "voiceover_script": "REEL only: ~65-85 words of SPOKEN narration for the fun, '
-        'personable AI chef — OPEN with a warm greeting introducing yourself and the dish, '
-        'then the recipe/ratio with personality, then a save/follow CTA; spoken words only, '
-        'no stage directions or emojis"'
+        ',\n  "voiceover_script": "REEL only: ~75-95 words of SPOKEN narration for the fun, '
+        'SELF-AWARE AI chef — warm greeting + dish intro, the recipe with personality, ONE '
+        'small witty meta-joke about being an AI (e.g. using images not video to save '
+        'compute/water, or cannot actually taste-test), then a save/follow CTA; spoken '
+        'words only, no stage directions or emojis"'
         if fmt == "reel" else ""
     )
 
