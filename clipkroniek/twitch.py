@@ -90,6 +90,36 @@ def resolve_user_ids(logins, client_id, token, http):
     return out
 
 
+def find_game(name, client_id, token, http):
+    """Resolve a category by name WITHOUT exiting. Tries the exact-name lookup,
+    then a fuzzy category search (handles near-miss names like 'Counter-Strike 2'
+    -> 'Counter-Strike'). Returns (game_id, canonical_name) or None."""
+    try:
+        r = http("GET", f"{HELIX}/games", params={"name": name},
+                 headers=_headers(client_id, token), timeout=30)
+        r.raise_for_status()
+        data = r.json().get("data", [])
+        if data:
+            return data[0]["id"], data[0]["name"]
+    except Exception:
+        pass
+    try:
+        r = http("GET", f"{HELIX}/search/categories",
+                 params={"query": name, "first": 5},
+                 headers=_headers(client_id, token), timeout=30)
+        r.raise_for_status()
+        data = r.json().get("data", [])
+        low = (name or "").strip().lower()
+        for d in data:                       # prefer an exact (case-insensitive) hit
+            if (d.get("name") or "").strip().lower() == low:
+                return d["id"], d["name"]
+        if data:
+            return data[0]["id"], data[0]["name"]
+    except Exception:
+        pass
+    return None
+
+
 def get_broadcaster_clips(broadcaster_id, started_at, ended_at, client_id, token,
                           http, first=50):
     """A single broadcaster's clips in [started_at, ended_at]. NOTE: returns clips

@@ -241,17 +241,20 @@ def _news_candidates(strategy, active):
     secret = os.environ.get("TWITCH_CLIENT_SECRET")
     tok = [None]
 
-    def resolves(name):
+    def canonical(name):
+        """Twitch's canonical category name, or None if it doesn't exist. Without
+        Twitch creds, trust the scanner's name. Never raises."""
         if not (cid and secret):
-            return True  # can't validate without creds -> trust the scanner
+            return name
         try:
             if tok[0] is None:
                 tok[0] = twitch.get_app_token(cid, secret, http)
-            twitch.resolve_game_id(name, cid, tok[0], http)
-            return True
+            found = twitch.find_game(name, cid, tok[0], http)
+            return found[1] if found else None
         except Exception:
-            return False
+            return None
 
+    active_names = {(registry.get(g) or "").strip().lower() for g in active}
     out, seen = [], set(active)
     for c in raw:
         if not isinstance(c, dict):
@@ -260,10 +263,13 @@ def _news_candidates(strategy, active):
         name = (c.get("twitch_name") or "").strip()
         if not k or not name or k in seen:
             continue
-        if not resolves(name):
-            print(f"    (candidate {k} '{name}' not found on Twitch; skipping)")
+        canon = canonical(name)
+        if not canon:
+            print(f"    (candidate {k} '{name}' not on Twitch; skipping)")
             continue
-        c["key"], c["twitch_name"] = k, name
+        if canon.strip().lower() in active_names:
+            continue                          # already active under another key
+        c["key"], c["twitch_name"] = k, canon
         out.append(c)
         seen.add(k)
     return out
@@ -395,7 +401,11 @@ def main():
     print("\nReviewing strategy (games + learnings)...")
     # Adaptive game rotation first (may reassign slots to a trending/new game),
     # then refresh the caption/selection learnings. Both mutate `strategy`.
-    rotate_games(strategy, history, dry)
+    # Rotation is defensively wrapped — it must NEVER crash the daily analyzer.
+    try:
+        rotate_games(strategy, history, dry)
+    except Exception as e:
+        print(f"  [rotation] failed (non-fatal): {e}")
 
     try:
         strategy["learnings"] = call_strategist(strategy, readout, followers)
