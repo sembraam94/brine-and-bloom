@@ -12,13 +12,15 @@ Degrades gracefully — any failure returns [] and the caller simply doesn't rot
 """
 
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
-# Sonnet 4.6 supports the dynamic-filtering web-search tool (no beta header).
-SCAN_MODEL = "claude-sonnet-4-6"
-WEB_SEARCH_TOOL = {"type": "web_search_20260209", "name": "web_search", "max_uses": 4}
+# Haiku 4.5 + the BASIC web-search tool: fast + cheap (the dynamic-filtering
+# _20260209 variant runs code-execution under the hood and can take minutes).
+# A weekly "what games are trending" scan doesn't need that. No beta header.
+SCAN_MODEL = "claude-haiku-4-5"
+WEB_SEARCH_TOOL = {"type": "web_search_20250305", "name": "web_search", "max_uses": 4}
 
-# A web-search turn legitimately runs for minutes; give it one long attempt and do
-# NOT let the shared http() retry it (a retry re-runs every search — slow + costly).
-SCAN_TIMEOUT = 280
+# A web-search turn can still run a while; give it one bounded attempt and do NOT
+# let the shared http() retry it (a retry re-runs every search — slow + costly).
+SCAN_TIMEOUT = 240
 SCAN_RETRIES = 0
 
 _HEADERS = {
