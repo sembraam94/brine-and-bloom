@@ -750,6 +750,76 @@ def build_reel(image_paths, audio_path, out_path, caption_text=None, mascot_path
     return out_path
 
 
+def compose_badge(char_path, out_path):
+    """Composite a transparent character into a circular badge with the head
+    'popping out' above the top of the circle. Returns out_path (transparent PNG)."""
+    from PIL import Image, ImageDraw
+    char = Image.open(char_path).convert("RGBA")
+    bb = char.getbbox()
+    if bb:
+        char = char.crop(bb)
+    cw, ch = char.size
+    W = 640
+    char = char.resize((W, max(1, int(ch * W / cw))))
+    cw, ch = char.size
+    D = cw                       # badge diameter
+    head = int(ch * 0.16)        # head height poking above the circle
+    ring = 14
+    top = head
+    cx, cy = cw // 2, top + D // 2
+    Hh = top + D + ring + 8
+    canvas = Image.new("RGBA", (cw, Hh), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(canvas)
+    draw.ellipse([cx - D // 2 - ring, cy - D // 2 - ring,
+                  cx + D // 2 + ring, cy + D // 2 + ring], fill=(244, 235, 221, 255))  # cream ring
+    draw.ellipse([cx - D // 2, cy - D // 2, cx + D // 2, cy + D // 2],
+                 fill=(95, 107, 65, 255))                                              # olive disc
+    mask = Image.new("L", (cw, Hh), 0)
+    md = ImageDraw.Draw(mask)
+    md.ellipse([cx - D // 2, cy - D // 2, cx + D // 2, cy + D // 2], fill=255)  # inside the disc
+    md.rectangle([0, 0, cw, top], fill=255)                                     # + above it (head)
+    layer = Image.new("RGBA", (cw, Hh), (0, 0, 0, 0))
+    layer.alpha_composite(char, (0, 0))
+    r, g, b, a = layer.split()
+    a = Image.composite(a, Image.new("L", (cw, Hh), 0), mask)
+    canvas.alpha_composite(Image.merge("RGBA", (r, g, b, a)))
+    canvas.save(out_path)
+    return out_path
+
+
+def build_badge(src_path="assets/ai_chef.jpg"):
+    """Remove the mascot background, build the 'head popping out of a circle'
+    badge, and host a preview on R2."""
+    src_url = host_file_r2(src_path, "tmp-mascot-src.jpg", "image/jpeg")
+    token = env("REPLICATE_API_TOKEN")
+    resp = http(
+        "POST", "https://api.replicate.com/v1/models/cjwbw/rembg/predictions",
+        headers={"Authorization": f"Bearer {token}",
+                 "Content-Type": "application/json", "Prefer": "wait"},
+        json={"input": {"image": src_url}}, timeout=180,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    while data.get("status") not in ("succeeded", "failed", "canceled"):
+        time.sleep(3)
+        pr = http("GET", data["urls"]["get"],
+                  headers={"Authorization": f"Bearer {token}"}, timeout=60)
+        pr.raise_for_status()
+        data = pr.json()
+    if data.get("status") != "succeeded":
+        sys.exit(f"Background removal failed: {data.get('error')}")
+    out = data.get("output")
+    png_url = out if isinstance(out, str) else (out[0] if isinstance(out, list) and out else None)
+    if not png_url:
+        sys.exit(f"No rembg output: {out}")
+    tmp = tempfile.gettempdir()
+    char = _download(png_url, os.path.join(tmp, "bb_char.png"))
+    badge = compose_badge(char, os.path.join(tmp, "bb_badge.png"))
+    url = host_file_r2(badge, "mascot-badge-preview.png", "image/png")
+    print(f"badge preview: {url}")
+    return url
+
+
 # =============================================================================
 # Step 3 — publish to Instagram (single image or carousel)
 # =============================================================================
@@ -1005,6 +1075,12 @@ def main():
         path = _download(url, os.path.join(tmp, "bb_asset.jpg"))
         hosted = host_file_r2(path, "asset-" + _safe_key(raw[:24]) + ".jpg", "image/jpeg")
         print(f"asset hosted: {hosted}")
+        return
+
+    if os.environ.get("BUILD_BADGE") == "1":
+        if not r2_configured():
+            sys.exit("BUILD_BADGE needs R2 configured.")
+        build_badge()
         return
 
     strategy = load_strategy()
