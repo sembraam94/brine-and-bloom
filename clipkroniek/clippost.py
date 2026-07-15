@@ -51,6 +51,7 @@ except ImportError:                      # pragma: no cover (Python < 3.9)
 
 import twitch
 import reddit
+import youtube
 
 # =============================================================================
 # CONFIG — brand/knobs live here; timing/cadence/mix live in strategy.json.
@@ -1126,6 +1127,47 @@ def _safe_key(s):
 
 
 # =============================================================================
+# YouTube Shorts cross-post (optional — only fires if YT_* secrets are present)
+# =============================================================================
+def crosspost_youtube(reel_path, strategy, slot, title_base, credit, tags):
+    """Push the same reel to YouTube as a Short. Non-fatal: any failure is logged
+    and returns None so it can never break the IG flow. Skips silently unless the
+    YT_* secrets are set and strategy.youtube.enabled isn't false."""
+    if not youtube.configured():
+        return None
+    if not (strategy.get("youtube", {}) or {}).get("enabled", True):
+        return None
+    game_name = strategy["games"].get(slot["game"], slot.get("game", "")) if slot.get("game") else ""
+    title = f"{title_base} | {game_name} #Shorts" if game_name else f"{title_base} #Shorts"
+    description = "\n\n".join(p for p in [
+        title_base,
+        f"🎥 Clip credit: {credit}" if credit else "",
+        "Daily best-of gaming clips — subscribe for more 🎮",
+        " ".join(tags or []),
+    ] if p)
+    yt_tags = [t.lstrip("#") for t in (tags or [])]
+    if game_name:
+        yt_tags.append(game_name.lower())
+    yt_tags += ["gaming", "clips", "shorts"]
+    privacy = (strategy.get("youtube", {}) or {}).get("privacy", "public")
+    try:
+        vid = youtube.upload_short(reel_path, title=title, description=description,
+                                   tags=yt_tags, privacy=privacy)
+        vid_id = vid.get("id")
+        status = (vid.get("status") or {}).get("privacyStatus")
+        url = f"https://youtu.be/{vid_id}" if vid_id else None
+        print(f"  YouTube: uploaded {url} (privacy={status})")
+        if status == "private" and privacy != "private":
+            print("  NOTE: YouTube forced this PRIVATE — the Cloud project needs the "
+                  "YouTube API compliance audit for public posting. Flip it in Studio, "
+                  "or submit the audit form for hands-off public Shorts.")
+        return {"id": vid_id, "url": url, "privacy": status}
+    except Exception as e:
+        print(f"  YouTube cross-post failed (non-fatal): {str(e)[:200]}")
+        return None
+
+
+# =============================================================================
 # Weekly Top-3 compilation (#8)
 # =============================================================================
 def _recent_top_posts(history, days=7, n=3):
@@ -1253,6 +1295,12 @@ def post_top3(strategy, history, dry=False):
     media_id, cover_method = post_reel_to_instagram(
         video_url, caption, cover_url=cover_url, thumb_offset=500)
     print(f"Published Top-3 reel — media_id={media_id} (cover={cover_method})")
+
+    yt = None
+    if youtube.configured():
+        yt = crosspost_youtube(comp, strategy, {"game": None, "region": "mixed"},
+                               f"Top 3 {label} clips of the week", credit_line, tags)
+
     delete_from_r2([k for k in (r2_key, cover_key) if k])
 
     local = local_now(strategy)
@@ -1270,6 +1318,7 @@ def post_top3(strategy, history, dry=False):
         "clip_ids": [p["clip_id"] for p in picks],
         "duration_s": round(float(duration_s), 2) if duration_s else None,
         "cover": cover_method,
+        "youtube": yt,
         "hashtags": tags,
         "media_id": media_id,
         "metrics": {},
@@ -1429,6 +1478,14 @@ def main():
         if not post_comment(media_id, first_comment):
             first_comment = None
 
+    # --- YouTube Shorts cross-post (optional; reuses the same reel) ------
+    yt = None
+    if youtube.configured():
+        title_base = ((caption.split("\n", 1)[0].strip() if caption else "")
+                      or clip.get("title") or "Insane gaming clip")
+        credit = clip.get("broadcaster_name") or clip.get("author")
+        yt = crosspost_youtube(reel, strategy, slot, title_base, credit, tags)
+
     delete_from_r2([k for k in (r2_key, cover_key) if k])
 
     local = local_now(strategy)
@@ -1457,6 +1514,7 @@ def main():
         "trim": [trim[0], trim[1]] if trim else None,
         "cover": cover_method,
         "first_comment": first_comment,
+        "youtube": yt,
         "title": clip.get("title"),
         "hook": hook,
         "hashtags": tags,

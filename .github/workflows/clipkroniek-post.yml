@@ -87,6 +87,10 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET:            ${{ secrets.R2_BUCKET }}
           R2_PUBLIC_BASE_URL:   ${{ secrets.R2_PUBLIC_BASE_URL }}
+          # Optional YouTube Shorts cross-post — no-op unless all three are set.
+          YT_CLIENT_ID:         ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET:     ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN:     ${{ secrets.YT_REFRESH_TOKEN }}
           FORCE:         ${{ github.event.inputs.force == 'yes' && '1' || '' }}
           DRY_RUN:       ${{ github.event.inputs.dry_run == 'yes' && '1' || '' }}
           DISCOVER_ONLY: ${{ github.event.inputs.discover_only == 'yes' && '1' || '' }}

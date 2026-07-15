@@ -325,6 +325,10 @@
   "went_dark_hours": 48,
   "top3_days": 7,
   "top3_seg_s": 10,
+  "youtube": {
+    "enabled": true,
+    "privacy": "public"
+  },
   "game_rotation": {
     "enabled": true,
     "min_active": 2,
