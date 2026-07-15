@@ -15,7 +15,8 @@ on:
     # tolerance lets a late slot catch up past midnight). ~22 runs/day, not 48.
     - cron: "7,37 15-23 * * *"
     - cron: "7,37 0-1 * * *"
-    - cron: "30 11 * * 0"       # Sunday 11:30 UTC — weekly Top-3 compilation (#8)
+    - cron: "30 11 * * 0"       # Sunday 11:30 UTC — weekly Top-3 Short compilation (#8)
+    - cron: "30 12 * * 0"       # Sunday 12:30 UTC — weekly long-form compilation (dormant until strategy.longform.enabled=true)
   workflow_dispatch:
     inputs:
       force:
@@ -34,9 +35,9 @@ on:
         options: ["no", "yes"]
         default: "no"
       format_override:
-        description: "Format: blank = daily clip | top3 = weekly compilation"
+        description: "Format: blank = daily clip | top3 = weekly Short | longform = weekly long-form"
         type: choice
-        options: ["", "top3"]
+        options: ["", "top3", "longform"]
         default: ""
       slot_game:
         description: "Override game (blank = slot's): gta | valorant"
@@ -91,11 +92,14 @@ jobs:
           YT_CLIENT_ID:         ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET:     ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN:     ${{ secrets.YT_REFRESH_TOKEN }}
+          # Optional long-form voiceover/grounding — no-op unless longform.enabled + these.
+          REPLICATE_API_TOKEN:  ${{ secrets.REPLICATE_API_TOKEN }}
+          GEMINI_API_KEY:       ${{ secrets.GEMINI_API_KEY }}
           FORCE:         ${{ github.event.inputs.force == 'yes' && '1' || '' }}
           DRY_RUN:       ${{ github.event.inputs.dry_run == 'yes' && '1' || '' }}
           DISCOVER_ONLY: ${{ github.event.inputs.discover_only == 'yes' && '1' || '' }}
-          # Top-3 on the Sunday cron, or when dispatched with format_override=top3.
-          FORMAT_OVERRIDE: ${{ github.event.inputs.format_override || (github.event.schedule == '30 11 * * 0' && 'top3' || '') }}
+          # Weekly Sunday crons select the format; manual dispatch can override.
+          FORMAT_OVERRIDE: ${{ github.event.inputs.format_override || (github.event.schedule == '30 11 * * 0' && 'top3') || (github.event.schedule == '30 12 * * 0' && 'longform') || '' }}
           SLOT_GAME:     ${{ github.event.inputs.slot_game }}
           SLOT_REGION:   ${{ github.event.inputs.slot_region }}
           SLOT_SOURCE:   ${{ github.event.inputs.slot_source }}

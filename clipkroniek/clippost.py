@@ -1346,6 +1346,12 @@ def main():
         post_top3(strategy, history, dry=dry)
         return
 
+    if os.environ.get("FORMAT_OVERRIDE") == "longform":
+        print(f"[{BRAND_NAME}] FORMAT_OVERRIDE=longform — weekly long-form run.")
+        import longform          # late import: dormant unless triggered
+        longform.run(strategy, history, dry=dry)
+        return
+
     if force:
         slot, key = forced_slot(strategy)
         print("FORCE=1 — bypassing the schedule for this run.")

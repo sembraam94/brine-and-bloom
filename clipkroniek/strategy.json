@@ -329,6 +329,18 @@
     "enabled": true,
     "privacy": "public"
   },
+  "longform": {
+    "enabled": false,
+    "clip_count": 10,
+    "days": 7,
+    "seg_max_s": 30,
+    "card_seconds": 3.5,
+    "voiceover": false,
+    "gemini_grounding": false,
+    "gemini_fps": 10,
+    "privacy": "private",
+    "title": "Top {n} {game} Clips of the Week"
+  },
   "game_rotation": {
     "enabled": true,
     "min_active": 2,
