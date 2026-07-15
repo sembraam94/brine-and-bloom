@@ -401,12 +401,64 @@ def _ensure_tool(name):
     subprocess.run(["sudo", "apt-get", "install", "-y", "-qq"] + pkgs, check=True)
 
 
-def _font():
-    for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-              "C:/Windows/Fonts/arialbd.ttf", "C:/Windows/Fonts/Arial.ttf"):
+def _font(bold=True):
+    paths = ([
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "C:/Windows/Fonts/arialbd.ttf", "C:/Windows/Fonts/Arial.ttf",
+    ] if bold else [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "C:/Windows/Fonts/arial.ttf", "C:/Windows/Fonts/Arial.ttf",
+    ])
+    for p in paths:
         if os.path.exists(p):
             return p
     return None
+
+
+def _ensure_font(bold=True):
+    """Return a usable TTF, installing fonts-dejavu-core on demand. ubuntu-latest
+    ships ffmpeg preinstalled, so `_ensure_tool('ffmpeg')` never reaches its font
+    install — without this, _font() returns None and every drawtext overlay would
+    silently no-op. Returns the path, or None only if install genuinely failed."""
+    f = _font(bold)
+    if f:
+        return f
+    if sys.platform.startswith("linux"):
+        try:
+            print("Installing fonts-dejavu-core...")
+            subprocess.run(["sudo", "apt-get", "update", "-qq"], check=False)
+            subprocess.run(["sudo", "apt-get", "install", "-y", "-qq",
+                            "fonts-dejavu-core"], check=True)
+        except Exception as e:
+            print(f"  (font install failed: {e})")
+        f = _font(bold)
+    return f
+
+
+def _probe(path):
+    """ffprobe -> {duration_s, fps, width, height}. Best-effort; keys None on
+    failure. ffprobe ships with ffmpeg."""
+    out = {"duration_s": None, "fps": None, "width": None, "height": None}
+    try:
+        r = subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", "v:0",
+             "-show_entries", "stream=width,height,avg_frame_rate:format=duration",
+             "-of", "json", path],
+            capture_output=True, text=True, timeout=60)
+        info = json.loads(r.stdout or "{}")
+        st = (info.get("streams") or [{}])[0]
+        fmt = info.get("format") or {}
+        if fmt.get("duration"):
+            out["duration_s"] = float(fmt["duration"])
+        out["width"], out["height"] = st.get("width"), st.get("height")
+        num, _, den = (st.get("avg_frame_rate") or "0/0").partition("/")
+        try:
+            out["fps"] = round(float(num) / float(den), 3) if float(den) else None
+        except Exception:
+            pass
+    except Exception as e:
+        print(f"  (ffprobe failed: {e})")
+    return out
 
 
 def download_clip(clip, out_path):

@@ -38,8 +38,38 @@ REMEASURE_WITHIN_DAYS = 14
 MIN_AGE_HOURS_TO_MEASURE = 18
 
 # Reel-valid insight metrics that also work below 100 followers.
+# profile_visits splits the funnel: reach -> profile_visit -> follow (#5).
 MEDIA_METRICS = ["reach", "likes", "comments", "saved", "shares",
-                 "total_interactions", "views", "ig_reels_avg_watch_time", "follows"]
+                 "total_interactions", "views", "ig_reels_avg_watch_time",
+                 "profile_visits", "follows"]
+
+RECENT_WINDOW_DAYS = 28   # scoring/adaptation ignores posts older than this (#18)
+
+
+def _post_age_hours(post):
+    try:
+        return (now_utc() - datetime.datetime.fromisoformat(post["date_utc"])).total_seconds() / 3600.0
+    except Exception:
+        return 1e9
+
+
+def _recent_posts(history):
+    cutoff = RECENT_WINDOW_DAYS * 24
+    return [p for p in history.get("posts", []) if _post_age_hours(p) <= cutoff]
+
+
+def _retention(post):
+    """avg watch time / source clip duration, clamped for loops. None if unknown
+    (older posts before duration_s was recorded)."""
+    m = post.get("metrics") or {}
+    wt = m.get("ig_reels_avg_watch_time")
+    dur = post.get("duration_s")
+    try:
+        if wt and dur and float(dur) > 0:
+            return min(1.5, (float(wt) / 1000.0) / float(dur))
+    except Exception:
+        pass
+    return None
 
 
 def _load(path, default):
@@ -121,6 +151,10 @@ def measure_posts(history, token):
             continue
         post["metrics"] = m
         post["measured_at"] = now.isoformat()
+        # Freeze a fixed-age snapshot so the A/B compares like-with-like instead of
+        # yesterday's fresh post against fully-matured ones (#18).
+        if 18 <= age_h <= 36 and not post.get("metrics_24h"):
+            post["metrics_24h"] = dict(m)
         measured += 1
         print(f"  {post.get('game')}/{post.get('region')}: reach={m.get('reach')} "
               f"shares={m.get('shares')} saved={m.get('saved')} follows={m.get('follows')}")
@@ -133,28 +167,39 @@ def _ratio(n, d):
 
 def ab_readout(history):
     groups = {}
-    for p in history.get("posts", []):
-        m = p.get("metrics") or {}
-        reach = m.get("reach") or 0
-        if not reach:
+    for p in _recent_posts(history):
+        if not ((p.get("metrics") or {}).get("reach") or 0):
             continue
         src = p.get("source", "twitch")
         cur = "curated" if p.get("curated") else "general"
+        fmt = p.get("format") or "single"
         keys = [f"region:{p.get('region')}", f"game:{p.get('game')}",
-                f"source:{src}", f"curation:{cur}", f"{src}|{p.get('game')}",
-                f"{p.get('region')}|{p.get('game')}"]
+                f"source:{src}", f"curation:{cur}", f"format:{fmt}",
+                f"hour:{p.get('slot_hour')}",
+                f"{src}|{p.get('game')}", f"{p.get('region')}|{p.get('game')}"]
+        if p.get("trimmed") is True:
+            keys.append("trim:on")
+        elif p.get("trimmed") is False:
+            keys.append("trim:off")
         for k in keys:
-            groups.setdefault(k, []).append((reach, m))
+            groups.setdefault(k, []).append(p)
 
-    def agg(items):
-        n = len(items)
-        R = sum(r for r, _ in items)
-        sh = sum((m.get("shares") or 0) for _, m in items)
-        sv = sum((m.get("saved") or 0) for _, m in items)
-        fo = sum((m.get("follows") or 0) for _, m in items)
-        return {"posts": n, "avg_reach": round(R / n, 1),
-                "shares_per_reach": _ratio(sh, R), "saves_per_reach": _ratio(sv, R),
-                "follows_per_reach": _ratio(fo, R), "total_follows": fo}
+    def agg(posts):
+        n = len(posts)
+        R = sum((p.get("metrics") or {}).get("reach") or 0 for p in posts)
+
+        def s(metric):
+            return sum((p.get("metrics") or {}).get(metric) or 0 for p in posts)
+        rets = [r for r in (_retention(p) for p in posts) if r is not None]
+        return {"posts": n, "avg_reach": round(R / n, 1) if n else 0,
+                "shares_per_reach": _ratio(s("shares"), R),
+                "saves_per_reach": _ratio(s("saved"), R),
+                "follows_per_reach": _ratio(s("follows"), R),
+                "visits_per_reach": _ratio(s("profile_visits"), R),
+                "follows_per_visit": _ratio(s("follows"), s("profile_visits")),
+                "views_per_reach": _ratio(s("views"), R),
+                "avg_retention": round(sum(rets) / len(rets), 3) if rets else None,
+                "total_follows": s("follows")}
     return {k: agg(v) for k, v in groups.items()}
 
 
@@ -172,17 +217,28 @@ def call_strategist(strategy, readout, followers):
     cur = followers[-1].get("followers") if followers else None
     system = (
         "You are the growth strategist for the Instagram gaming-clip page "
-        "'Clipkroniek' (reposts GTA V + VALORANT clips WITH creator credit). The goal "
-        "is reach that converts to FOLLOWS. You are given an A/B readout by region "
-        "(western = English-language source clips vs asian = Asian-language source "
-        "clips) and by game. Write a concise 'learnings' paragraph (UNDER 120 words) "
-        "with concrete guidance for the next cycle: which region and which game "
-        "convert best (rank by follows_per_reach, then shares_per_reach), what to do "
-        "more/less of, and whether to shift the Western/Asian mix or the GTA/VALORANT "
-        "mix. If data is thin, say so and advise holding the current mix. Return ONLY "
-        "the learnings text — no JSON, no preamble."
+        "'Clipkroniek' (reposts trending game clips WITH creator credit). Goal: reach "
+        "that converts to FOLLOWS. You get an A/B readout keyed by region "
+        "(western=English clips, asian=Asian-language clips), game, source, format, "
+        "hour, curation, and trim (smart-trim on/off). How to read it:\n"
+        "- REGION is the primary experiment. IGNORE any cell with posts < 8 — it is "
+        "noise; draw no conclusions from it.\n"
+        "- The curation cell (curated vs general) is CONFOUNDED (curated clips exist "
+        "only on western slots) — don't over-read it.\n"
+        "- Funnel: reach -> profile_visit -> follow. Use visits_per_reach (are people "
+        "tapping through?) vs follows_per_visit (do they follow once they do?) to "
+        "locate WHERE conversion leaks. avg_retention (watch-through) is the best "
+        "quality signal while follows are still near zero.\n"
+        "- Rank options by follows_per_reach, then shares_per_reach, then retention.\n\n"
+        "Write a 'learnings' paragraph (UNDER 150 words) that the CAPTION WRITER and "
+        "clip selector read before EVERY post — make it ACTIONABLE for them: which "
+        "hook/caption styles and search keywords convert, what region/game/hour/format "
+        "to favour or drop, and whether to keep or flip the smart-trim test. If data "
+        "is thin (most cells < 8 posts) say so and advise holding. Return ONLY the "
+        "learnings text — no JSON, no preamble."
     )
     payload = {"current_followers": cur, "ab_readout": readout,
+               "active_games": list(strategy.get("games", {})),
                "current_slots": strategy.get("slots"),
                "current_learnings": strategy.get("learnings")}
     body = {"model": CLAUDE_MODEL, "max_tokens": 700, "system": system,
@@ -201,16 +257,21 @@ def call_strategist(strategy, readout, followers):
 # =============================================================================
 # Adaptive game rotation
 # =============================================================================
-def _game_score(rows):
-    """Score one game's measured posts. Goal is FOLLOWS; shares are the strongest
-    reach signal; avg reach is a tiebreak. Returns (score, n_measured)."""
-    n = len(rows)
-    R = sum((m.get("reach") or 0) for m in rows)
+def _game_score(posts):
+    """Score one game's measured posts (list of post dicts). Goal is FOLLOWS;
+    shares are the strongest reach signal; RETENTION is the best quality signal at
+    tiny follower counts (where follows/shares are ~0 and the score would otherwise
+    degenerate to the avg-reach tiebreak that already failed); avg reach breaks
+    ties. Returns (score, n_measured)."""
+    n = len(posts)
+    R = sum((p.get("metrics") or {}).get("reach") or 0 for p in posts)
     if not n or not R:
         return 0.0, n
-    fo = sum((m.get("follows") or 0) for m in rows)
-    sh = sum((m.get("shares") or 0) for m in rows)
-    score = (fo / R) * 10000 + (sh / R) * 1000 + (R / n) * 0.001
+    fo = sum((p.get("metrics") or {}).get("follows") or 0 for p in posts)
+    sh = sum((p.get("metrics") or {}).get("shares") or 0 for p in posts)
+    rets = [r for r in (_retention(p) for p in posts) if r is not None]
+    ret = (sum(rets) / len(rets)) if rets else 0.0
+    score = (fo / R) * 10000 + (sh / R) * 1000 + ret * 100 + (R / n) * 0.001
     return score, n
 
 
@@ -292,10 +353,9 @@ def rotate_games(strategy, history, dry):
     active = _active_games(strategy)
 
     rows = {}
-    for p in history.get("posts", []):
-        m = p.get("metrics") or {}
-        if m.get("reach"):
-            rows.setdefault(p.get("game"), []).append(m)
+    for p in _recent_posts(history):
+        if (p.get("metrics") or {}).get("reach"):
+            rows.setdefault(p.get("game"), []).append(p)
     sc, npost = {}, {}
     for g in active:
         s, n = _game_score(rows.get(g, []))
@@ -336,6 +396,10 @@ def rotate_games(strategy, history, dry):
     elif is_release:
         reason = f"launch wave: {top['key']} replaces worst active {worst}"
     elif int(top.get("momentum") or 0) >= add_mom:
+        if len(elig) < 2:
+            print(f"  [rotation] only {len(elig)} game(s) have >= {min_posts} posts; "
+                  "need >=2 measured games before a performance swap -> holding.")
+            return False
         reason = f"perf swap: {worst} (worst) -> {top['key']} (momentum {top.get('momentum')})"
     else:
         print(f"  [rotation] top momentum {top.get('momentum')} < {add_mom} -> holding.")
@@ -355,6 +419,13 @@ def rotate_games(strategy, history, dry):
                      f"{str(top.get('why', ''))[:50]})")
     registry[add_key] = add_name
     strategy["games"] = registry
+    # Persist scanner-suggested hashtags so a rotated-in game isn't captioned with
+    # an empty tag pool (#22b).
+    sug = [t for t in (top.get("suggested_hashtags") or []) if isinstance(t, str)][:6]
+    if sug:
+        gh = dict(strategy.get("game_hashtags", {}))
+        gh[add_key] = sug
+        strategy["game_hashtags"] = gh
     print(f"  [rotation] {'DRY-RUN ' if dry else ''}{'SHARE' if share else 'SWAP'} -> "
           f"{reason}; reassigned {len(targets)}/{len(worst_slots)} slot(s) "
           f"{worst} -> {add_key} ({add_name})")
@@ -368,6 +439,23 @@ def main():
 
     strategy = load_strategy()
     history = load_history()
+
+    # Went-dark alarm (#21): the poster's 'no clip found' days exit 0 (a green run),
+    # so a silently-stopped account would never surface. If the newest post is older
+    # than went_dark_hours, fail loudly so the failed Actions run emails the owner.
+    posts = history.get("posts", [])
+    newest = max((p.get("date_utc") for p in posts if p.get("date_utc")), default=None)
+    if posts and newest and not dry:
+        try:
+            age_h = (now_utc() - datetime.datetime.fromisoformat(newest)).total_seconds() / 3600.0
+        except Exception:
+            age_h = None
+        limit = float(strategy.get("went_dark_hours", 48))
+        if age_h is not None and age_h > limit:
+            sys.exit(f"WENT DARK: newest post is {age_h:.0f}h old (> {limit:.0f}h). "
+                     "The account has stopped posting — check the poster runs, the "
+                     "clip pool, and the IG token.")
+
     token = env("IG_ACCESS_TOKEN")
     ig = resolve_ig_user_id(token)
 
@@ -387,9 +475,10 @@ def main():
         print("\nA/B readout:")
         for k in sorted(readout):
             v = readout[k]
-            print(f"  {k:>18}: posts={v['posts']:>2} avg_reach={v['avg_reach']:>8} "
-                  f"shares/reach={v['shares_per_reach']} "
-                  f"follows/reach={v['follows_per_reach']} follows={v['total_follows']}")
+            print(f"  {k:>20}: n={v['posts']:>2} reach={v['avg_reach']:>7} "
+                  f"ret={v['avg_retention']} vis/reach={v['visits_per_reach']} "
+                  f"f/vis={v['follows_per_visit']} sh/reach={v['shares_per_reach']} "
+                  f"f/reach={v['follows_per_reach']} f={v['total_follows']}")
     else:
         print("\nNo measured posts yet — A/B readout will populate after the first posts age 18h.")
 

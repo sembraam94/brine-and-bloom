@@ -73,7 +73,8 @@ def scan_games(anthropic_key, http, active_names, benched_names):
         '{"candidates": [{"key": "short_snake_case", "twitch_name": "exact Twitch '
         'category name", "momentum": 0-100, "is_new_release": true|false, '
         '"release_window": "imminent"|"recent"|"none", "region_lean": '
-        '"western"|"asian"|"global", "why": "one short line"}], "notes": "one line"}\n'
+        '"western"|"asian"|"global", "suggested_hashtags": ["#4-6 niche IG hashtags '
+        'for this game, lowercase"], "why": "one short line"}], "notes": "one line"}\n'
         "- twitch_name MUST be the exact Twitch directory/category name (e.g. "
         "'Grand Theft Auto V', 'VALORANT', 'Call of Duty: Warzone', 'Fortnite', "
         "'Marvel Rivals', 'Apex Legends', 'Counter-Strike 2', 'Battlefield 6').\n"

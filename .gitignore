@@ -5,6 +5,10 @@
 
 # Clip video files (staged to R2, then deleted — never committed)
 *.mp4
+*.jpg
+
+# Internal work order — do not publish to the public repo
+clipkroniek/PLAN.md
 
 # Python
 __pycache__/
