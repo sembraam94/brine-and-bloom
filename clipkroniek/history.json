@@ -29,6 +29,52 @@
       "media_id": "18115638742902051",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-15-w2-20",
+      "date_utc": "2026-07-15T18:20:08.589733+00:00",
+      "local_date": "2026-07-15",
+      "weekday": 2,
+      "slot_hour": 20,
+      "game": "gta",
+      "region": "asian",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "StylishLaconicCoffeeKappa-iXKu3IBOxLXpNgSI",
+      "clip_url": "https://www.twitch.tv/haoubekki_juri_vt/clip/StylishLaconicCoffeeKappa-iXKu3IBOxLXpNgSI",
+      "broadcaster": "覇王別姫樹里チャンネル",
+      "creator": "Sin_idress",
+      "language": "ja",
+      "clip_views": 918,
+      "clip_velocity": 169.4,
+      "duration_s": 9.78,
+      "trimmed": true,
+      "trim": [
+        20.1,
+        29.88
+      ],
+      "cover": "cover_url",
+      "first_comment": "Rate this reaction 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#2)",
+      "youtube": {
+        "id": "8Bwru-X6vjQ",
+        "url": "https://youtu.be/8Bwru-X6vjQ",
+        "privacy": "public"
+      },
+      "title": "救急隊の業務手順書に驚くジュリウス・ベッキー",
+      "hook": "",
+      "hashtags": [
+        "#gtarp",
+        "#gtaonline",
+        "#gtaclips",
+        "#gta5rp",
+        "#gtaroleplay"
+      ],
+      "media_id": "17988035913008310",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
