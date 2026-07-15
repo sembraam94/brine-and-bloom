@@ -1,0 +1,32 @@
+# Clipkroniek — token health check (manual only).
+# Read-only: confirms CK_IG_ACCESS_TOKEN is valid and carries the manage-comments
+# scope the auto first-comment needs. Never posts. Run it anytime from the Actions
+# tab (Run workflow) to sanity-check the token.
+
+name: Clipkroniek — token health check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        working-directory: clipkroniek
+        run: pip install requests
+
+      - name: Check token validity + scopes
+        working-directory: clipkroniek
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.CK_IG_ACCESS_TOKEN }}
+        run: python check_token.py
