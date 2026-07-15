@@ -579,6 +579,7 @@ def _probe(path):
     """ffprobe -> {duration_s, fps, width, height}. Best-effort; keys None on
     failure. ffprobe ships with ffmpeg."""
     out = {"duration_s": None, "fps": None, "width": None, "height": None}
+    _ensure_tool("ffmpeg")            # ffprobe ships with ffmpeg; may not be preinstalled
     try:
         r = subprocess.run(
             ["ffprobe", "-v", "error", "-select_streams", "v:0",
@@ -643,6 +644,7 @@ def _audio_peak_window(path, dur, pre_s, post_s, min_s):
     the reel cold-opens near the action and loops cleanly. None on failure."""
     if not dur or dur <= max(min_s, pre_s + post_s) + 1:
         return None
+    _ensure_tool("ffmpeg")
     try:
         r = subprocess.run(
             ["ffmpeg", "-hide_banner", "-nostats", "-i", path,
