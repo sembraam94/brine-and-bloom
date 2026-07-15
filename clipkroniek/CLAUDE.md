@@ -184,3 +184,34 @@ uses a dedicated **100/day** quota bucket; a Short is classified automatically b
 9:16 aspect + ≤180s (no `#Shorts` needed); title ≤100 chars with `< >` stripped;
 `selfDeclaredMadeForKids` is always sent. The `check_token.py`-style health check
 doesn't cover YouTube — a failed upload just logs and the IG post is unaffected.
+
+## Weekly long-form compilation (`longform.py`) — DORMANT until enabled
+
+A ranked long-form YouTube best-of: intro card → `[ #N card → clip ]` worst→best
+(#1 last) → outro card, assembled **16:9** and uploaded as long-form (not a Short).
+This is the transformative, watch-time format that clears the reused-content bar the
+daily Shorts can't. **YouTube-only** (a ~10-min video can't be an IG Reel). Triggered
+by `FORMAT_OVERRIDE=longform` (Sunday 12:30 UTC cron + a dispatch choice).
+
+**Off by default** (`strategy.longform.enabled=false`); the cron no-ops until enabled.
+Three stacking activation levels — each layer needs its flag AND its key, and degrades
+gracefully if absent:
+
+1. **Silent countdown** — set `longform.enabled=true`. Needs only the existing YT
+   secrets (+ R2). Text cards + clips, no voice. Zero new dependencies.
+2. **+ AI voiceover** — also set `longform.voiceover=true` and add `REPLICATE_API_TOKEN`.
+   `tts.py` narrates each card (Kokoro by default; override via `TTS_MODEL`/`TTS_VOICE`).
+   Narration is on the CARDS; clips keep their own audio (no ducking/sync).
+3. **+ Gemini-grounded narration** — also set `longform.gemini_grounding=true` and add
+   `GEMINI_API_KEY`. `gemini.py` watches each trimmed clip at `gemini_fps` (default 10)
+   and returns a one-line description so the narration is specific, not generic. ~cents.
+
+Config: `strategy.longform.{clip_count, days, seg_max_s, card_seconds, voiceover,
+gemini_grounding, gemini_fps, privacy, title}`. Idempotent per ISO week
+(`longform-<year>-W<week>` slot_key). Records `format:"longform"`.
+
+**Caveats:** captions v1 = the on-card text (rank/streamer/one-line desc), not a
+word-for-word SRT track — a full timed SRT (Whisper the final mix → captions.insert)
+is a follow-up. A source clip with **no audio track** would break the concat (Twitch
+clips always have audio; documented, fails loudly). First live run needs ≥ `clip_count/2`
+real clips banked in the last 7 days, so it self-skips until the account has history.
