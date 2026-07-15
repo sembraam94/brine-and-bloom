@@ -289,7 +289,40 @@
     "shinjifromjapanxd",
     "kaysan"
   ],
-  "curated_boost": 3.0,
+  "curated_boost": 2.0,
+  "prune_broadcasters": [
+    "riotgames", "valorant", "rainbow6", "playapex", "rocketleague", "warframe",
+    "worldoftanks", "eslcs", "lck", "lolesportstw", "ow_esports", "ow_esports_jp",
+    "pgl_dota2", "betboom_dota_ru", "dota2_paragon_ru", "cs2_paragon_ru",
+    "fissure_cs_a", "evo", "gamesdonequick", "alveussanctuary"
+  ],
+  "asian_streamers": [
+    "fps_shaka", "k4sen", "stylishnoob4", "kato_junichi0817", "yaritaiji",
+    "chche999", "roger9527", "gon_vl", "meiy_vl", "deepins02", "yuyuta0702",
+    "hiiragitsurugi", "gocchanmikey", "dmf_kyochan", "shinjifromjapanxd"
+  ],
+  "wide_langs": ["en", "de", "fr", "es", "pt"],
+  "discover_pages_asian": 20,
+  "fg_zoom": {
+    "gta": 1.25,
+    "valorant": 1.45,
+    "default": 1.3
+  },
+  "smart_trim": {
+    "mode": "ab",
+    "pre_s": 7,
+    "post_s": 5
+  },
+  "brand_watermark": true,
+  "cover": {
+    "enabled": true
+  },
+  "cover_colors": {
+    "gta": "#F5A623",
+    "valorant": "#FF4655",
+    "default": "#00E5FF"
+  },
+  "went_dark_hours": 48,
   "game_rotation": {
     "enabled": true,
     "min_active": 2,

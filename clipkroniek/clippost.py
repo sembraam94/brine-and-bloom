@@ -35,6 +35,7 @@ import os
 import sys
 import json
 import glob
+import math
 import time
 import shutil
 import hashlib
@@ -145,6 +146,17 @@ def http(method, url, *, retries=4, backoff=3, **kwargs):
 
 def now_utc():
     return datetime.datetime.now(datetime.timezone.utc)
+
+
+def _parse_ts(s):
+    """Parse an ISO/RFC3339 timestamp (Twitch 'created_at', our 'date_utc') to an
+    aware datetime, or None."""
+    if not s:
+        return None
+    try:
+        return datetime.datetime.fromisoformat(str(s).replace("Z", "+00:00"))
+    except Exception:
+        return None
 
 
 def _load_json(path, default):
@@ -269,58 +281,104 @@ def _curated_logins(strategy, slot):
     return list(cur)
 
 
-def _discover_twitch(strategy, slot, posted_ids):
-    """Twitch candidates = the game-wide top clips, with clips from curated-roster
-    broadcasters tagged is_curated (so the ranker can boost them). Efficient at any
-    roster size: no per-streamer queries — resolve the roster to broadcaster ids
-    once, then flag matching clips in the pool. Filters: region (clip language),
-    length, not-posted. `discover_pages` controls pool depth (deeper = more chance
-    to catch a curated streamer's lower-view clip)."""
+def _discover_twitch(strategy, slot, posted_ids, hours=None, langs=None, pages=None):
+    """Twitch candidates = the game-wide top clips, tagged with is_curated (roster
+    boost, #9), age_hours + velocity (views/hour, #6). Parameterized so the
+    escalation ladder (#11) can re-query with a wider window/langs. Extras:
+      - #9 prune: clips from org/tournament channels (RiotGames, ESL, LCK, ...) are
+        dropped — they aren't creators we can credit-grow toward.
+      - #10 Asian: for Asian slots, top up the game-wide list with recent clips
+        pulled directly from an Asian-creator roster (the global top list skews to
+        the biggest names), and count language-less clips instead of assuming 'en'.
+    """
     cid = env("TWITCH_CLIENT_ID")
     secret = env("TWITCH_CLIENT_SECRET")
     token = twitch.get_app_token(cid, secret, http)
     game_name = strategy["games"][slot["game"]]
     game_id = twitch.resolve_game_id(game_name, cid, token, http)
 
-    hours = int(strategy.get("recency_hours", 24))
+    hours = int(hours or strategy.get("recency_hours", 24))
     ended = now_utc()
     started = ended - datetime.timedelta(hours=hours)
     fmt = "%Y-%m-%dT%H:%M:%SZ"
     s_iso, e_iso = started.strftime(fmt), ended.strftime(fmt)
-    pages = int(strategy.get("discover_pages", 8))
+    if pages is None:
+        pages = int(strategy.get("discover_pages_asian", 20)
+                    if slot.get("region") == "asian"
+                    else strategy.get("discover_pages", 8))
 
     clips = twitch.get_recent_clips(game_id, s_iso, e_iso, cid, token, http, pages=pages)
 
-    # Resolve the curated roster to broadcaster ids once (Western slots only), then
-    # flag any pool clip whose broadcaster is on the roster.
-    curated_ids = set()
-    logins = _curated_logins(strategy, slot)
-    if logins:
-        try:
-            curated_ids = {str(v) for v in
-                           twitch.resolve_user_ids(logins, cid, token, http).values()}
-        except Exception as e:
-            print(f"    (curated roster resolve failed: {e})")
+    # #10 Asian top-up: pull each Asian-roster streamer's recent clips (any game),
+    # keep the ones for THIS game/window not already in the pool.
+    n_topup = 0
+    if slot.get("region") == "asian":
+        roster = (strategy.get("asian_streamers") or [])[:15]
+        if roster:
+            try:
+                ids = twitch.resolve_user_ids(roster, cid, token, http)
+                seen = {c.get("id") for c in clips}
+                for bid in ids.values():
+                    try:
+                        extra = twitch.get_broadcaster_clips(
+                            bid, s_iso, e_iso, cid, token, http, first=20)
+                    except Exception:
+                        continue
+                    for c in extra:
+                        if str(c.get("game_id")) == str(game_id) and c.get("id") not in seen:
+                            seen.add(c.get("id"))
+                            clips.append(c)
+                            n_topup += 1
+            except Exception as e:
+                print(f"    (asian roster top-up failed: {e})")
 
-    langs = _region_langs(strategy, slot["region"])
+    # Resolve the curated roster (Western only) and the org-channel prune list to
+    # broadcaster ids once, then tag/drop pool clips by broadcaster id.
+    def _ids(logins):
+        if not logins:
+            return set()
+        try:
+            return {str(v) for v in
+                    twitch.resolve_user_ids(logins, cid, token, http).values()}
+        except Exception as e:
+            print(f"    (roster resolve failed: {e})")
+            return set()
+
+    curated_ids = _ids(_curated_logins(strategy, slot))
+    prune_ids = _ids(strategy.get("prune_broadcasters") or [])
+
+    langs = set(langs) if langs else _region_langs(strategy, slot["region"])
     min_d = float(strategy.get("min_duration_s", 5))
     max_d = float(strategy.get("max_duration_s", 60))
-    base = []
+    now = now_utc()
+    base, n_no_lang, n_pruned = [], 0, 0
     for cl in clips:
         if cl.get("id") in posted_ids:
             continue
-        if (cl.get("language") or "en") not in langs:
+        if str(cl.get("broadcaster_id")) in prune_ids:
+            n_pruned += 1
+            continue
+        lang = cl.get("language")
+        if not lang:
+            n_no_lang += 1                       # #10: don't silently treat as 'en'
+        if (lang or "en") not in langs:
             continue
         dur = cl.get("duration")
         if dur is not None and (float(dur) < min_d or float(dur) > max_d):
             continue
+        created = _parse_ts(cl.get("created_at"))
+        age_h = (max((now - created).total_seconds() / 3600.0, 0.5)
+                 if created else float(hours))
+        cl["age_hours"] = round(age_h, 2)
+        cl["velocity"] = round(float(cl.get("view_count") or 0) / age_h, 2)
         cl["source"] = "twitch"
         cl["is_curated"] = str(cl.get("broadcaster_id")) in curated_ids
         base.append(cl)
     n_cur = sum(1 for c in base if c.get("is_curated"))
     label = (f"{game_name} {slot['region']}={sorted(langs)} last {hours}h "
-             f"({len(clips)} clips/{pages}pg; roster {len(logins)} -> "
-             f"{len(base)} candidates, {n_cur} curated)")
+             f"({len(clips)} clips/{pages}pg" + (f"+{n_topup}topup" if n_topup else "")
+             + f"; -{n_pruned}org; roster {len(_curated_logins(strategy, slot))} -> "
+             f"{len(base)} cand, {n_cur} curated, {n_no_lang} no-lang)")
     return base, label
 
 
@@ -344,41 +402,123 @@ def _discover_reddit(strategy, slot, posted_ids):
     return base, label
 
 
+def _duration_weight(dur):
+    """#11: bands favouring loop-friendly lengths. 8-30s is the sweet spot for
+    Reels; very short = too thin, long = weak completion."""
+    if dur is None:
+        return 0.8
+    d = float(dur)
+    if d < 8:
+        return 0.6
+    if d <= 30:
+        return 1.0
+    if d <= 45:
+        return 0.7
+    if d <= 60:
+        return 0.4
+    return 0.2
+
+
+def _broadcaster_recency_weight(history, name):
+    """#9 variety: down-weight a broadcaster we posted very recently so the feed
+    isn't the same 3 faces. x0.3 if <3d ago, x0.6 if <7d, else 1.0."""
+    if not name:
+        return 1.0
+    now, newest = now_utc(), None
+    for p in history.get("posts", []):
+        if (p.get("broadcaster") or "").lower() == name.lower():
+            t = _parse_ts(p.get("date_utc"))
+            if t and (newest is None or t > newest):
+                newest = t
+    if not newest:
+        return 1.0
+    age_d = (now - newest).total_seconds() / 86400.0
+    if age_d < 3:
+        return 0.3
+    if age_d < 7:
+        return 0.6
+    return 1.0
+
+
 def discover_clip(strategy, slot, history):
-    """Best not-yet-posted clip for this slot, from its source (twitch|reddit),
-    ranked by view_count (Twitch views / Reddit upvotes)."""
+    """Ranked POOL (not just the top clip) of not-yet-posted candidates for this
+    slot, so the Claude judge (#7) can pick and main can fall back on a download
+    failure (#22a). Score = velocity (views/hour, #6) in log-domain, weighted by
+    clip duration (#11), broadcaster recency (#9) and a curated-roster boost (#9).
+    Twitch uses an escalation ladder (#11) so a quiet game/region still yields a
+    post rather than going dark."""
     posted_ids = {p.get("clip_id") for p in history.get("posts", [])}
     min_v = int(strategy.get("min_view_count", 50))
     hard_floor = int(strategy.get("hard_view_floor", 10))
     source = slot.get("source", "twitch")
+    boost = float(strategy.get("curated_boost", 2.0))
+
+    def score(cl):
+        vel = float(cl.get("velocity") or cl.get("view_count") or 0)
+        s = math.log10(vel + 1.0)
+        s *= _duration_weight(cl.get("duration"))
+        s *= _broadcaster_recency_weight(history, cl.get("broadcaster_name"))
+        if cl.get("is_curated"):
+            s *= boost
+        return s
+
+    def rank(base):
+        for c in base:
+            c["_score"] = round(score(c), 4)
+        base.sort(key=lambda c: c["_score"], reverse=True)
+        return base
+
+    def qualifying(base):
+        return [c for c in base if int(c.get("view_count") or 0) >= min_v]
+
+    def finalize(pool, cap=12):
+        pool = pool[:cap]
+        for c in pool:
+            c.setdefault("source", source)
+        if pool:
+            top = pool[0]
+            tag = "CURATED " if top.get("is_curated") else ""
+            print(f"  top: {tag}{top.get('view_count')} views @ "
+                  f"{top.get('velocity')}/h | {top.get('broadcaster_name')} | "
+                  f"{(top.get('title') or '')[:50]}")
+        return pool
 
     if source == "reddit":
         base, label = _discover_reddit(strategy, slot, posted_ids)
-    else:
-        base, label = _discover_twitch(strategy, slot, posted_ids)
+        for c in base:                                # no created-at velocity on reddit
+            c.setdefault("velocity", float(c.get("view_count") or 0))
+        base = rank(base)
+        pool = qualifying(base) or [c for c in base
+                                    if int(c.get("view_count") or 0) >= hard_floor]
+        print(f"  discovery[reddit]: {label}; {len(base)} cand, {len(pool)} in pool")
+        return finalize(pool)
 
-    # Effective score = raw views, boosted for curated-streamer clips so they win
-    # unless a general clip is genuinely bigger (preference, not blind override).
-    boost = float(strategy.get("curated_boost", 3.0))
+    # --- Twitch escalation ladder ---------------------------------------
+    tried = []
+    base, label = _discover_twitch(strategy, slot, posted_ids)
+    base = rank(base)
+    tried.append(label)
+    pool = qualifying(base)
 
-    def eff(cl):
-        v = int(cl.get("view_count") or 0)
-        return v * boost if cl.get("is_curated") else v
+    if not pool:                                      # step 2: widen window to 48h
+        b, l = _discover_twitch(strategy, slot, posted_ids, hours=48)
+        base = rank(b)
+        tried.append(l + " [48h]")
+        pool = qualifying(base)
 
-    base.sort(key=eff, reverse=True)
-    preferred = [cl for cl in base if eff(cl) >= min_v]
-    fallback = [cl for cl in base if eff(cl) >= hard_floor]
-    pool = preferred or fallback
-    print(f"  discovery[{source}]: {label}; {len(base)} candidates, "
-          f"{len(preferred)} >= {min_v} (eff, curated x{boost:g})"
-          + ("" if preferred else f" -> best-available (>= {hard_floor})"))
-    best = pool[0] if pool else None
-    if best:
-        best.setdefault("source", source)
-        tag = "CURATED " if best.get("is_curated") else ""
-        print(f"  -> {tag}{best.get('view_count')} views | "
-              f"{best.get('broadcaster_name')} | {(best.get('title') or '')[:50]}")
-    return best
+    if not pool and slot.get("region") == "western":  # step 3: widen European langs
+        wide = strategy.get("wide_langs", ["en", "de", "fr", "es", "pt"])
+        b, l = _discover_twitch(strategy, slot, posted_ids, hours=48, langs=wide)
+        base = rank(b)
+        tried.append(l + " [wide-langs]")
+        pool = qualifying(base)
+
+    if not pool:                                      # step 4: best-available or none
+        pool = [c for c in base if int(c.get("view_count") or 0) >= hard_floor]
+
+    print(f"  discovery[twitch] ladder: {' | '.join(tried)}")
+    print(f"  -> {len(pool)} in pool (min_v={min_v}, curated x{boost:g})")
+    return finalize(pool)
 
 
 # =============================================================================
@@ -491,8 +631,66 @@ def download_clip(clip, out_path):
         if alt:
             os.replace(alt[0], out_path)
     if not os.path.exists(out_path):
-        sys.exit(f"yt-dlp failed to download after retries:\n{last}")
+        # Raise (not sys.exit) so the caller can fall back to the next candidate.
+        raise RuntimeError(f"yt-dlp failed to download {clip.get('id')}:\n{last}")
     return out_path
+
+
+def _audio_peak_window(path, dur, pre_s, post_s, min_s):
+    """Twitch clips are captured AFTER the moment, so the payoff sits late — fatal
+    for Reels' first-2s test. Find the loudest instant (gunfire/screams/hype) via
+    ebur128 momentary loudness and return a (start, end, peak) window around it, so
+    the reel cold-opens near the action and loops cleanly. None on failure."""
+    if not dur or dur <= max(min_s, pre_s + post_s) + 1:
+        return None
+    try:
+        r = subprocess.run(
+            ["ffmpeg", "-hide_banner", "-nostats", "-i", path,
+             "-af", "ebur128=metadata=1", "-f", "null", "-"],
+            capture_output=True, text=True, timeout=180)
+    except Exception as e:
+        print(f"  (peak analysis failed: {e})")
+        return None
+    import re
+    best_t, best_m = None, -1e9
+    for line in r.stderr.splitlines():
+        m = re.search(r"t:\s*([\d.]+).*?M:\s*(-?[\d.]+)", line)
+        if not m:
+            continue
+        t, loud = float(m.group(1)), float(m.group(2))
+        if loud > best_m:
+            best_m, best_t = loud, t
+    if best_t is None:
+        return None
+    start = max(0.0, best_t - pre_s)
+    end = min(dur, best_t + post_s)
+    if end - start < min_s:                    # widen symmetrically to the min length
+        need = min_s - (end - start)
+        start = max(0.0, start - need / 2)
+        end = min(dur, end + need / 2)
+    if end - start < min_s:
+        return None
+    return round(start, 2), round(end, 2), round(best_t, 2)
+
+
+def _decide_trim(strategy, slot_key, raw_path, dur):
+    """Smart-trim as an A/B TEST (owner requirement: prove it lifts views first).
+    mode 'ab' -> ~50/50 by a stable hash of slot_key; 'always' / 'off' also work.
+    Returns (window_or_None, applied_bool)."""
+    cfg = strategy.get("smart_trim", {}) or {}
+    mode = cfg.get("mode", "off")
+    if mode == "off":
+        return None, False
+    if mode == "ab":
+        on = int(hashlib.md5(slot_key.encode()).hexdigest(), 16) % 2 == 0
+    else:
+        on = True
+    if not on:
+        return None, False
+    win = _audio_peak_window(raw_path, dur,
+                             float(cfg.get("pre_s", 7)), float(cfg.get("post_s", 5)),
+                             float(strategy.get("min_duration_s", 5)))
+    return win, (win is not None)
 
 
 def _clean_drawtext(s):
@@ -501,94 +699,224 @@ def _clean_drawtext(s):
     return s.upper().strip()[:26] or "WATCH THIS"
 
 
-def reformat_reel(in_path, out_path, hook_text, max_s=60):
-    """Blurred 9:16 fill + centered gameplay + a bold hook banner near the top."""
+def _drawtext(font, text, **opts):
+    """Build a drawtext filter string. `text` must already be drawtext-safe (no
+    ':' or ','); font path colons are escaped here."""
+    fe = str(font).replace("\\", "/").replace(":", "\\:")
+    parts = [f"fontfile='{fe}'", f"text='{text}'"]
+    parts += [f"{k}={v}" for k, v in opts.items()]
+    return "drawtext=" + ":".join(parts)
+
+
+def reformat_reel(in_path, out_path, strategy, slot, hook_text="", trim=None,
+                  max_s=60, rank_label=None):
+    """9:16 Reel: blurred fill + a zoom-cropped gameplay overlay (#13, gameplay
+    fills more of the frame), optional smart-trim to the action (#12), a permanent
+    @clipkroniek watermark + a last-2.5s follow CTA (#1), loudness-normalised audio
+    (#15), 60fps cap (#14) and a higher-quality encode. `trim`=(start,end[,peak])
+    cuts to that window; None = whole clip. `rank_label` (e.g. '#1') is burned for
+    the weekly Top-3 compilation."""
     _ensure_tool("ffmpeg")
-    hook = _clean_drawtext(hook_text) if hook_text else ""
-    font = _font()
-    fill = (
-        f"[0:v]scale={REEL_W}:{REEL_H}:force_original_aspect_ratio=increase,"
-        f"crop={REEL_W}:{REEL_H},boxblur=26:6,eq=brightness=-0.10[bg];"
-        f"[0:v]scale={REEL_W}:-2:force_original_aspect_ratio=decrease[fg];"
-        f"[bg][fg]overlay=(W-w)/2:(H-h)/2[base]"
-    )
-    if font and hook:                     # burn the hook banner only if enabled + a font exists
-        vf = (fill + ";"
-              f"[base]drawtext=fontfile='{font}':text='{hook}':fontcolor=white:"
-              f"fontsize=68:borderw=6:bordercolor=black@0.9:x=(w-text_w)/2:y=190:"
-              f"box=1:boxcolor=black@0.45:boxborderw=26[out]")
-        out_label = "[out]"
+    game = slot.get("game")
+    fg_zoom = float((strategy.get("fg_zoom", {}) or {}).get(
+        game, (strategy.get("fg_zoom", {}) or {}).get("default", 1.3)))
+    watermark = bool(strategy.get("brand_watermark", True))
+    font = _ensure_font(bold=True) if (watermark or rank_label) else _font(bold=True)
+    if watermark and not font:
+        sys.exit("brand_watermark is on but no usable font could be installed — "
+                 "aborting (an unbranded reel defeats the identity fix).")
+
+    seek = ["-ss", f"{float(trim[0]):.2f}"] if trim else []
+    if trim:
+        dur = min(max(0.5, float(trim[1]) - float(trim[0])), float(max_s))
+        length = ["-t", f"{dur:.2f}"]
     else:
-        print("  (no font found — skipping the text hook overlay)")
-        vf = fill
-        out_label = "[base]"
-    cmd = ["ffmpeg", "-y", "-i", in_path, "-filter_complex", vf,
-           "-map", out_label, "-map", "0:a?",
-           "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
-           "-c:a", "aac", "-b:a", "128k", "-ar", "44100",
-           "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-           "-r", "30", "-t", str(max_s), out_path]
-    proc = subprocess.run(cmd, timeout=300, stderr=subprocess.PIPE)
+        pr = _probe(in_path).get("duration_s")
+        dur = min(float(pr), float(max_s)) if pr else float(max_s)
+        length = ["-t", str(max_s)]
+
+    zw = int(REEL_W * fg_zoom)
+    bg = (f"[0:v]scale={REEL_W}:{REEL_H}:force_original_aspect_ratio=increase,"
+          f"crop={REEL_W}:{REEL_H},boxblur=26:6,eq=brightness=-0.10[bg]")
+    fg = (f"[0:v]scale={zw}:-2,"
+          f"crop=min(iw\\,{REEL_W}):min(ih\\,{REEL_H}):(iw-ow)/2:(ih-oh)/2[fg]")
+    graph = f"{bg};{fg};[bg][fg]overlay=(W-w)/2:(H-h)/2[base]"
+    label = "[base]"
+
+    draws = []
+    hook = _clean_drawtext(hook_text) if hook_text else ""
+    if hook and font:                          # optional legacy top hook (burn_hook)
+        draws.append(_drawtext(font, hook, fontcolor="white", fontsize=68,
+                               borderw=6, bordercolor="black@0.9", box=1,
+                               boxcolor="black@0.45", boxborderw=26,
+                               x="(w-text_w)/2", y=190))
+    if watermark and font:
+        draws.append(_drawtext(font, "@clipkroniek", fontcolor="white@0.85",
+                               fontsize=34, borderw=3, bordercolor="black@0.65",
+                               x="(w-text_w)/2", y=232))
+        cta_at = max(0.0, dur - 2.5)
+        draws.append(_drawtext(font, "FOLLOW FOR DAILY CLIPS", fontcolor="white",
+                               fontsize=46, borderw=5, bordercolor="black@0.9",
+                               box=1, boxcolor="black@0.5", boxborderw=20,
+                               x="(w-text_w)/2", y=1330,
+                               enable=f"gte(t\\,{cta_at:.2f})"))
+    if rank_label and font:
+        draws.append(_drawtext(font, _clean_drawtext(rank_label), fontcolor="yellow",
+                               fontsize=96, borderw=8, bordercolor="black",
+                               x="(w-text_w)/2", y=300))
+    if draws:
+        graph += f";[base]{','.join(draws)}[out]"
+        label = "[out]"
+
+    cmd = (["ffmpeg", "-y"] + seek + ["-i", in_path,
+            "-filter_complex", graph, "-map", label, "-map", "0:a?",
+            "-af", "loudnorm=I=-14:TP=-1.5:LRA=11",
+            "-c:v", "libx264", "-preset", "slow", "-crf", "18",
+            "-c:a", "aac", "-b:a", "192k", "-ar", "44100",
+            "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+            "-fpsmax", "60"] + length + [out_path])
+    proc = subprocess.run(cmd, timeout=420, stderr=subprocess.PIPE)
     if proc.returncode != 0 or not os.path.exists(out_path):
-        sys.exit("ffmpeg reformat failed:\n" + proc.stderr.decode("utf-8", "replace")[-1500:])
+        sys.exit("ffmpeg reformat failed:\n"
+                 + proc.stderr.decode("utf-8", "replace")[-1800:])
+    return out_path
+
+
+def build_cover(raw_path, out_path, strategy, slot, history, at_s):
+    """Branded, episode-numbered cover (#3): a frame from the clip in the 9:16 look
+    with 'CLIPKRONIEK' + '#N - GAME' burned into the grid-safe centre (a scroll-
+    stopping, consistent profile grid). Returns out_path, or None on failure (the
+    caller then falls back to thumb_offset). Episode number is on the COVER only —
+    never in the caption (owner decision)."""
+    _ensure_tool("ffmpeg")
+    font = _ensure_font(bold=True)
+    if not font:
+        return None
+    n = len(history.get("posts", [])) + 1
+    game_label = _clean_drawtext(strategy["games"].get(slot["game"], slot["game"]))
+    colors = strategy.get("cover_colors", {}) or {}
+    color = str(colors.get(slot["game"], colors.get("default", "#00E5FF"))).replace("#", "0x")
+    zw = int(REEL_W * 1.25)
+    graph = (
+        f"[0:v]scale={REEL_W}:{REEL_H}:force_original_aspect_ratio=increase,"
+        f"crop={REEL_W}:{REEL_H},boxblur=30:8,eq=brightness=-0.18[bg];"
+        f"[0:v]scale={zw}:-2,crop=min(iw\\,{REEL_W}):min(ih\\,{REEL_H}):"
+        f"(iw-ow)/2:(ih-oh)/2[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2[base];"
+        f"[base]"
+        + _drawtext(font, "CLIPKRONIEK", fontcolor="white", fontsize=64, borderw=6,
+                    bordercolor="black", x="(w-text_w)/2", y=360) + ","
+        + _drawtext(font, f"#{n} - {game_label}", fontcolor=color, fontsize=52,
+                    borderw=5, bordercolor="black", x="(w-text_w)/2", y=1470)
+        + "[out]"
+    )
+    cmd = ["ffmpeg", "-y", "-ss", f"{max(0.0, float(at_s)):.2f}", "-i", raw_path,
+           "-filter_complex", graph, "-map", "[out]",
+           "-frames:v", "1", "-q:v", "3", out_path]
+    proc = subprocess.run(cmd, timeout=120, stderr=subprocess.PIPE)
+    if proc.returncode != 0 or not os.path.exists(out_path):
+        print("  (cover build failed: "
+              + proc.stderr.decode("utf-8", "replace")[-300:] + ")")
+        return None
     return out_path
 
 
 # =============================================================================
 # Caption (Claude)
 # =============================================================================
-def call_claude(clip, slot, strategy):
-    game_name = strategy["games"][slot["game"]]
-    pool = " ".join(GAME_HASHTAGS.get(slot["game"], []))
-    system = (
-        "You write for 'Clipkroniek', an Instagram page that reposts the best "
-        "gaming clips WITH creator credit. You get ONE clip's METADATA (title, "
-        "game, streamer) but you CANNOT watch the video. Return a JSON object "
-        "ONLY (no prose, no markdown):\n"
-        '{"hook": "...", "caption": "...", "hashtags": ["#..."]}\n'
-        "CRITICAL: because you can't see the clip, NEVER invent or assert specific "
-        "events, outcomes, kill counts, or who-did-what — you will be wrong. Stay "
-        "intriguing but GENERAL.\n"
-        "- caption: 1-2 short punchy lines. A general curiosity/hype line that "
-        "names the game plainly (for search). English. NO hashtags and NO @credit "
-        "inside (both are appended separately).\n"
-        "- hook: a SHORT 2-4 word UPPERCASE on-screen teaser that is true for ANY "
-        "clip (e.g. 'WAIT FOR IT', 'CAUGHT ON STREAM', 'GTA RP MOMENT'), ASCII "
-        "only, no specific claims. (Often unused, but keep it safe/generic.)\n"
-        f"- hashtags: 4-5 niche tags for this game, lowercase, like: {pool}. "
-        "No mega-generic tags (#gaming, #viral, #fyp)."
-    )
-    user = json.dumps({
-        "game": game_name,
-        "clip_title": clip.get("title"),
-        "broadcaster": clip.get("broadcaster_name"),
-        "clipper": clip.get("creator_name"),
-        "view_count": clip.get("view_count"),
-        "language": clip.get("language"),
-    }, ensure_ascii=False)
+def _game_hashtags(strategy, game):
+    """Learned hashtags for a game (analyzer writes strategy.game_hashtags) with the
+    hardcoded pool as fallback."""
+    return ((strategy.get("game_hashtags", {}) or {}).get(game)
+            or GAME_HASHTAGS.get(game, []))
 
-    body = {"model": CLAUDE_MODEL, "max_tokens": 500, "system": system,
+
+def call_claude(pool, slot, strategy):
+    """One call does two jobs: (#7) JUDGE the candidate clips by metadata and pick
+    the most viral-looking gameplay clip, and write the post copy — an SEO caption
+    (#19a), a generic hook, niche hashtags, and a first-comment question (#4).
+    Claude CANNOT watch the videos, so it stays general. Learnings + caption
+    strategy are fed in as advisory (#16)."""
+    game_name = strategy["games"][slot["game"]]
+    tags_pool = " ".join(_game_hashtags(strategy, slot["game"]))
+    cands = [{
+        "index": i,
+        "title": c.get("title"),
+        "streamer": c.get("broadcaster_name"),
+        "views": c.get("view_count"),
+        "views_per_hour": c.get("velocity"),
+        "duration_s": c.get("duration"),
+        "language": c.get("language"),
+        "curated": bool(c.get("is_curated")),
+    } for i, c in enumerate(pool[:8])]
+
+    system = (
+        "You are the editor for 'Clipkroniek', an Instagram page that reposts the "
+        "best FRESH gaming clips WITH creator credit. You are given METADATA for "
+        "several candidate clips (you CANNOT watch them) and must (1) PICK the one "
+        "most likely to go viral as a 9:16 Reel, and (2) write the post copy.\n"
+        "PICK guidance: prefer high views_per_hour (momentum) and a clean, punchy, "
+        "SFW title that reads like real gameplay (insane play / clutch / funny fail "
+        "/ chaos). AVOID titles that look like reaction/watch-along, gambling or "
+        "slots, giveaways, drama, pure clickbait, or anything sketchy/NSFW. A "
+        "shorter clip (8-30s) usually loops better.\n"
+        "Return a JSON object ONLY (no prose, no markdown):\n"
+        '{"pick_index": <int>, "why_pick": "one short line", "hook": "...", '
+        '"caption": "...", "hashtags": ["#..."], "comment_question": "..."}\n'
+        "CRITICAL: because you can't see the clip, NEVER invent specific events, "
+        "outcomes, kill counts, or who-did-what. Stay intriguing but GENERAL.\n"
+        f"- caption: 1-2 short punchy lines that NAME the game plainly and include a "
+        f"natural search phrase people type (e.g. '{game_name} clips', 'best "
+        f"{game_name} moments') — caption SEO matters more than hashtags now. "
+        "English. NO hashtags and NO @credit inside (appended separately).\n"
+        "- hook: SHORT 2-4 word UPPERCASE teaser true for ANY clip ('WAIT FOR IT', "
+        "'CAUGHT ON STREAM'), ASCII only. (Often unused; keep it safe/generic.)\n"
+        f"- hashtags: 4-5 niche lowercase tags for this game like: {tags_pool}. No "
+        "mega-generic tags (#gaming #viral #fyp).\n"
+        "- comment_question: ONE short, engaging question to pin as the first "
+        "comment (comments drive reach). Generic — e.g. 'Rate this 1-10 👇' or "
+        "'Could you pull this off?'. No specific claims."
+    )
+    cap_strat = strategy.get("caption_strategy") or ""
+    learnings = strategy.get("learnings") or ""
+    if cap_strat or learnings:
+        system += ("\n\nADVISORY (from performance data — use to improve the copy; "
+                   "the safety rules above still win):\n")
+        if cap_strat:
+            system += f"- caption strategy: {cap_strat}\n"
+        if learnings:
+            system += f"- learnings: {learnings}\n"
+
+    user = json.dumps({"game": game_name, "region": slot["region"],
+                       "candidates": cands}, ensure_ascii=False)
+    body = {"model": CLAUDE_MODEL, "max_tokens": 700, "system": system,
             "messages": [{"role": "user",
-                          "content": "Write the JSON for this clip:\n" + user}]}
-    resp = http("POST", "https://api.anthropic.com/v1/messages",
-                headers={"x-api-key": env("ANTHROPIC_API_KEY"),
-                         "anthropic-version": "2023-06-01",
-                         "content-type": "application/json"},
-                json=body, timeout=90)
-    resp.raise_for_status()
-    text = "".join(b.get("text", "") for b in resp.json().get("content", [])
-                   if b.get("type") == "text").strip()
-    if text.startswith("```"):
-        text = text.split("```")[1]
-        if text.lstrip().startswith("json"):
-            text = text.lstrip()[4:]
-        text = text.strip()
+                          "content": "Pick the best clip and write the JSON:\n" + user}]}
     try:
-        return json.loads(text)
-    except Exception:
-        title = clip.get("title") or "Insane clip"
-        return {"hook": title[:24], "caption": f"{title} — {game_name}",
-                "hashtags": GAME_HASHTAGS.get(slot["game"], [])[:5]}
+        resp = http("POST", "https://api.anthropic.com/v1/messages",
+                    headers={"x-api-key": env("ANTHROPIC_API_KEY"),
+                             "anthropic-version": "2023-06-01",
+                             "content-type": "application/json"},
+                    json=body, timeout=90)
+        resp.raise_for_status()
+        text = "".join(b.get("text", "") for b in resp.json().get("content", [])
+                       if b.get("type") == "text").strip()
+        if text.startswith("```"):
+            text = text.split("```")[1]
+            if text.lstrip().startswith("json"):
+                text = text.lstrip()[4:]
+            text = text.strip()
+        ai = json.loads(text)
+        if not isinstance(ai, dict):
+            raise ValueError("response was not a JSON object")
+        return ai
+    except Exception as e:
+        print(f"  (Claude judge/caption failed: {e}; top candidate + fallback copy)")
+        top = pool[0] if pool else {}
+        title = top.get("title") or "Insane clip"
+        return {"pick_index": 0, "hook": _clean_drawtext(title),
+                "caption": f"{title} — {game_name}",
+                "hashtags": _game_hashtags(strategy, slot["game"])[:5],
+                "comment_question": "Rate this clip 1-10 👇"}
 
 
 def assemble_caption(ai, clip, slot, strategy):
@@ -604,7 +932,7 @@ def assemble_caption(ai, clip, slot, strategy):
     cta = strategy.get("cta", "Follow for daily clips")
     tags = [h for h in (ai.get("hashtags") or []) if isinstance(h, str)][:MAX_HASHTAGS]
     if not tags:
-        tags = GAME_HASHTAGS.get(slot["game"], [])[:MAX_HASHTAGS]
+        tags = _game_hashtags(strategy, slot["game"])[:MAX_HASHTAGS]
     parts = [body, credit, cta]
     if DISCLOSURE:
         parts.append(DISCLOSURE)
@@ -656,14 +984,30 @@ def _wait_for_container(container_id, token, max_wait=420, interval=10):
     sys.exit(f"Reel container not FINISHED after {max_wait}s")
 
 
-def post_reel_to_instagram(video_url, caption):
+def post_reel_to_instagram(video_url, caption, cover_url=None, thumb_offset=None):
+    """Publish a Reel. Prefers a branded cover_url (#3); if IG rejects it, retries
+    once with thumb_offset (a frame index). Returns (media_id, cover_method)."""
     token = env("IG_ACCESS_TOKEN")
     ig = resolve_ig_user_id(token)
     base = _graph_node(ig)
-    create = http("POST", f"{base}/media",
-                  data={"media_type": "REELS", "video_url": video_url,
-                        "caption": caption, "share_to_feed": "true",
-                        "access_token": token}, timeout=120)
+
+    def _create(with_cover):
+        d = {"media_type": "REELS", "video_url": video_url, "caption": caption,
+             "share_to_feed": "true", "access_token": token}
+        if with_cover and cover_url:
+            d["cover_url"] = cover_url
+        elif thumb_offset is not None:
+            d["thumb_offset"] = str(int(thumb_offset))
+        return http("POST", f"{base}/media", data=d, timeout=120)
+
+    method = "cover_url" if cover_url else ("thumb_offset" if thumb_offset is not None
+                                            else "auto")
+    create = _create(True)
+    if create.status_code >= 400 and cover_url:
+        print(f"  cover_url rejected ({create.status_code}: {create.text[:160]}) — "
+              "retrying with thumb_offset")
+        method = "thumb_offset" if thumb_offset is not None else "auto"
+        create = _create(False)
     create.raise_for_status()
     cid = create.json().get("id")
     if not cid:
@@ -672,7 +1016,25 @@ def post_reel_to_instagram(video_url, caption):
     pub = http("POST", f"{base}/media_publish",
                data={"creation_id": cid, "access_token": token}, timeout=120)
     pub.raise_for_status()
-    return pub.json().get("id")
+    return pub.json().get("id"), method
+
+
+def post_comment(media_id, message):
+    """Pin-worthy first comment (#4). Non-fatal — needs the manage-comments scope on
+    the token; if it 400s we log a hint and continue (the Reel already published)."""
+    token = env("IG_ACCESS_TOKEN")
+    try:
+        r = http("POST", _graph_node(f"{media_id}/comments"),
+                 data={"message": message, "access_token": token}, timeout=60)
+        if r.status_code >= 400:
+            print(f"  first comment failed ({r.status_code}): {r.text[:180]}")
+            print("  (if this is a permissions error, regenerate CK_IG_ACCESS_TOKEN "
+                  "with the instagram_business_manage_comments scope)")
+            return False
+        return True
+    except Exception as e:
+        print(f"  first comment error: {e}")
+        return False
 
 
 def r2_configured():
@@ -736,28 +1098,38 @@ def main():
         return
 
     slot = dict(slot)
-    if os.environ.get("SLOT_GAME"):
-        slot["game"] = os.environ["SLOT_GAME"]
-    if os.environ.get("SLOT_REGION"):
-        slot["region"] = os.environ["SLOT_REGION"]
-    if os.environ.get("SLOT_SOURCE"):
-        slot["source"] = os.environ["SLOT_SOURCE"]
+    for envk, field in (("SLOT_GAME", "game"), ("SLOT_REGION", "region"),
+                        ("SLOT_SOURCE", "source")):
+        if os.environ.get(envk):
+            slot[field] = os.environ[envk]
     print(f"[{BRAND_NAME}] slot {key} — game={slot['game']} "
           f"region={slot['region']} source={slot.get('source', 'twitch')}")
 
-    clip = discover_clip(strategy, slot, history)
-    if clip is None:
+    pool = discover_clip(strategy, slot, history)
+    if not pool:
         print("No fresh qualifying clip for this slot — skipping (no post).")
         return
-    print(f"Picked: {clip.get('view_count')} views | lang={clip.get('language')} | "
-          f"{(clip.get('title') or '')[:60]}")
-    print(f"  by {clip.get('broadcaster_name')} — {clip.get('url')}")
 
-    ai = call_claude(clip, slot, strategy)
+    # #7: let Claude judge the metadata and pick; fall back to the top-ranked clip.
+    ai = call_claude(pool, slot, strategy)
+    pick = ai.get("pick_index", 0)
+    try:
+        pick = int(pick)
+        if not (0 <= pick < len(pool)):
+            pick = 0
+    except Exception:
+        pick = 0
+    if ai.get("why_pick"):
+        print(f"  judge picked #{pick}: {str(ai.get('why_pick'))[:120]}")
+    ordered = [pool[pick]] + [c for i, c in enumerate(pool) if i != pick]
+    clip = ordered[0]
+
     caption, tags = assemble_caption(ai, clip, slot, strategy)
     burn = bool(strategy.get("burn_hook", False))
     hook = (ai.get("hook") or "").strip() if burn else ""
-    print(f"Hook overlay: {hook!r}" + ("" if burn else " (burn_hook off — clean video, no text)"))
+    print(f"Picked: {clip.get('view_count')} views @ {clip.get('velocity')}/h | "
+          f"lang={clip.get('language')} | {(clip.get('title') or '')[:60]}")
+    print(f"  by {clip.get('broadcaster_name')} — {clip.get('url')}")
     print("Caption:\n" + caption)
 
     if discover_only:
@@ -765,20 +1137,56 @@ def main():
         return
 
     tmp = tempfile.gettempdir()
-    raw = os.path.join(tmp, f"ck_raw_{_safe_key(clip['id'])}.mp4")
+    # --- download with fallback across the ranked pool (#22a) ------------
+    raw = None
+    for cand in ordered[:6]:
+        cand_raw = os.path.join(tmp, f"ck_raw_{_safe_key(cand['id'])}.mp4")
+        try:
+            print(f"Downloading clip {cand.get('id')} ...")
+            download_clip(cand, cand_raw)
+            clip, raw = cand, cand_raw
+            break
+        except Exception as e:
+            tail = (str(e).splitlines() or [""])[-1][:160]
+            print(f"  download failed ({cand.get('id')}): {tail}; trying next")
+    if raw is None:
+        sys.exit("All candidate downloads failed for this slot.")
+    if clip is not ordered[0]:                    # fallback changed the clip -> recaption
+        caption, tags = assemble_caption(ai, clip, slot, strategy)
+
+    dur_src = _probe(raw).get("duration_s")
+    # --- smart-trim A/B (#12): prove it lifts views before defaulting on --
+    trim, trimmed = _decide_trim(strategy, key, raw, dur_src)
+    if trim:
+        print(f"  smart-trim ON: {trim[0]}-{trim[1]}s (peak @ {trim[2]}s of {dur_src}s)")
+    else:
+        print(f"  smart-trim: off this post — full clip ({dur_src}s)")
+
     reel = os.path.join(tmp, f"ck_reel_{_safe_key(clip['id'])}.mp4")
-    print("Downloading clip...")
-    download_clip(clip, raw)
     print("Reformatting to 9:16 Reel...")
-    reformat_reel(raw, reel, hook, max_s=int(strategy.get("max_duration_s", 60)))
-    print(f"Built reel: {reel} ({os.path.getsize(reel) // 1024} KB)")
+    reformat_reel(raw, reel, strategy, slot, hook_text=hook, trim=trim,
+                  max_s=int(strategy.get("max_duration_s", 60)))
+    r_dur = _probe(reel).get("duration_s")
+    duration_s = r_dur or (trim[1] - trim[0] if trim else dur_src)
+    print(f"Built reel: {reel} ({os.path.getsize(reel) // 1024} KB, {duration_s}s)")
+
+    # --- branded cover (#3): frame at the action peak (or 40%) ----------
+    cover_at = trim[2] if trim else (float(dur_src) * 0.4 if dur_src else 1.0)
+    cover_path = None
+    if (strategy.get("cover", {}) or {}).get("enabled", True):
+        cover_path = build_cover(
+            raw, os.path.join(tmp, f"ck_cover_{_safe_key(clip['id'])}.jpg"),
+            strategy, slot, history, cover_at)
 
     if dry:
         print("\nDRY_RUN=1 — built the reel; not publishing.")
         if r2_configured():
-            pkey = f"previews/{_safe_key(clip['id'])}.mp4"
-            purl = host_file_r2(reel, pkey, "video/mp4")
+            purl = host_file_r2(reel, f"previews/{_safe_key(clip['id'])}.mp4", "video/mp4")
             print(f"Preview (hosted, NOT posted): {purl}")
+            if cover_path:
+                curl = host_file_r2(cover_path, f"previews/{_safe_key(clip['id'])}.jpg",
+                                    "image/jpeg")
+                print(f"Cover preview: {curl}")
         else:
             print("(R2 not configured — no preview URL; file is on the runner only.)")
         return
@@ -788,9 +1196,27 @@ def main():
     r2_key = f"reels/{_safe_key(clip['id'])}.mp4"
     video_url = host_file_r2(reel, r2_key, "video/mp4")
     print(f"Hosted: {video_url}")
-    media_id = post_reel_to_instagram(video_url, caption)
-    print(f"Published reel — media_id={media_id}")
-    delete_from_r2([r2_key])
+    cover_url, cover_key = None, None
+    if cover_path:
+        cover_key = f"covers/{_safe_key(clip['id'])}.jpg"
+        cover_url = host_file_r2(cover_path, cover_key, "image/jpeg")
+        print(f"Cover: {cover_url}")
+    # thumb_offset fallback (ms into the FINAL reel): peak relative to trim start.
+    thumb_ms = int(max(0.0, cover_at - (trim[0] if trim else 0.0)) * 1000)
+    media_id, cover_method = post_reel_to_instagram(
+        video_url, caption, cover_url=cover_url, thumb_offset=thumb_ms)
+    print(f"Published reel — media_id={media_id} (cover={cover_method})")
+
+    # --- pinned first comment (#4) --------------------------------------
+    first_comment = None
+    cq = (ai.get("comment_question") or "").strip()
+    if cq:
+        n = len(history.get("posts", [])) + 1
+        first_comment = f"{cq}\n\nDaily best-of gaming clips — drop a follow 🎮 (#{n})"
+        if not post_comment(media_id, first_comment):
+            first_comment = None
+
+    delete_from_r2([k for k in (r2_key, cover_key) if k])
 
     local = local_now(strategy)
     history["posts"].append({
@@ -803,6 +1229,7 @@ def main():
         "region": slot["region"],
         "source": clip.get("source", slot.get("source", "twitch")),
         "curated": bool(clip.get("is_curated")),
+        "format": "single",
         "subreddit": clip.get("subreddit"),
         "author": clip.get("author"),
         "clip_id": clip["id"],
@@ -811,6 +1238,12 @@ def main():
         "creator": clip.get("creator_name"),
         "language": clip.get("language"),
         "clip_views": clip.get("view_count"),
+        "clip_velocity": clip.get("velocity"),
+        "duration_s": round(float(duration_s), 2) if duration_s else None,
+        "trimmed": bool(trimmed),
+        "trim": [trim[0], trim[1]] if trim else None,
+        "cover": cover_method,
+        "first_comment": first_comment,
         "title": clip.get("title"),
         "hook": hook,
         "hashtags": tags,
