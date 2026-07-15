@@ -26,6 +26,7 @@ import requests
 
 import twitch
 import newsscan
+import youtube
 from clippost import (
     BRAND_NAME, CLAUDE_MODEL, STRATEGY_FILE,
     env, http, now_utc, load_strategy, load_history, save_history,
@@ -35,6 +36,7 @@ from clippost import (
 FOLLOWERS_FILE = "followers.json"
 REVIEW_EVERY_DAYS = 7
 REMEASURE_WITHIN_DAYS = 14
+YT_REMEASURE_DAYS = 14
 MIN_AGE_HOURS_TO_MEASURE = 18
 
 # Reel-valid insight metrics that also work below 100 followers.
@@ -159,6 +161,95 @@ def measure_posts(history, token):
         print(f"  {post.get('game')}/{post.get('region')}: reach={m.get('reach')} "
               f"shares={m.get('shares')} saved={m.get('saved')} follows={m.get('follows')}")
     return measured
+
+
+def measure_youtube(history):
+    """Pull YouTube performance for cross-posted videos (daily reels, Top-3, long-form)
+    into each record's `youtube.metrics`, so we can eventually compare what works on
+    YouTube vs Instagram. Gated on the YT secrets AND a token with read scopes — until
+    the owner re-mints with youtube.readonly + yt-analytics.readonly, this logs the
+    fix and no-ops (safe to ship now). Private videos read ~0 (expected until public)."""
+    if not youtube.configured():
+        return 0
+    try:
+        token = youtube.get_access_token()
+    except Exception as e:
+        print(f"  youtube: no access token ({str(e)[:120]}) — skipping YT measurement.")
+        return 0
+
+    now = now_utc()
+    targets = []
+    for p in history.get("posts", []):
+        vid = (p.get("youtube") or {}).get("id")
+        if not vid:
+            continue
+        age_h = _post_age_hours(p)
+        if age_h < MIN_AGE_HOURS_TO_MEASURE:
+            continue
+        if age_h > YT_REMEASURE_DAYS * 24 and (p.get("youtube") or {}).get("metrics"):
+            continue
+        targets.append((p, vid))
+    if not targets:
+        return 0
+
+    try:
+        stats = youtube.get_video_stats(token, [v for _, v in targets])
+    except youtube.ScopeError:
+        print("  youtube: token lacks read scope — re-mint YT_REFRESH_TOKEN with "
+              "youtube.readonly + yt-analytics.readonly (see clipkroniek/CLAUDE.md) "
+              "to turn on YouTube measurement.")
+        return 0
+    except Exception as e:
+        print(f"  youtube stats failed: {e}")
+        return 0
+
+    start, end = "2005-04-23", now.date().isoformat()   # YT launch -> today (lifetime)
+    analytics_ok = True
+    measured = 0
+    for p, vid in targets:
+        m = dict(stats.get(vid, {}))
+        if analytics_ok:
+            try:
+                a = youtube.get_video_analytics(token, vid, start, end)
+                for k in ("estimatedMinutesWatched", "averageViewDuration",
+                          "averageViewPercentage", "subscribersGained"):
+                    if k in a:
+                        m[k] = a[k]
+            except youtube.ScopeError:
+                analytics_ok = False
+                print("  youtube: analytics scope (yt-analytics.readonly) missing — "
+                      "storing basic stats only; re-mint to add watch-time/retention.")
+            except Exception as e:
+                print(f"  youtube analytics failed for {vid}: {e}")
+        yt = dict(p.get("youtube") or {})
+        yt["metrics"] = m
+        yt["measured_at"] = now.isoformat()
+        p["youtube"] = yt
+        measured += 1
+        print(f"  YT {p.get('game')}/{p.get('format') or 'single'}: views={m.get('views')} "
+              f"watch%={m.get('averageViewPercentage')} subs+={m.get('subscribersGained')}")
+    return measured
+
+
+def youtube_readout(history):
+    """Lightweight YouTube aggregate by game/format over the recent window — the seed
+    of the eventual IG-vs-YT comparison. Empty until YT videos have real (public) data."""
+    groups = {}
+    for p in _recent_posts(history):
+        m = (p.get("youtube") or {}).get("metrics") or {}
+        if not (m.get("views") or 0):
+            continue
+        for k in (f"yt:game:{p.get('game')}", f"yt:format:{p.get('format') or 'single'}"):
+            groups.setdefault(k, []).append(m)
+
+    def agg(ms):
+        n = len(ms)
+        return {"videos": n,
+                "avg_views": round(sum(x.get("views") or 0 for x in ms) / n, 1),
+                "avg_watch_pct": round(sum(float(x.get("averageViewPercentage") or 0)
+                                           for x in ms) / n, 1),
+                "subs_gained": sum(int(x.get("subscribersGained") or 0) for x in ms)}
+    return {k: agg(v) for k, v in groups.items()}
 
 
 def _ratio(n, d):
@@ -466,9 +557,18 @@ def main():
 
     print("Measuring recent posts...")
     measured = measure_posts(history, token)
+    yt_measured = measure_youtube(history)          # YouTube cross-post performance
     if not dry:
         save_history(history)
-    print(f"Measured {measured} post(s).")
+    print(f"Measured {measured} IG post(s), {yt_measured} YouTube video(s).")
+
+    yt_ro = youtube_readout(history)
+    if yt_ro:
+        print("\nYouTube readout:")
+        for k in sorted(yt_ro):
+            v = yt_ro[k]
+            print(f"  {k:>18}: n={v['videos']:>2} views={v['avg_views']} "
+                  f"watch%={v['avg_watch_pct']} subs+={v['subs_gained']}")
 
     readout = ab_readout(history)
     if readout:

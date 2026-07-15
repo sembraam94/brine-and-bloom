@@ -50,6 +50,11 @@ jobs:
           IG_ACCESS_TOKEN:      ${{ secrets.CK_IG_ACCESS_TOKEN }}
           TWITCH_CLIENT_ID:     ${{ secrets.TWITCH_CLIENT_ID }}
           TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          # Optional YouTube measurement — no-op unless all three are set AND the
+          # token was re-minted with youtube.readonly + yt-analytics.readonly.
+          YT_CLIENT_ID:         ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET:     ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN:     ${{ secrets.YT_REFRESH_TOKEN }}
           DRY_RUN: ${{ github.event.inputs.dry_run == 'yes' && '1' || '' }}
         run: python analyze.py ${{ github.event.inputs.strategize == 'yes' && '--strategize' || '' }}
 

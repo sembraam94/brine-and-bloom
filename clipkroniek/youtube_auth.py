@@ -26,7 +26,14 @@ import requests
 
 CLIENT_ID = os.environ.get("YT_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("YT_CLIENT_SECRET")
-SCOPE = "https://www.googleapis.com/auth/youtube.upload"
+# Three scopes: upload (post videos) + read (videos.list stats) + analytics
+# (watch-time/retention/subscribers). The read scopes power measure_youtube in
+# analyze.py; if you only need uploading, youtube.upload alone is enough.
+SCOPE = (
+    "https://www.googleapis.com/auth/youtube.upload "
+    "https://www.googleapis.com/auth/youtube.readonly "
+    "https://www.googleapis.com/auth/yt-analytics.readonly"
+)
 AUTH_URI = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_URI = "https://oauth2.googleapis.com/token"
 PORT = 8765

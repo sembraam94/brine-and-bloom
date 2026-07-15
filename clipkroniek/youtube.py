@@ -27,9 +27,16 @@ import requests
 
 TOKEN_URI = "https://oauth2.googleapis.com/token"
 UPLOAD_URI = "https://www.googleapis.com/upload/youtube/v3/videos"
+DATA_API = "https://www.googleapis.com/youtube/v3"
+ANALYTICS_API = "https://youtubeanalytics.googleapis.com/v2/reports"
 GAMING_CATEGORY = "20"
 _RETRYABLE = {500, 502, 503, 504}
 _ENV = ("YT_CLIENT_ID", "YT_CLIENT_SECRET", "YT_REFRESH_TOKEN")
+
+
+class ScopeError(Exception):
+    """Raised when the token lacks a read scope (403) — the fix is a token re-mint,
+    not a code change."""
 
 
 def configured():
@@ -59,6 +66,51 @@ def get_access_token():
 def _sanitize_title(raw):
     # <=100 chars; '<' and '>' are disallowed by the API and 400 the request.
     return (raw or "").replace("<", "").replace(">", "").strip()[:100] or "Gaming clip"
+
+
+# =============================================================================
+# Read-back / measurement (needs the token re-minted with read scopes:
+#   youtube.readonly (basic stats) + yt-analytics.readonly (watch-time/retention).
+# The upload-only token 403s these -> ScopeError, and the analyzer prints how to fix.
+# =============================================================================
+def get_video_stats(access_token, video_ids):
+    """Data API videos.list statistics for up to 50 ids -> {id: {views,likes,comments}}.
+    Reading OUR OWN (private) videos needs the youtube.readonly scope on the token."""
+    ids = [v for v in (video_ids or []) if v][:50]
+    if not ids:
+        return {}
+    r = requests.get(f"{DATA_API}/videos",
+                     params={"part": "statistics", "id": ",".join(ids)},
+                     headers={"Authorization": f"Bearer {access_token}"}, timeout=30)
+    if r.status_code in (401, 403):
+        raise ScopeError(r.text[:220])
+    r.raise_for_status()
+    out = {}
+    for it in r.json().get("items", []):
+        s = it.get("statistics") or {}
+        out[it["id"]] = {"views": int(s.get("viewCount") or 0),
+                         "likes": int(s.get("likeCount") or 0),
+                         "comments": int(s.get("commentCount") or 0)}
+    return out
+
+
+def get_video_analytics(access_token, video_id, start_date, end_date):
+    """YouTube Analytics API per-video metrics (watch time, retention %, subs gained).
+    Needs the yt-analytics.readonly scope. Returns {} if the video has no data yet."""
+    r = requests.get(ANALYTICS_API, params={
+        "ids": "channel==MINE",
+        "startDate": start_date, "endDate": end_date,
+        "metrics": ("views,estimatedMinutesWatched,averageViewDuration,"
+                    "averageViewPercentage,subscribersGained,likes,shares,comments"),
+        "filters": f"video=={video_id}",
+    }, headers={"Authorization": f"Bearer {access_token}"}, timeout=30)
+    if r.status_code in (401, 403):
+        raise ScopeError(r.text[:220])
+    r.raise_for_status()
+    j = r.json()
+    cols = [h.get("name") for h in j.get("columnHeaders", [])]
+    rows = j.get("rows") or []
+    return dict(zip(cols, rows[0])) if rows else {}
 
 
 def upload_short(file_path, *, title, description="", tags=None,
