@@ -1088,6 +1088,39 @@ def delete_from_r2(keys):
         print(f"(R2 cleanup skipped: {e})")
 
 
+def sweep_r2_orphans(prefixes=("previews/", "reels/", "covers/"), older_than_h=6):
+    """#22c housekeeping: delete stray R2 objects — dry-run previews, or reel/cover
+    objects a crashed run failed to clean up. A live post deletes its objects within
+    seconds, so anything older than a few hours is an orphan. Best-effort, never
+    fatal, skips silently if R2 isn't configured."""
+    if not r2_configured():
+        return
+    try:
+        client, bucket = _r2_client(), env("R2_BUCKET")
+        cutoff = now_utc() - datetime.timedelta(hours=older_than_h)
+        removed = 0
+        for pref in prefixes:
+            token = None
+            while True:
+                kw = {"Bucket": bucket, "Prefix": pref, "MaxKeys": 1000}
+                if token:
+                    kw["ContinuationToken"] = token
+                resp = client.list_objects_v2(**kw)
+                for obj in resp.get("Contents", []):
+                    lm = obj.get("LastModified")
+                    if lm is not None and lm.astimezone(datetime.timezone.utc) < cutoff:
+                        client.delete_object(Bucket=bucket, Key=obj["Key"])
+                        removed += 1
+                if resp.get("IsTruncated"):
+                    token = resp.get("NextContinuationToken")
+                else:
+                    break
+        if removed:
+            print(f"  R2 sweep: removed {removed} orphaned object(s).")
+    except Exception as e:
+        print(f"  (R2 sweep skipped: {e})")
+
+
 def _safe_key(s):
     return "".join(ch if (ch.isalnum() or ch in "-_") else "-" for ch in str(s))
 
@@ -1255,6 +1288,9 @@ def main():
     dry = os.environ.get("DRY_RUN") == "1"
     discover_only = os.environ.get("DISCOVER_ONLY") == "1"
     force = os.environ.get("FORCE") == "1"
+
+    if not (dry or discover_only):
+        sweep_r2_orphans()          # #22c: clean up any crash-orphaned R2 objects
 
     if os.environ.get("FORMAT_OVERRIDE") == "top3":
         print(f"[{BRAND_NAME}] FORMAT_OVERRIDE=top3 — weekly compilation run.")

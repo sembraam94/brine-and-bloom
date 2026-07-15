@@ -323,6 +323,8 @@
     "default": "#00E5FF"
   },
   "went_dark_hours": 48,
+  "top3_days": 7,
+  "top3_seg_s": 10,
   "game_rotation": {
     "enabled": true,
     "min_active": 2,
@@ -334,12 +336,12 @@
   "slots": [
     {
       "weekday": 0,
-      "hour": 19,
-      "minute": 12,
+      "hour": 23,
+      "minute": 18,
       "game": "gta",
       "region": "western",
       "source": "twitch",
-      "note": "Mon - GTA western (Twitch)"
+      "note": "Mon - GTA western, US-evening slot (23:18 CET ~= 17:18 EST) - timing A/B vs the EU-evening slots"
     },
     {
       "weekday": 1,
@@ -361,12 +363,12 @@
     },
     {
       "weekday": 3,
-      "hour": 19,
-      "minute": 41,
+      "hour": 23,
+      "minute": 47,
       "game": "valorant",
       "region": "western",
       "source": "twitch",
-      "note": "Thu - VALORANT western (Twitch)"
+      "note": "Thu - VALORANT western, US-evening slot (23:47 CET ~= 17:47 EST) - timing A/B vs the EU-evening slots"
     },
     {
       "weekday": 4,

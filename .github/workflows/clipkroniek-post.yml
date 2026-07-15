@@ -10,7 +10,12 @@ name: Clipkroniek — clip poster
 
 on:
   schedule:
-    - cron: "7,37 * * * *"   # every 30 min; gates on strategy.json slots
+    # Narrowed to the slot hours + the 150-min tolerance window, with a DST buffer
+    # (slots run 18:00–23:xx CET = 16:00–23:xx UTC summer / 17:00–00:xx UTC winter;
+    # tolerance lets a late slot catch up past midnight). ~22 runs/day, not 48.
+    - cron: "7,37 15-23 * * *"
+    - cron: "7,37 0-1 * * *"
+    - cron: "30 11 * * 0"       # Sunday 11:30 UTC — weekly Top-3 compilation (#8)
   workflow_dispatch:
     inputs:
       force:
@@ -28,6 +33,11 @@ on:
         type: choice
         options: ["no", "yes"]
         default: "no"
+      format_override:
+        description: "Format: blank = daily clip | top3 = weekly compilation"
+        type: choice
+        options: ["", "top3"]
+        default: ""
       slot_game:
         description: "Override game (blank = slot's): gta | valorant"
         required: false
@@ -80,6 +90,8 @@ jobs:
           FORCE:         ${{ github.event.inputs.force == 'yes' && '1' || '' }}
           DRY_RUN:       ${{ github.event.inputs.dry_run == 'yes' && '1' || '' }}
           DISCOVER_ONLY: ${{ github.event.inputs.discover_only == 'yes' && '1' || '' }}
+          # Top-3 on the Sunday cron, or when dispatched with format_override=top3.
+          FORMAT_OVERRIDE: ${{ github.event.inputs.format_override || (github.event.schedule == '30 11 * * 0' && 'top3' || '') }}
           SLOT_GAME:     ${{ github.event.inputs.slot_game }}
           SLOT_REGION:   ${{ github.event.inputs.slot_region }}
           SLOT_SOURCE:   ${{ github.event.inputs.slot_source }}
