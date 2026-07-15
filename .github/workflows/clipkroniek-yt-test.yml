@@ -1,0 +1,34 @@
+# Clipkroniek — YouTube upload test (manual only).
+# Uploads a tiny PRIVATE test clip to confirm the YT_* secrets + youtube.py work.
+# Never posts to Instagram, never makes anything public. Run once after adding the
+# YouTube secrets; delete the test video from YouTube Studio afterward.
+
+name: Clipkroniek — YouTube upload test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  yt-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        working-directory: clipkroniek
+        run: pip install -r requirements.txt
+
+      - name: Upload a private test Short
+        working-directory: clipkroniek
+        env:
+          YT_CLIENT_ID:     ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: python youtube_test.py
