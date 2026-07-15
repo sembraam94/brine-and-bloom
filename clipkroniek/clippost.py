@@ -645,23 +645,38 @@ def _audio_peak_window(path, dur, pre_s, post_s, min_s):
     if not dur or dur <= max(min_s, pre_s + post_s) + 1:
         return None
     _ensure_tool("ffmpeg")
+    # Print ebur128 momentary loudness (lavfi.r128.M) per frame to a file via
+    # ametadata — build-independent, unlike the console 't:/M:' lines which some
+    # ffmpeg builds don't emit at the default log level.
+    meta = path + ".r128.txt"
     try:
-        r = subprocess.run(
+        subprocess.run(
             ["ffmpeg", "-hide_banner", "-nostats", "-i", path,
-             "-af", "ebur128=metadata=1", "-f", "null", "-"],
+             "-af", f"ebur128=metadata=1,ametadata=mode=print:file={meta}",
+             "-f", "null", "-"],
             capture_output=True, text=True, timeout=180)
+        with open(meta, encoding="utf-8", errors="replace") as f:
+            lines = f.read().splitlines()
     except Exception as e:
         print(f"  (peak analysis failed: {e})")
         return None
+    finally:
+        try:
+            os.remove(meta)
+        except OSError:
+            pass
     import re
-    best_t, best_m = None, -1e9
-    for line in r.stderr.splitlines():
-        m = re.search(r"t:\s*([\d.]+).*?M:\s*(-?[\d.]+)", line)
-        if not m:
+    best_t, best_m, cur_t = None, -1e9, None
+    for line in lines:
+        mt = re.search(r"pts_time:(-?[\d.]+)", line)
+        if mt:
+            cur_t = float(mt.group(1))
             continue
-        t, loud = float(m.group(1)), float(m.group(2))
-        if loud > best_m:
-            best_m, best_t = loud, t
+        mm = re.search(r"lavfi\.r128\.M=(-?[\d.]+)", line)
+        if mm and cur_t is not None:
+            loud = float(mm.group(1))
+            if loud > best_m:
+                best_m, best_t = loud, cur_t
     if best_t is None:
         return None
     start = max(0.0, best_t - pre_s)
@@ -711,7 +726,7 @@ def _drawtext(font, text, **opts):
 
 
 def reformat_reel(in_path, out_path, strategy, slot, hook_text="", trim=None,
-                  max_s=60, rank_label=None):
+                  max_s=60, rank_label=None, cta=True):
     """9:16 Reel: blurred fill + a zoom-cropped gameplay overlay (#13, gameplay
     fills more of the frame), optional smart-trim to the action (#12), a permanent
     @clipkroniek watermark + a last-2.5s follow CTA (#1), loudness-normalised audio
@@ -756,12 +771,13 @@ def reformat_reel(in_path, out_path, strategy, slot, hook_text="", trim=None,
         draws.append(_drawtext(font, "@clipkroniek", fontcolor="white@0.85",
                                fontsize=34, borderw=3, bordercolor="black@0.65",
                                x="(w-text_w)/2", y=232))
-        cta_at = max(0.0, dur - 2.5)
-        draws.append(_drawtext(font, "FOLLOW FOR DAILY CLIPS", fontcolor="white",
-                               fontsize=46, borderw=5, bordercolor="black@0.9",
-                               box=1, boxcolor="black@0.5", boxborderw=20,
-                               x="(w-text_w)/2", y=1330,
-                               enable=f"gte(t\\,{cta_at:.2f})"))
+        if cta:
+            cta_at = max(0.0, dur - 2.5)
+            draws.append(_drawtext(font, "FOLLOW FOR DAILY CLIPS", fontcolor="white",
+                                   fontsize=46, borderw=5, bordercolor="black@0.9",
+                                   box=1, boxcolor="black@0.5", boxborderw=20,
+                                   x="(w-text_w)/2", y=1330,
+                                   enable=f"gte(t\\,{cta_at:.2f})"))
     if rank_label and font:
         draws.append(_drawtext(font, _clean_drawtext(rank_label), fontcolor="yellow",
                                fontsize=96, borderw=8, bordercolor="black",
@@ -1077,6 +1093,160 @@ def _safe_key(s):
 
 
 # =============================================================================
+# Weekly Top-3 compilation (#8)
+# =============================================================================
+def _recent_top_posts(history, days=7, n=3):
+    """The best real (non-compilation) posts in the last `days`, ranked by reach/
+    views. Used to build the weekly Top-3."""
+    cutoff = now_utc() - datetime.timedelta(days=days)
+
+    def perf(p):
+        m = p.get("metrics") or {}
+        return m.get("views") or m.get("reach") or p.get("clip_views") or 0
+
+    elig = []
+    for p in history.get("posts", []):
+        if p.get("format") == "top3" or not p.get("clip_url"):
+            continue
+        t = _parse_ts(p.get("date_utc"))
+        if t and t >= cutoff:
+            elig.append(p)
+    elig.sort(key=perf, reverse=True)
+    return elig[:n]
+
+
+def _concat_reels(segments, out_path):
+    """Join N already-normalised 9:16 segments into one reel. Re-encodes via the
+    concat filter so minor timing differences still join cleanly. Assumes each
+    segment has an audio track (Twitch clips do); fails loudly otherwise."""
+    _ensure_tool("ffmpeg")
+    inputs = []
+    for s in segments:
+        inputs += ["-i", s]
+    n = len(segments)
+    streams = "".join(f"[{i}:v][{i}:a]" for i in range(n))
+    graph = f"{streams}concat=n={n}:v=1:a=1[v][a]"
+    cmd = (["ffmpeg", "-y"] + inputs
+           + ["-filter_complex", graph, "-map", "[v]", "-map", "[a]",
+              "-c:v", "libx264", "-preset", "slow", "-crf", "18",
+              "-c:a", "aac", "-b:a", "192k", "-ar", "44100",
+              "-pix_fmt", "yuv420p", "-movflags", "+faststart", out_path])
+    proc = subprocess.run(cmd, timeout=420, stderr=subprocess.PIPE)
+    if proc.returncode != 0 or not os.path.exists(out_path):
+        sys.exit("ffmpeg concat failed:\n"
+                 + proc.stderr.decode("utf-8", "replace")[-1500:])
+    return out_path
+
+
+def post_top3(strategy, history, dry=False):
+    """#8 weekly compilation: re-cut the week's top-3 clips (by reach/views) into a
+    single ranked '#1/#2/#3' reel — a recap that rewards the audience and gives the
+    grid a distinct weekly beat. Idempotent per day via a 'top3-<date>' slot_key."""
+    tkey = "top3-" + local_now(strategy).date().isoformat()
+    if any(p.get("slot_key") == tkey for p in history.get("posts", [])):
+        print("Top-3 already posted today — skipping.")
+        return
+    picks = _recent_top_posts(history, days=int(strategy.get("top3_days", 7)), n=3)
+    if len(picks) < 3:
+        print(f"Top-3: only {len(picks)} eligible posts in the window — skipping "
+              "(need 3).")
+        return
+
+    tmp = tempfile.gettempdir()
+    segments, credits, games = [], [], []
+    for rank, p in enumerate(picks, start=1):
+        clip = {"id": p["clip_id"], "url": p.get("clip_url"),
+                "source": p.get("source", "twitch")}
+        raw = os.path.join(tmp, f"ck_t3_{rank}_{_safe_key(p['clip_id'])}.mp4")
+        try:
+            download_clip(clip, raw)
+        except Exception as e:
+            tail = (str(e).splitlines() or [""])[-1][:120]
+            print(f"  top3 #{rank}: download failed ({p.get('clip_id')}): {tail}; skip")
+            continue
+        dur = _probe(raw).get("duration_s")
+        win = _audio_peak_window(raw, dur, 4.0, 6.0,
+                                 float(strategy.get("min_duration_s", 5)))
+        seg = os.path.join(tmp, f"ck_t3seg_{rank}.mp4")
+        seg_slot = {"game": p.get("game"), "region": p.get("region")}
+        reformat_reel(raw, seg, strategy, seg_slot, trim=win,
+                      max_s=int(strategy.get("top3_seg_s", 10)),
+                      rank_label=f"#{rank}", cta=False)
+        segments.append(seg)
+        credits.append(p.get("broadcaster") or p.get("author") or "a creator")
+        games.append(p.get("game"))
+    if len(segments) < 2:
+        print("Top-3: fewer than 2 usable segments after downloads — skipping.")
+        return
+
+    comp = os.path.join(tmp, "ck_top3.mp4")
+    _concat_reels(segments, comp)
+    duration_s = _probe(comp).get("duration_s")
+    print(f"Built Top-3 reel: {comp} ({os.path.getsize(comp) // 1024} KB, {duration_s}s)")
+
+    uniq_games = list(dict.fromkeys(games))
+    label = " + ".join(strategy["games"].get(g, g) for g in uniq_games) or "gaming"
+    credit_line = " · ".join(f"#{i + 1} {c}" for i, c in enumerate(credits))
+    tags = []
+    for g in uniq_games:
+        tags += _game_hashtags(strategy, g)
+    tags = list(dict.fromkeys(tags))[:MAX_HASHTAGS]
+    caption = "\n\n".join([
+        f"TOP 3 {label} clips of the week 🏆 which one is your #1?",
+        f"🎥 {credit_line}",
+        strategy.get("cta", "Follow @clipkroniek for daily clips 🎮"),
+        " ".join(tags),
+    ]).strip()[:MAX_CAPTION_CHARS]
+    print("Top-3 caption:\n" + caption)
+
+    cover_path = build_cover(segments[0], os.path.join(tmp, "ck_top3_cover.jpg"),
+                             strategy, {"game": games[0]}, history, 0.5)
+
+    if dry:
+        print("\nDRY_RUN=1 — built the Top-3 reel; not publishing.")
+        if r2_configured():
+            print("Preview: " + host_file_r2(comp, "previews/ck_top3.mp4", "video/mp4"))
+        return
+
+    if not r2_configured():
+        sys.exit("Reels need R2 configured (a public video_url).")
+    stamp = now_utc().strftime("%Y%m%d")
+    r2_key = f"reels/ck_top3_{stamp}.mp4"
+    video_url = host_file_r2(comp, r2_key, "video/mp4")
+    cover_url, cover_key = None, None
+    if cover_path:
+        cover_key = f"covers/ck_top3_{stamp}.jpg"
+        cover_url = host_file_r2(cover_path, cover_key, "image/jpeg")
+    media_id, cover_method = post_reel_to_instagram(
+        video_url, caption, cover_url=cover_url, thumb_offset=500)
+    print(f"Published Top-3 reel — media_id={media_id} (cover={cover_method})")
+    delete_from_r2([k for k in (r2_key, cover_key) if k])
+
+    local = local_now(strategy)
+    history["posts"].append({
+        "slot_key": tkey,
+        "date_utc": now_utc().isoformat(),
+        "local_date": local.date().isoformat(),
+        "weekday": local.weekday(),
+        "slot_hour": local.hour,
+        "game": "+".join(uniq_games),
+        "region": "mixed",
+        "source": "compilation",
+        "format": "top3",
+        "clip_id": tkey,
+        "clip_ids": [p["clip_id"] for p in picks],
+        "duration_s": round(float(duration_s), 2) if duration_s else None,
+        "cover": cover_method,
+        "hashtags": tags,
+        "media_id": media_id,
+        "metrics": {},
+        "measured_at": None,
+    })
+    save_history(history)
+    print("Recorded Top-3 to history.json")
+
+
+# =============================================================================
 # Orchestration
 # =============================================================================
 def main():
@@ -1085,6 +1255,11 @@ def main():
     dry = os.environ.get("DRY_RUN") == "1"
     discover_only = os.environ.get("DISCOVER_ONLY") == "1"
     force = os.environ.get("FORCE") == "1"
+
+    if os.environ.get("FORMAT_OVERRIDE") == "top3":
+        print(f"[{BRAND_NAME}] FORMAT_OVERRIDE=top3 — weekly compilation run.")
+        post_top3(strategy, history, dry=dry)
+        return
 
     if force:
         slot, key = forced_slot(strategy)
