@@ -178,6 +178,28 @@ def measure_youtube(history):
         return 0
 
     now = now_utc()
+    # Self-verifying scope probe (also logs a channel growth snapshot every run).
+    try:
+        ch = youtube.get_channel(token)
+        if ch:
+            print(f"  YouTube channel: {ch.get('title')} — {ch.get('subscribers')} subs, "
+                  f"{ch.get('views')} views, {ch.get('videos')} videos")
+    except youtube.ScopeError:
+        print("  youtube: token lacks read scope — re-mint YT_REFRESH_TOKEN with "
+              "youtube.readonly + yt-analytics.readonly (see clipkroniek/CLAUDE.md) to "
+              "turn on YouTube measurement.")
+        return 0
+    except Exception as e:
+        print(f"  youtube channel probe failed: {e}")
+    try:
+        youtube.channel_analytics(token, "2005-04-23", now.date().isoformat())
+        print("  youtube: analytics scope OK (watch-time / retention available).")
+    except youtube.ScopeError:
+        print("  youtube: analytics scope (yt-analytics.readonly) missing — basic stats "
+              "only until you re-mint with it.")
+    except Exception as e:
+        print(f"  youtube analytics probe failed: {e}")
+
     targets = []
     for p in history.get("posts", []):
         vid = (p.get("youtube") or {}).get("id")

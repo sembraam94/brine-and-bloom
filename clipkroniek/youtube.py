@@ -73,6 +73,42 @@ def _sanitize_title(raw):
 #   youtube.readonly (basic stats) + yt-analytics.readonly (watch-time/retention).
 # The upload-only token 403s these -> ScopeError, and the analyzer prints how to fix.
 # =============================================================================
+def get_channel(access_token):
+    """channels.list(mine=true) -> {title, subscribers, views, videos}. Confirms the
+    youtube.readonly scope + gives a channel-level growth snapshot. ScopeError on 401/403."""
+    r = requests.get(f"{DATA_API}/channels",
+                     params={"part": "snippet,statistics", "mine": "true"},
+                     headers={"Authorization": f"Bearer {access_token}"}, timeout=30)
+    if r.status_code in (401, 403):
+        raise ScopeError(r.text[:220])
+    r.raise_for_status()
+    items = r.json().get("items") or []
+    if not items:
+        return {}
+    it = items[0]
+    s = it.get("statistics") or {}
+    return {"title": (it.get("snippet") or {}).get("title"),
+            "subscribers": int(s.get("subscriberCount") or 0),
+            "views": int(s.get("viewCount") or 0),
+            "videos": int(s.get("videoCount") or 0)}
+
+
+def channel_analytics(access_token, start_date, end_date):
+    """Channel-level analytics ping (no video filter) — confirms the yt-analytics.readonly
+    scope even when there are no measurable videos yet. ScopeError on 401/403."""
+    r = requests.get(ANALYTICS_API, params={
+        "ids": "channel==MINE", "startDate": start_date, "endDate": end_date,
+        "metrics": "views,subscribersGained",
+    }, headers={"Authorization": f"Bearer {access_token}"}, timeout=30)
+    if r.status_code in (401, 403):
+        raise ScopeError(r.text[:220])
+    r.raise_for_status()
+    j = r.json()
+    rows = j.get("rows") or []
+    cols = [h.get("name") for h in j.get("columnHeaders", [])]
+    return dict(zip(cols, rows[0])) if rows else {}
+
+
 def get_video_stats(access_token, video_ids):
     """Data API videos.list statistics for up to 50 ids -> {id: {views,likes,comments}}.
     Reading OUR OWN (private) videos needs the youtube.readonly scope on the token."""
