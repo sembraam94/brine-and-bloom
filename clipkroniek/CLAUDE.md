@@ -163,6 +163,18 @@ DRY_RUN=1 python analyze.py --strategize     # show proposed learnings, write no
 `youtube.py` uploads the same reel to the Clipkroniek YouTube channel as a Short,
 right after the IG publish. It's **off until three secrets exist** and never fatal.
 
+**YouTube measurement** (`analyze.py measure_youtube`): the daily analyzer pulls each
+cross-posted video's stats into `record.youtube.metrics` (Data API `videos.list`
+statistics + Analytics API `reports.query`: watch time, `averageViewPercentage`
+= retention, `subscribersGained`) and prints a `yt:game/format` readout — the seed of
+an eventual IG-vs-YT comparison. It needs the token re-minted with **read** scopes:
+`youtube.readonly` + `yt-analytics.readonly` (the upload-only token 403s → the run
+just logs the re-mint hint and no-ops, so it's safe already). To activate: add those
+two scopes on the OAuth consent screen, re-run `youtube_auth.py` (its `SCOPE` already
+requests all three), update `YT_REFRESH_TOKEN`, and add the `YT_*` secrets to the
+analyzer workflow. Numbers stay ~0 until the videos are **public** (a private video
+has no audience).
+
 **One-time setup:**
 1. Google Cloud project → enable **YouTube Data API v3**.
 2. **OAuth consent screen** → External → add scope `.../auth/youtube.upload` →
