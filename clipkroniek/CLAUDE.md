@@ -53,7 +53,8 @@ strategy.json -> clippost.py -> Instagram Reel -> Insights -> analyze.py -.
    the COVER ONLY (never the caption). `cover_url` with a `thumb_offset` fallback.
 6. **Host + publish** — upload mp4 (+ cover jpg) to **R2** →
    `post_reel_to_instagram` → record to history.json → **first comment**
-   (`post_comment`, #4, non-fatal) → delete the R2 objects. `sweep_r2_orphans`
+   (`post_comment`, #4, non-fatal) → **YouTube Shorts cross-post** (`crosspost_youtube`,
+   optional/non-fatal — reuses the same reel) → delete the R2 objects. `sweep_r2_orphans`
    cleans up crash-orphaned objects at the start of each live run (#22c).
 
 **Weekly Top-3** (`post_top3`, #8): `FORMAT_OVERRIDE=top3` (Sunday 11:30 UTC cron or
@@ -89,6 +90,7 @@ followers.json  # auto-created
 | `IG_ACCESS_TOKEN` | @clipkroniek token — needs `instagram_business_content_publish` (+ insights). The first-comment feature (#4) also needs `instagram_business_manage_comments`; if absent the comment 400s and is skipped (non-fatal). Wired from the `CK_IG_ACCESS_TOKEN` secret. |
 | `GH_PAT` | optional; PAT with Secrets:write so `refresh-token.yml` can store the rotated token (fails loudly without it) |
 | `FORMAT_OVERRIDE` | `top3` triggers the weekly compilation (Sunday cron / manual) |
+| `YT_CLIENT_ID` / `YT_CLIENT_SECRET` / `YT_REFRESH_TOKEN` | optional YouTube Shorts cross-post (`youtube.py`). No-op unless all three are set. Minted once via `youtube_auth.py`; see the YouTube section below. |
 | `IG_USER_ID` | optional; derived from token |
 | `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` | Twitch app (client-credentials) for clip discovery |
 | `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` / `R2_PUBLIC_BASE_URL` | host the mp4 (reuse Brine & Bloom's R2) |
@@ -155,3 +157,30 @@ DRY_RUN=1 python analyze.py --strategize     # show proposed learnings, write no
 5. **Watch the game rotation** — the news scanner can propose single-player launch
    waves (e.g. an AC remaster); glance at the weekly `[rotation]` log line before
    trusting a swap.
+
+## YouTube Shorts cross-post (optional)
+
+`youtube.py` uploads the same reel to the Clipkroniek YouTube channel as a Short,
+right after the IG publish. It's **off until three secrets exist** and never fatal.
+
+**One-time setup:**
+1. Google Cloud project → enable **YouTube Data API v3**.
+2. **OAuth consent screen** → External → add scope `.../auth/youtube.upload` →
+   **PUBLISH to Production** (⚠️ Testing mode expires the refresh token after 7 days
+   for this sensitive scope).
+3. **Credentials** → OAuth client ID → **Desktop app** → get Client ID + Secret.
+4. Run `youtube_auth.py` locally once (`YT_CLIENT_ID=… YT_CLIENT_SECRET=… python
+   youtube_auth.py`) → authorize on the Clipkroniek channel (click through the
+   "unverified app" warning) → it prints the refresh token.
+5. Add repo secrets `YT_CLIENT_ID`, `YT_CLIENT_SECRET`, `YT_REFRESH_TOKEN`.
+
+**Known limit — the private lock:** an **unaudited** Cloud project forces every
+API upload to `privacyStatus: private` regardless of what we request. The poster
+requests `public` (`strategy.youtube.privacy`) and logs a NOTE if YouTube overrides
+it to private. To get hands-off **public** Shorts, complete YouTube's **API
+compliance audit** (separate from OAuth verification); until then, uploads land
+private and must be flipped to public in YouTube Studio. Verified facts: `videos.insert`
+uses a dedicated **100/day** quota bucket; a Short is classified automatically by
+9:16 aspect + ≤180s (no `#Shorts` needed); title ≤100 chars with `< >` stripped;
+`selfDeclaredMadeForKids` is always sent. The `check_token.py`-style health check
+doesn't cover YouTube — a failed upload just logs and the IG post is unaffected.
