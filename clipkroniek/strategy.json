@@ -380,11 +380,11 @@
     {
       "weekday": 3,
       "hour": 23,
-      "minute": 47,
+      "minute": 22,
       "game": "valorant",
       "region": "western",
       "source": "twitch",
-      "note": "Thu - VALORANT western, US-evening slot (23:47 CET ~= 17:47 EST) - timing A/B vs the EU-evening slots"
+      "note": "Thu - VALORANT western, US-evening slot (23:22 CET ~= 17:22 EST) - timing A/B. Kept <=23:30 so the narrowed :07/:37 cron catches it before the Thu->Fri weekday boundary."
     },
     {
       "weekday": 4,
