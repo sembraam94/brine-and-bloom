@@ -438,6 +438,26 @@
         "follows": 0
       },
       "measured_at": "2026-07-16T06:42:32.729171+00:00"
+    },
+    {
+      "slot_key": "2026-197-w3-1217",
+      "date_utc": "2026-07-16T11:30:14.155564+00:00",
+      "local_date": "2026-07-16",
+      "weekday": 3,
+      "slot_hour": 12,
+      "format": "carousel",
+      "theme": "sauce",
+      "title": "2-1-1-walnut-pomegranate-molasses-sauce-versatile",
+      "hashtags": [
+        "#saucefromscratch",
+        "#pomegranatemolasses",
+        "#tahinirecipe",
+        "#flavourtips",
+        "#brineandbloom"
+      ],
+      "media_id": "17945015181253220",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
