@@ -27,8 +27,27 @@
         "#gtamoments"
       ],
       "media_id": "18115638742902051",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 115,
+        "likes": 0,
+        "comments": 0,
+        "saved": 1,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 129,
+        "ig_reels_avg_watch_time": 5880
+      },
+      "measured_at": "2026-07-16T07:28:45.845810+00:00",
+      "metrics_24h": {
+        "reach": 115,
+        "likes": 0,
+        "comments": 0,
+        "saved": 1,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 129,
+        "ig_reels_avg_watch_time": 5880
+      }
     },
     {
       "slot_key": "2026-07-15-w2-20",
