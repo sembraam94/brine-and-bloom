@@ -94,6 +94,49 @@
       "media_id": "17988035913008310",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-16-w3-23",
+      "date_utc": "2026-07-16T21:15:59.941524+00:00",
+      "local_date": "2026-07-16",
+      "weekday": 3,
+      "slot_hour": 23,
+      "game": "valorant",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "WittyCrunchyRhinocerosPJSugar-LiwDQ-J8LMvR1kh0",
+      "clip_url": "https://www.twitch.tv/zy0xxx/clip/WittyCrunchyRhinocerosPJSugar-LiwDQ-J8LMvR1kh0",
+      "broadcaster": "Zy0xxx",
+      "creator": "Ahmed_H75",
+      "language": "en",
+      "clip_views": 272,
+      "clip_velocity": 14.11,
+      "duration_s": 14.45,
+      "trimmed": false,
+      "trim": null,
+      "cover": "cover_url",
+      "first_comment": "Could you pull this off? 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#3)",
+      "youtube": {
+        "id": "gyi3s9Vyj8A",
+        "url": "https://youtu.be/gyi3s9Vyj8A",
+        "privacy": "public"
+      },
+      "title": "Hanzo aim but make it valorant",
+      "hook": "",
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#valorantaim"
+      ],
+      "media_id": "18087077768138507",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
