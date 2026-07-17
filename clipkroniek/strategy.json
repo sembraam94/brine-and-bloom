@@ -315,7 +315,7 @@
   },
   "brand_watermark": true,
   "facecam_stack": {
-    "enabled": false
+    "enabled": true
   },
   "cover": {
     "enabled": true
