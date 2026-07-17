@@ -73,6 +73,13 @@ jobs:
         working-directory: clipkroniek
         run: pip install -r requirements.txt
 
+      # Cache the self-hosted Whisper model (only used if Groq is down/absent).
+      - name: Cache Whisper model (STT fallback)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: fw-large-v3-turbo-v1
+
       - name: Discover, build, and publish (no-op if not a slot)
         working-directory: clipkroniek
         env:
@@ -95,6 +102,9 @@ jobs:
           # Optional long-form voiceover/grounding — no-op unless longform.enabled + these.
           REPLICATE_API_TOKEN:  ${{ secrets.REPLICATE_API_TOKEN }}
           GEMINI_API_KEY:       ${{ secrets.GEMINI_API_KEY }}
+          # Optional clip transcription (helps pick the cut moment). Groq primary
+          # (free); without it, STT stays off unless self_host_standalone is set.
+          GROQ_API_KEY:         ${{ secrets.GROQ_API_KEY }}
           FORCE:         ${{ github.event.inputs.force == 'yes' && '1' || '' }}
           DRY_RUN:       ${{ github.event.inputs.dry_run == 'yes' && '1' || '' }}
           DISCOVER_ONLY: ${{ github.event.inputs.discover_only == 'yes' && '1' || '' }}

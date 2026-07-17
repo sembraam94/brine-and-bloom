@@ -311,7 +311,14 @@
   "smart_trim": {
     "mode": "ab",
     "pre_s": 7,
-    "post_s": 5
+    "post_s": 5,
+    "transcript_window_s": 5
+  },
+  "transcribe": {
+    "enabled": true,
+    "self_host": true,
+    "self_host_standalone": false,
+    "self_host_model": "large-v3-turbo"
   },
   "brand_watermark": true,
   "facecam_stack": {
