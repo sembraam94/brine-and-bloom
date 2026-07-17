@@ -34,10 +34,10 @@
         "saved": 1,
         "shares": 0,
         "total_interactions": 1,
-        "views": 129,
-        "ig_reels_avg_watch_time": 5880
+        "views": 130,
+        "ig_reels_avg_watch_time": 5855
       },
-      "measured_at": "2026-07-16T08:37:07.580160+00:00",
+      "measured_at": "2026-07-17T08:31:07.011911+00:00",
       "metrics_24h": {
         "reach": 115,
         "likes": 0,
@@ -80,7 +80,17 @@
       "youtube": {
         "id": "8Bwru-X6vjQ",
         "url": "https://youtu.be/8Bwru-X6vjQ",
-        "privacy": "public"
+        "privacy": "public",
+        "metrics": {
+          "views": 0,
+          "likes": 0,
+          "comments": 0,
+          "estimatedMinutesWatched": 0,
+          "averageViewDuration": 0,
+          "averageViewPercentage": 0,
+          "subscribersGained": 0
+        },
+        "measured_at": "2026-07-17T08:31:12.388014+00:00"
       },
       "title": "救急隊の業務手順書に驚くジュリウス・ベッキー",
       "hook": "",
@@ -92,8 +102,17 @@
         "#gtaroleplay"
       ],
       "media_id": "17988035913008310",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 0,
+        "likes": 0,
+        "comments": 1,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 0,
+        "ig_reels_avg_watch_time": 18045
+      },
+      "measured_at": "2026-07-17T08:31:07.011911+00:00"
     },
     {
       "slot_key": "2026-07-16-w3-23",
