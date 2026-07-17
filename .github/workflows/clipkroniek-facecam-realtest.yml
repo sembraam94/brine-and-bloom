@@ -1,0 +1,46 @@
+# Clipkroniek — facecam real-clip test (manual only).
+# Runs one specific Twitch clip through facecam detection + the stacked reformat and
+# hosts a PRIVATE R2 preview. For eyeballing the facecam-stack on real footage.
+
+name: Clipkroniek — facecam real-clip test
+
+on:
+  workflow_dispatch:
+    inputs:
+      clip_url:
+        description: "Twitch clip URL to test"
+        required: true
+      clip_id:
+        description: "clip id (for the preview filename)"
+        required: false
+        default: "realtest"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        working-directory: clipkroniek
+        run: pip install -r requirements.txt
+
+      - name: Facecam real-clip test
+        working-directory: clipkroniek
+        env:
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
+          R2_ACCOUNT_ID:        ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID:     ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET:            ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_BASE_URL:   ${{ secrets.R2_PUBLIC_BASE_URL }}
+          CLIP_URL:             ${{ github.event.inputs.clip_url }}
+          CLIP_ID:              ${{ github.event.inputs.clip_id }}
+        run: python facecam_realtest.py

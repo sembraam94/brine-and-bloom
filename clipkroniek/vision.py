@@ -58,16 +58,18 @@ def detect_facecam(image_path, model=None):
             b64 = base64.b64encode(f.read()).decode()
         prompt = (
             "This is one frame from a 16:9 livestream gaming clip. Streamers usually "
-            "overlay a small 'facecam' — a webcam feed of their face/upper body, in a "
-            "corner, separate from the gameplay. Decide whether a facecam is present and "
-            "where. Return JSON ONLY:\n"
+            "overlay a 'facecam' — EITHER a webcam feed of their real face/upper body, "
+            "OR a VTuber-style animated avatar representing them — as a distinct inset "
+            "in a corner, separate from the gameplay. Decide whether such a facecam/"
+            "avatar is present and where. Return JSON ONLY:\n"
             '{"facecam": true|false, "corner": "top-left|top-right|bottom-left|'
             'bottom-right|other", "box": {"x":0-1,"y":0-1,"w":0-1,"h":0-1}, '
             '"confidence": 0-1}\n'
-            "box = the facecam's bounding box as fractions of the frame (x,y is its "
-            "top-left). If there is NO facecam (just gameplay/HUD), return "
-            '{"facecam": false}. Do NOT treat the game HUD, minimap, kill-feed, or '
-            "scoreboard as a facecam — only a real camera feed of a person."
+            "box = its bounding box as fractions of the frame (x,y is the top-left). "
+            'If there is none (just gameplay/HUD), return {"facecam": false}. Count a '
+            "real webcam OR a VTuber avatar of the streamer. Do NOT count the game HUD, "
+            "minimap, kill-feed, scoreboard, or in-game characters that are part of the "
+            "gameplay itself."
         )
         body = {"model": model, "max_tokens": 200,
                 "messages": [{"role": "user", "content": [
