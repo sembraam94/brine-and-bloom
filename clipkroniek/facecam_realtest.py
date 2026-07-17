@@ -51,6 +51,10 @@ def main():
     if C.r2_configured():
         key = f"previews/facecam_real_{C._safe_key(cid)}.mp4"
         print("PREVIEW: " + C.host_file_r2(reel, key, "video/mp4"))
+        still = os.path.join(tmp, "fcr_still.jpg")
+        if C._extract_frame(reel, (pr.get("duration_s") or 4) * 0.5, still):
+            print("STILL: " + C.host_file_r2(
+                still, f"previews/facecam_real_{C._safe_key(cid)}.jpg", "image/jpeg"))
     print("RESULT: " + ("STACKED (facecam)" if box else "standard layout"))
 
 
