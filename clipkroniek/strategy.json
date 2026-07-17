@@ -309,7 +309,7 @@
     "default": 1.3
   },
   "smart_trim": {
-    "mode": "ab",
+    "mode": "always",
     "pre_s": 7,
     "post_s": 5,
     "transcript_window_s": 5
