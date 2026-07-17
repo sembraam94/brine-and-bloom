@@ -314,6 +314,9 @@
     "post_s": 5
   },
   "brand_watermark": true,
+  "facecam_stack": {
+    "enabled": true
+  },
   "cover": {
     "enabled": true
   },

@@ -52,6 +52,7 @@ except ImportError:                      # pragma: no cover (Python < 3.9)
 import twitch
 import reddit
 import youtube
+import vision
 
 # =============================================================================
 # CONFIG — brand/knobs live here; timing/cadence/mix live in strategy.json.
@@ -603,6 +604,15 @@ def _probe(path):
     return out
 
 
+def _extract_frame(path, at_s, out):
+    """Grab one JPEG frame at at_s (used for facecam detection). True on success."""
+    _ensure_tool("ffmpeg")
+    proc = subprocess.run(
+        ["ffmpeg", "-y", "-ss", f"{max(0.0, float(at_s)):.2f}", "-i", path,
+         "-frames:v", "1", "-q:v", "3", out], timeout=60, stderr=subprocess.PIPE)
+    return proc.returncode == 0 and os.path.exists(out)
+
+
 def download_clip(clip, out_path):
     _ensure_tool("yt-dlp")
     # Twitch's private GQL intermittently returns a bad shape -> yt-dlp raises
@@ -726,14 +736,48 @@ def _drawtext(font, text, **opts):
     return "drawtext=" + ":".join(parts)
 
 
+def _facecam_stack_graph(in_path, box):
+    """Stacked 9:16 for reaction clips: an enlarged facecam panel on TOP of the full
+    gameplay panel, over a blurred fill — so the streamer's face is fully visible
+    instead of cropped out (and NOT overlaying the gameplay). `box`=(x,y,w,h) in 0-1
+    fractions from vision.detect_facecam. Returns a graph ending in [base]."""
+    pr = _probe(in_path)
+    sw = int(pr.get("width") or 1920)
+    sh = int(pr.get("height") or 1080)
+    x, y, w, h = box
+    pad = 0.025                                  # pad the box so the face isn't clipped
+    x = max(0.0, x - pad); y = max(0.0, y - pad)
+    w = min(1.0 - x, w + 2 * pad); h = min(1.0 - y, h + 2 * pad)
+    bx, by = int(x * sw), int(y * sh)
+    bw, bh = max(16, int(w * sw)), max(16, int(h * sh))
+    bx = min(bx, sw - bw); by = min(by, sh - bh)
+    gp_h = int(round(REEL_W * sh / sw))          # gameplay panel height at 1080 wide (~608)
+    # Fit the facecam INSIDE a 1080 x gp_h box, aspect preserved (never distorted,
+    # never taller than the gameplay); it centres over the blur if narrower than 1080.
+    fc_h = int(round(REEL_W * bh / bw)) if (bw / bh) >= (REEL_W / gp_h) else gp_h
+    gap = 12
+    total = fc_h + gp_h + gap
+    top = max(20, (REEL_H - total) // 2)
+    y_fc, y_gp = top, top + fc_h + gap
+    bg = (f"[0:v]scale={REEL_W}:{REEL_H}:force_original_aspect_ratio=increase,"
+          f"crop={REEL_W}:{REEL_H},boxblur=28:6,eq=brightness=-0.12[bg]")
+    fc = (f"[0:v]crop={bw}:{bh}:{bx}:{by},"
+          f"scale={REEL_W}:{gp_h}:force_original_aspect_ratio=decrease[fc]")
+    gp = f"[0:v]scale={REEL_W}:{gp_h}[gp]"
+    return (f"{bg};{fc};{gp};"
+            f"[bg][fc]overlay=(W-w)/2:{y_fc}[t1];"
+            f"[t1][gp]overlay=(W-w)/2:{y_gp}[base]")
+
+
 def reformat_reel(in_path, out_path, strategy, slot, hook_text="", trim=None,
-                  max_s=60, rank_label=None, cta=True):
+                  max_s=60, rank_label=None, cta=True, facecam=None):
     """9:16 Reel: blurred fill + a zoom-cropped gameplay overlay (#13, gameplay
     fills more of the frame), optional smart-trim to the action (#12), a permanent
     @clipkroniek watermark + a last-2.5s follow CTA (#1), loudness-normalised audio
     (#15), 60fps cap (#14) and a higher-quality encode. `trim`=(start,end[,peak])
     cuts to that window; None = whole clip. `rank_label` (e.g. '#1') is burned for
-    the weekly Top-3 compilation."""
+    the weekly Top-3 compilation. `facecam`=(x,y,w,h) normalized -> STACK the facecam
+    above the gameplay (reaction clips) instead of the zoom-crop."""
     _ensure_tool("ffmpeg")
     game = slot.get("game")
     fg_zoom = float((strategy.get("fg_zoom", {}) or {}).get(
@@ -753,12 +797,15 @@ def reformat_reel(in_path, out_path, strategy, slot, hook_text="", trim=None,
         dur = min(float(pr), float(max_s)) if pr else float(max_s)
         length = ["-t", str(max_s)]
 
-    zw = int(REEL_W * fg_zoom)
-    bg = (f"[0:v]scale={REEL_W}:{REEL_H}:force_original_aspect_ratio=increase,"
-          f"crop={REEL_W}:{REEL_H},boxblur=26:6,eq=brightness=-0.10[bg]")
-    fg = (f"[0:v]scale={zw}:-2,"
-          f"crop=min(iw\\,{REEL_W}):min(ih\\,{REEL_H}):(iw-ow)/2:(ih-oh)/2[fg]")
-    graph = f"{bg};{fg};[bg][fg]overlay=(W-w)/2:(H-h)/2[base]"
+    if facecam:
+        graph = _facecam_stack_graph(in_path, facecam)
+    else:
+        zw = int(REEL_W * fg_zoom)
+        bg = (f"[0:v]scale={REEL_W}:{REEL_H}:force_original_aspect_ratio=increase,"
+              f"crop={REEL_W}:{REEL_H},boxblur=26:6,eq=brightness=-0.10[bg]")
+        fg = (f"[0:v]scale={zw}:-2,"
+              f"crop=min(iw\\,{REEL_W}):min(ih\\,{REEL_H}):(iw-ow)/2:(ih-oh)/2[fg]")
+        graph = f"{bg};{fg};[bg][fg]overlay=(W-w)/2:(H-h)/2[base]"
     label = "[base]"
 
     draws = []
@@ -1430,10 +1477,27 @@ def main():
     else:
         print(f"  smart-trim: off this post — full clip ({dur_src}s)")
 
+    # --- facecam detection (Claude Vision, one frame) -------------------
+    # Streamer reactions are half the clip; the zoom-crop was cutting the corner
+    # facecam off. Detect it and STACK it above the gameplay. None -> standard layout.
+    facecam = None
+    if (strategy.get("facecam_stack", {}) or {}).get("enabled", True) and vision.configured():
+        at = trim[2] if trim else (float(dur_src) * 0.4 if dur_src else 1.0)
+        frame = os.path.join(tmp, f"ck_frame_{_safe_key(clip['id'])}.jpg")
+        if _extract_frame(raw, at, frame):
+            fc = vision.detect_facecam(frame)
+            if fc:
+                facecam = fc["box"]
+                print(f"  facecam: {fc.get('corner')} "
+                      f"box={['%.2f' % v for v in facecam]} (conf {fc.get('confidence')})"
+                      " -> STACKED layout")
+            else:
+                print("  facecam: none detected -> standard layout")
+
     reel = os.path.join(tmp, f"ck_reel_{_safe_key(clip['id'])}.mp4")
     print("Reformatting to 9:16 Reel...")
     reformat_reel(raw, reel, strategy, slot, hook_text=hook, trim=trim,
-                  max_s=int(strategy.get("max_duration_s", 60)))
+                  max_s=int(strategy.get("max_duration_s", 60)), facecam=facecam)
     r_dur = _probe(reel).get("duration_s")
     duration_s = r_dur or (trim[1] - trim[0] if trim else dur_src)
     print(f"Built reel: {reel} ({os.path.getsize(reel) // 1024} KB, {duration_s}s)")
@@ -1521,6 +1585,7 @@ def main():
         "cover": cover_method,
         "first_comment": first_comment,
         "youtube": yt,
+        "facecam": list(facecam) if facecam else None,
         "title": clip.get("title"),
         "hook": hook,
         "hashtags": tags,
