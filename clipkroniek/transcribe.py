@@ -62,8 +62,10 @@ def _groq(wav):
                 GROQ_URL,
                 headers={"Authorization": f"Bearer {os.environ['GROQ_API_KEY']}"},
                 files={"file": (os.path.basename(wav), f, "audio/wav")},
-                data={"model": model, "response_format": "verbose_json",
-                      "timestamp_granularities[]": "word"},
+                # a list of tuples sends the repeated key -> BOTH word + segment timestamps.
+                data=[("model", model), ("response_format", "verbose_json"),
+                      ("timestamp_granularities[]", "segment"),
+                      ("timestamp_granularities[]", "word")],
                 timeout=120)
         if r.status_code >= 400:
             print(f"  groq stt failed {r.status_code}: {r.text[:160]}")

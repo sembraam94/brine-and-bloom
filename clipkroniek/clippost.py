@@ -721,8 +721,19 @@ def _suggest_cut_moment(transcript, dur, audio_peak_t):
     """Claude reads the timestamped transcript and returns the most CLIPPABLE verbal
     moment (reaction/exclamation/punchline) in seconds, or None. A HELPER only — the
     audio peak still leads. Handles any language (JP/KR VTubers included)."""
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return None
     segs = transcript.get("segments") or []
-    if not segs or not os.environ.get("ANTHROPIC_API_KEY"):
+    if not segs:                                  # no segments -> group words into ~2s lines
+        cur = None
+        for w in (transcript.get("words") or []):
+            wt = float(w.get("start") or 0)
+            if cur is None or wt - cur["start"] >= 2.0:
+                cur = {"start": wt, "text": (w.get("word") or "").strip()}
+                segs.append(cur)
+            else:
+                cur["text"] = (cur["text"] + " " + (w.get("word") or "").strip()).strip()
+    if not segs:
         return None
     lines = "\n".join(f"[{s['start']:.1f}] {s['text']}"
                       for s in segs if s.get("text"))[:2500]
