@@ -44,10 +44,15 @@ strategy.json -> clippost.py -> Instagram Reel -> Insights -> analyze.py -.
 3. **Download with fallback** (#22a) — `yt-dlp` the pick; on failure try the next
    pool candidate; exit non-zero only if ALL fail.
 4. **Reformat** (`reformat_reel`) — ffmpeg → 9:16 (blurred fill + a **zoom-cropped**
-   gameplay overlay, per-game `fg_zoom`, #13). Optional **smart-trim to the audio
-   peak** (#12, an A/B via `smart_trim.mode:"ab"` — ~50/50 by slot hash). Permanent
-   **@clipkroniek watermark** + a last-2.5s **FOLLOW CTA** (#1). **loudnorm** (#15),
-   **60fps cap** (#14), slow/crf18 encode.
+   gameplay overlay, per-game `fg_zoom`, #13). **Facecam detection** (`vision.py`,
+   one **Claude Vision** call on a single frame, reuses `ANTHROPIC_API_KEY`): if the
+   streamer's webcam is found, the reel **STACKS** the facecam above the gameplay
+   (both fully visible, not overlaid) instead of cropping it off; none found →
+   standard layout. Gated on `strategy.facecam_stack.enabled` (default true), fully
+   non-fatal. Optional **smart-trim to the audio peak** (#12, an A/B via
+   `smart_trim.mode:"ab"` — ~50/50 by slot hash). Permanent **@clipkroniek
+   watermark** + a last-2.5s **FOLLOW CTA** (#1). **loudnorm** (#15), **60fps cap**
+   (#14), slow/crf18 encode. (Compilations keep the zoom-crop.)
 5. **Cover** (`build_cover`, #3) — a frame at the action peak in the 9:16 look with
    `CLIPKRONIEK #N — GAME` burned into the grid-safe centre. Episode number is on
    the COVER ONLY (never the caption). `cover_url` with a `thumb_offset` fallback.
