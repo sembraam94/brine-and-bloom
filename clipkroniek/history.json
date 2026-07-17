@@ -156,6 +156,59 @@
       "media_id": "18087077768138507",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-17-w4-18",
+      "date_utc": "2026-07-17T16:25:33.455951+00:00",
+      "local_date": "2026-07-17",
+      "weekday": 4,
+      "slot_hour": 18,
+      "game": "gta",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "CallousUninterestedRuffArsonNoSexy-lzd9D150MDC4vCiP",
+      "clip_url": "https://www.twitch.tv/freebanddity/clip/CallousUninterestedRuffArsonNoSexy-lzd9D150MDC4vCiP",
+      "broadcaster": "freebanddity",
+      "creator": "thats_jayinfamous",
+      "language": "en",
+      "clip_views": 424,
+      "clip_velocity": 28.67,
+      "duration_s": 9.3,
+      "trimmed": true,
+      "trim": [
+        0.0,
+        9.28
+      ],
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 5.0,
+        "audio_peak": 3.8
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this reaction 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#4)",
+      "youtube": {
+        "id": "Dp9IGCgOR6Q",
+        "url": "https://youtu.be/Dp9IGCgOR6Q",
+        "privacy": "public"
+      },
+      "facecam": null,
+      "title": "what lmfaoooooo",
+      "hook": "",
+      "hashtags": [
+        "#gtarp",
+        "#gtaclips",
+        "#gta5",
+        "#nopixel",
+        "#gtaroleplay"
+      ],
+      "media_id": "17867074011630366",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
