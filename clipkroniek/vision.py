@@ -65,11 +65,12 @@ def detect_facecam(image_path, model=None):
             '{"facecam": true|false, "corner": "top-left|top-right|bottom-left|'
             'bottom-right|other", "box": {"x":0-1,"y":0-1,"w":0-1,"h":0-1}, '
             '"confidence": 0-1}\n'
-            "box = its bounding box as fractions of the frame (x,y is the top-left). "
-            'If there is none (just gameplay/HUD), return {"facecam": false}. Count a '
-            "real webcam OR a VTuber avatar of the streamer. Do NOT count the game HUD, "
-            "minimap, kill-feed, scoreboard, or in-game characters that are part of the "
-            "gameplay itself."
+            "box = a TIGHT bounding box around ONLY the webcam/avatar rectangle itself "
+            "(x,y is its top-left) — hug its edges; do NOT include the minimap, chat, "
+            "kill-feed, scoreboard, or gameplay next to it. If there is none (just "
+            'gameplay/HUD), return {"facecam": false}. Count a real webcam OR a VTuber '
+            "avatar of the streamer, but NOT the game HUD, minimap, kill-feed, "
+            "scoreboard, or in-game characters that are part of the gameplay itself."
         )
         body = {"model": model, "max_tokens": 200,
                 "messages": [{"role": "user", "content": [

@@ -745,9 +745,11 @@ def _facecam_stack_graph(in_path, box):
     sw = int(pr.get("width") or 1920)
     sh = int(pr.get("height") or 1080)
     x, y, w, h = box
-    pad = 0.025                                  # pad the box so the face isn't clipped
-    x = max(0.0, x - pad); y = max(0.0, y - pad)
-    w = min(1.0 - x, w + 2 * pad); h = min(1.0 - y, h + 2 * pad)
+    # Trim slightly INWARD — vision boxes tend to run a touch loose and drag in HUD;
+    # a small inset keeps the panel to just the webcam/avatar.
+    inset = 0.006
+    x = min(0.9, x + inset); y = min(0.9, y + inset)
+    w = max(0.05, w - 2 * inset); h = max(0.05, h - 2 * inset)
     bx, by = int(x * sw), int(y * sh)
     bw, bh = max(16, int(w * sw)), max(16, int(h * sh))
     bx = min(bx, sw - bw); by = min(by, sh - bh)
@@ -763,7 +765,21 @@ def _facecam_stack_graph(in_path, box):
           f"crop={REEL_W}:{REEL_H},boxblur=28:6,eq=brightness=-0.12[bg]")
     fc = (f"[0:v]crop={bw}:{bh}:{bx}:{by},"
           f"scale={REEL_W}:{gp_h}:force_original_aspect_ratio=decrease[fc]")
-    gp = f"[0:v]scale={REEL_W}:{gp_h}[gp]"
+    # Gameplay panel: crop AWAY from the facecam's side so the cam isn't duplicated in
+    # the bottom panel, then fill the panel (zoom-crop to fit). Split horizontally by
+    # which side the cam sits on (facecams live on the left or right edge).
+    fcx = box[0] + box[2] / 2.0
+    if fcx < 0.5:
+        gx0 = min(0.6, box[0] + box[2])          # keep gameplay to the RIGHT of the cam
+        gx1 = 1.0
+    else:
+        gx0 = 0.0
+        gx1 = max(0.4, box[0])                    # keep gameplay to the LEFT of the cam
+    gcx = int(gx0 * sw)
+    gcw = max(320, int((gx1 - gx0) * sw))
+    gp = (f"[0:v]crop={gcw}:{sh}:{gcx}:0,"
+          f"scale={REEL_W}:{gp_h}:force_original_aspect_ratio=increase,"
+          f"crop={REEL_W}:{gp_h}[gp]")
     return (f"{bg};{fc};{gp};"
             f"[bg][fc]overlay=(W-w)/2:{y_fc}[t1];"
             f"[t1][gp]overlay=(W-w)/2:{y_gp}[base]")
