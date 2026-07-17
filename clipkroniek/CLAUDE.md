@@ -50,7 +50,11 @@ strategy.json -> clippost.py -> Instagram Reel -> Insights -> analyze.py -.
    (both fully visible, not overlaid) instead of cropping it off; none found →
    standard layout. Gated on `strategy.facecam_stack.enabled` (default true), fully
    non-fatal. Optional **smart-trim to the audio peak** (#12, an A/B via
-   `smart_trim.mode:"ab"` — ~50/50 by slot hash). Permanent **@clipkroniek
+   `smart_trim.mode:"ab"` — ~50/50 by slot hash); when **transcription** is on
+   (`transcribe.py`: Groq `whisper-large-v3-turbo` primary + self-hosted
+   `faster-whisper` fallback, needs `GROQ_API_KEY`), the transcript's verbal-reaction
+   moment REFINES the cut — audio peak leads, blended 60/40 when they agree, ignored
+   when they diverge or the clip has no speech. Permanent **@clipkroniek
    watermark** + a last-2.5s **FOLLOW CTA** (#1). **loudnorm** (#15), **60fps cap**
    (#14), slow/crf18 encode. (Compilations keep the zoom-crop.)
 5. **Cover** (`build_cover`, #3) — a frame at the action peak in the 9:16 look with
@@ -96,6 +100,7 @@ followers.json  # auto-created
 | `GH_PAT` | optional; PAT with Secrets:write so `refresh-token.yml` can store the rotated token (fails loudly without it) |
 | `FORMAT_OVERRIDE` | `top3` triggers the weekly compilation (Sunday cron / manual) |
 | `YT_CLIENT_ID` / `YT_CLIENT_SECRET` / `YT_REFRESH_TOKEN` | optional YouTube Shorts cross-post (`youtube.py`). No-op unless all three are set. Minted once via `youtube_auth.py`; see the YouTube section below. |
+| `GROQ_API_KEY` | optional clip transcription (`transcribe.py`) that assists the cut-moment choice. Free (no card). Without it, STT is off (audio-peak only) unless `transcribe.self_host_standalone`. Self-hosted `faster-whisper` is the fallback. |
 | `IG_USER_ID` | optional; derived from token |
 | `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` | Twitch app (client-credentials) for clip discovery |
 | `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` / `R2_PUBLIC_BASE_URL` | host the mp4 (reuse Brine & Bloom's R2) |
