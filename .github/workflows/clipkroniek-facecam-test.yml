@@ -1,0 +1,35 @@
+# Clipkroniek — facecam stack test (manual only).
+# Builds a synthetic clip with a fake facecam and runs the stacked reformat path,
+# to validate the ffmpeg stacked layout without a real clip. Hosts a preview to R2.
+
+name: Clipkroniek — facecam stack test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  facecam-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        working-directory: clipkroniek
+        run: pip install -r requirements.txt
+
+      - name: Build a synthetic stacked reel
+        working-directory: clipkroniek
+        env:
+          R2_ACCOUNT_ID:        ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID:     ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET:            ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_BASE_URL:   ${{ secrets.R2_PUBLIC_BASE_URL }}
+        run: python facecam_test.py
