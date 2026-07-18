@@ -56,7 +56,12 @@ strategy.json -> clippost.py -> Instagram Reel -> Insights -> analyze.py -.
    moment REFINES the cut — audio peak leads, blended 60/40 when they agree, ignored
    when they diverge or the clip has no speech. Permanent **@clipkroniek
    watermark** + a last-2.5s **FOLLOW CTA** (#1). **loudnorm** (#15), **60fps cap**
-   (#14), slow/crf18 encode. (Compilations keep the zoom-crop.)
+   (#14), slow/crf18 encode. (Compilations keep the zoom-crop.) **Animated captions**
+   (`captions.py`): builds an ASS subtitle file from the transcript's word timestamps
+   and burns it via ffmpeg libass (Anton font bundled in `fonts/`, Noto Sans CJK
+   auto-installed for JP/KR) — 1-3 UPPERCASE words, the spoken word pops + highlights
+   yellow in sync; on for all clips (`strategy.captions`). Plus a small **streamer
+   credit** burned top-left (`@twitch-login`).
 5. **Cover** (`build_cover`, #3) — a frame at the action peak in the 9:16 look with
    `CLIPKRONIEK #N — GAME` burned into the grid-safe centre. Episode number is on
    the COVER ONLY (never the caption). `cover_url` with a `thumb_offset` fallback.
