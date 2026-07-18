@@ -553,6 +553,46 @@ def survivorship_diagnostics(control, hot, all_early):
 
 
 # ==========================================================================
+# Early development (answerable NOW — needs no 24h completion)
+# ==========================================================================
+EARLY_PAIRS = [(0.5, 1.5), (0.5, 1.0), (1.0, 1.5)]
+
+
+def _milestone_views(rec, target_h):
+    m = get_milestone(rec, target_h, _early_tol(target_h))
+    return m[0] if m else None
+
+
+def early_development(clips, rng):
+    """Does the EARLY view leaderboard predict the slightly-later one? Uses every clip
+    that has BOTH milestones (pruned clips included — pruning happens AT 1.5h, after both
+    snapshots exist), so this is answerable long before any 24h completion. Two reads:
+    control = clean (mid-ranked, not discovery-selected on early views); all = bigger n
+    but includes hot clips picked FOR high early views (range-restricted) → descriptive.
+    View counts are CUMULATIVE (later >= earlier) so some persistence is mechanical; the
+    rank correlation shows how much the ORDER reshuffles between the two checkpoints."""
+    out = {}
+    for me, ml in EARLY_PAIRS:
+        out[f"{me}->{ml}"] = {}
+        for pop, keep in (("control", True), ("all", False)):
+            pairs = []
+            for r in clips:
+                if keep and not r.get("control"):
+                    continue
+                ve = _milestone_views(r, me); vl = _milestone_views(r, ml)
+                if ve is not None and vl is not None:
+                    pairs.append({"game": r.get("game_id") or r.get("game") or "?",
+                                  "cohort": reconstruct_cohort(r), "x": ve, "y": vl})
+            rho, n = pooled_within_group_spearman(pairs)
+            ci = None
+            if rho is not None and n >= 10:
+                ci, _ = cluster_bootstrap_ci(pairs, rng)
+            out[f"{me}->{ml}"][pop] = {"rho": rho, "n": n, "ci": ci,
+                                       "lift": tercile_precision_lift(pairs)}
+    return out
+
+
+# ==========================================================================
 # Headline decision
 # ==========================================================================
 def decide_earliest_usable(results):
@@ -597,6 +637,49 @@ def _spans(ci, base):
     return ci is None or (ci[0] <= base <= ci[1])
 
 
+def _strength(rho):
+    a = abs(rho)
+    return "strong" if a >= 0.7 else "moderate" if a >= 0.4 else "weak"
+
+
+def _render_early_development(W, ed):
+    if not ed:
+        return
+    head = ed.get("0.5->1.5", {})
+    c = head.get("control", {}); a = head.get("all", {})
+    # headline read: prefer the clean control sample once it has enough pairs, else all
+    prim, plabel = ((c, "control sample") if (c.get("rho") is not None and c.get("n", 0) >= 20)
+                    else (a, "all-clips sample"))
+    W("## Early development — does the 30-min view leaderboard hold at 1.5h?\n")
+    if prim.get("rho") is None:
+        W("Not enough clips have both a 30-min and a 1.5h snapshot yet — check back shortly.\n")
+        return
+    lift = prim.get("lift")
+    liftstr = ""
+    if lift:
+        liftstr = (f" Of clips in the **top third by 30-min views**, "
+                   f"**{lift['precision']:.0%}** were still top third at 1.5h "
+                   f"({lift['lift']:.2f}× chance).")
+    holds = ("largely holds" if prim["rho"] >= 0.7 else
+             "partly holds" if prim["rho"] >= 0.4 else "reshuffles a lot")
+    W(f"**ρ = {prim['rho']:+.2f}** (Spearman, within-game, {plabel}, n={prim['n']}, "
+      f"95% CI {_fmt_ci(prim.get('ci'))}) — a **{_strength(prim['rho'])}** rank correlation, "
+      f"so the 30-min order **{holds}** by 1.5h.{liftstr}")
+    W("\n_View counts are cumulative (1.5h views ≥ 30-min views by definition), so some "
+      "persistence is mechanical — ρ measures how much the RANKING reshuffles between the "
+      "two checkpoints, which is the real question._\n")
+    W("| Interval | control ρ (n) | all-clips ρ (n) |")
+    W("|---|---|---|")
+    for me, ml in EARLY_PAIRS:
+        r = ed.get(f"{me}->{ml}", {})
+        cc = r.get("control", {}); aa = r.get("all", {})
+        W(f"| {me}h→{ml}h | {_fmt(cc.get('rho'))} ({cc.get('n', 0)}) | "
+          f"{_fmt(aa.get('rho'))} ({aa.get('n', 0)}) |")
+    W("\n_control = mid-ranked clips (a clean read); all-clips also includes clips "
+      "discovered FOR their high early views (range-restricted), so treat that column as "
+      "descriptive, not a clean estimate._\n")
+
+
 def render_readout(ctx):
     L = []
     W = L.append
@@ -608,6 +691,8 @@ def render_readout(ctx):
       f"duplicates removed {ctx['dupes']}")
     W(f"- Usable (any clip with a valid 24h outcome): **{ctx['usable']}** · "
       f"control-with-24h: **{ctx['control24']}**\n")
+
+    _render_early_development(W, ctx.get("early_dev"))
 
     if not ctx["gate_passed"]:
         W(f"## ⏳ Not enough data yet\n")
@@ -782,16 +867,17 @@ def analyze(clips, run_utc, stats, dupes):
     control, hot, all_early, excluded, inv = partition(clips)
     usable = len(control) + len(hot)
     control24 = len(control)
+    rng = np.random.default_rng(SEED)
 
     ctx = {"run_utc": run_utc, "inv": inv, "usable": usable, "control24": control24,
            "results": {}, "gate_passed": False, "headline": {"usable": False, "m": None},
-           "stats": stats, "dupes": dupes}
+           "stats": stats, "dupes": dupes,
+           "early_dev": early_development(clips, rng)}
 
     if usable < FLOOR_USABLE or control24 < FLOOR_CONTROL24:
         return ctx
 
     ctx["gate_passed"] = True
-    rng = np.random.default_rng(SEED)
 
     perm_ps = []
     perm_index = {}
