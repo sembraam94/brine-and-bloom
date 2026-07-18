@@ -37,7 +37,7 @@
         "views": 130,
         "ig_reels_avg_watch_time": 5855
       },
-      "measured_at": "2026-07-17T08:31:07.011911+00:00",
+      "measured_at": "2026-07-18T08:12:17.166268+00:00",
       "metrics_24h": {
         "reach": 115,
         "likes": 0,
@@ -90,7 +90,7 @@
           "averageViewPercentage": 0,
           "subscribersGained": 0
         },
-        "measured_at": "2026-07-17T08:31:12.388014+00:00"
+        "measured_at": "2026-07-18T08:12:21.601756+00:00"
       },
       "title": "救急隊の業務手順書に驚くジュリウス・ベッキー",
       "hook": "",
@@ -112,7 +112,7 @@
         "views": 0,
         "ig_reels_avg_watch_time": 18045
       },
-      "measured_at": "2026-07-17T08:31:07.011911+00:00"
+      "measured_at": "2026-07-18T08:12:17.166268+00:00"
     },
     {
       "slot_key": "2026-07-16-w3-23",
@@ -142,7 +142,17 @@
       "youtube": {
         "id": "gyi3s9Vyj8A",
         "url": "https://youtu.be/gyi3s9Vyj8A",
-        "privacy": "public"
+        "privacy": "public",
+        "metrics": {
+          "views": 1,
+          "likes": 0,
+          "comments": 0,
+          "estimatedMinutesWatched": 0,
+          "averageViewDuration": 0,
+          "averageViewPercentage": 0,
+          "subscribersGained": 0
+        },
+        "measured_at": "2026-07-18T08:12:21.601756+00:00"
       },
       "title": "Hanzo aim but make it valorant",
       "hook": "",
@@ -154,8 +164,27 @@
         "#valorantaim"
       ],
       "media_id": "18087077768138507",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 140,
+        "likes": 0,
+        "comments": 1,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 183,
+        "ig_reels_avg_watch_time": 9929
+      },
+      "measured_at": "2026-07-18T08:12:17.166268+00:00",
+      "metrics_24h": {
+        "reach": 140,
+        "likes": 0,
+        "comments": 1,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 183,
+        "ig_reels_avg_watch_time": 9929
+      }
     },
     {
       "slot_key": "2026-07-17-w4-18",
