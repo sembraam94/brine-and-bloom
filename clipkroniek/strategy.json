@@ -324,6 +324,11 @@
     "self_host_model": "large-v3-turbo"
   },
   "brand_watermark": true,
+  "captions": {
+    "enabled": true,
+    "font_size": 80,
+    "pos_y": 1180
+  },
   "facecam_stack": {
     "enabled": true
   },

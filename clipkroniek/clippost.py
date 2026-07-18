@@ -54,6 +54,7 @@ import reddit
 import youtube
 import vision
 import transcribe
+import captions
 
 # =============================================================================
 # CONFIG — brand/knobs live here; timing/cadence/mix live in strategy.json.
@@ -794,12 +795,13 @@ def _decide_trim(strategy, slot_key, raw_path, dur):
     cfg = strategy.get("smart_trim", {}) or {}
     mode = cfg.get("mode", "off")
     meta = {"transcript_used": False, "language": None, "verbal_moment": None}
+    tr = None
     if mode == "off":
-        return None, False, meta
+        return None, False, meta, tr
     on = (int(hashlib.md5(slot_key.encode()).hexdigest(), 16) % 2 == 0
           if mode == "ab" else True)
     if not on:
-        return None, False, meta
+        return None, False, meta, tr
 
     post = float(cfg.get("post_s", 5))
     lead_min = float(cfg.get("lead_in_min", 3))
@@ -841,15 +843,38 @@ def _decide_trim(strategy, slot_key, raw_path, dur):
     meta["lead_in_s"] = round(lead, 2)
 
     if center is None:
-        return None, False, meta
+        return None, False, meta, tr
     win = _window_around(center, dur, lead, post, min_s)  # dynamic lead-in applied here
-    return win, (win is not None), meta
+    return win, (win is not None), meta, tr
 
 
 def _clean_drawtext(s):
     """Sanitize an on-screen hook to a short, ffmpeg-drawtext-safe ASCII string."""
     s = "".join(ch for ch in (s or "") if ch.isalnum() or ch in " !?.-")
     return s.upper().strip()[:26] or "WATCH THIS"
+
+
+def _credit_safe(s):
+    """Sanitize a streamer credit for a small burned-in label — keeps @/_/./- and
+    case (logins are lowercase), drops drawtext-unsafe chars. Empty -> ''."""
+    s = "".join(ch for ch in (s or "") if ch.isalnum() or ch in "@_.- ")
+    return s.strip()[:28]
+
+
+def _streamer_credit(clip):
+    """A small ASCII credit for the streamer: the Twitch login from the clip URL
+    (ASCII, renders fine even when the display name is CJK), else broadcaster/author."""
+    url = clip.get("url") or ""
+    if "twitch.tv/" in url and "/clip/" in url:
+        try:
+            login = url.split("twitch.tv/")[1].split("/")[0].strip()
+            if login:
+                return "@" + login
+        except Exception:
+            pass
+    if clip.get("author"):
+        return "u/" + str(clip.get("author"))
+    return _credit_safe(clip.get("broadcaster_name") or "")
 
 
 def _drawtext(font, text, **opts):
@@ -911,7 +936,8 @@ def _facecam_stack_graph(in_path, box):
 
 
 def reformat_reel(in_path, out_path, strategy, slot, hook_text="", trim=None,
-                  max_s=60, rank_label=None, cta=True, facecam=None):
+                  max_s=60, rank_label=None, cta=True, facecam=None,
+                  credit=None, captions_ass=None):
     """9:16 Reel: blurred fill + a zoom-cropped gameplay overlay (#13, gameplay
     fills more of the frame), optional smart-trim to the action (#12), a permanent
     @clipkroniek watermark + a last-2.5s follow CTA (#1), loudness-normalised audio
@@ -950,6 +976,10 @@ def reformat_reel(in_path, out_path, strategy, slot, hook_text="", trim=None,
     label = "[base]"
 
     draws = []
+    if credit and font:                        # small streamer credit, top-left
+        draws.append(_drawtext(font, _credit_safe(credit), fontcolor="white@0.8",
+                               fontsize=26, borderw=2, bordercolor="black@0.6",
+                               x=28, y=26))
     hook = _clean_drawtext(hook_text) if hook_text else ""
     if hook and font:                          # optional legacy top hook (burn_hook)
         draws.append(_drawtext(font, hook, fontcolor="white", fontsize=68,
@@ -971,8 +1001,11 @@ def reformat_reel(in_path, out_path, strategy, slot, hook_text="", trim=None,
         draws.append(_drawtext(font, _clean_drawtext(rank_label), fontcolor="yellow",
                                fontsize=96, borderw=8, bordercolor="black",
                                x="(w-text_w)/2", y=300))
-    if draws:
-        graph += f";[base]{','.join(draws)}[out]"
+    vfilters = list(draws)
+    if captions_ass:                           # burn animated captions LAST (on top)
+        vfilters.append(f"ass=filename={captions_ass}:fontsdir=fonts")
+    if vfilters:
+        graph += f";[base]{','.join(vfilters)}[out]"
         label = "[out]"
 
     cmd = (["ffmpeg", "-y"] + seek + ["-i", in_path,
@@ -1611,8 +1644,8 @@ def main():
         caption, tags = assemble_caption(ai, clip, slot, strategy)
 
     dur_src = _probe(raw).get("duration_s")
-    # --- smart-trim A/B (#12): prove it lifts views before defaulting on --
-    trim, trimmed, trim_meta = _decide_trim(strategy, key, raw, dur_src)
+    # --- smart-trim (#12): audio peak + transcript-assisted cut moment ---------
+    trim, trimmed, trim_meta, transcript = _decide_trim(strategy, key, raw, dur_src)
     if trim:
         src = ("audio+speech" if trim_meta.get("transcript_used")
                else "action/no-speech" if trim_meta.get("no_speech") else "audio")
@@ -1642,10 +1675,33 @@ def main():
             else:
                 print("  facecam: none detected -> standard layout")
 
+    # --- animated captions (from the transcript we already have) + credit ------
+    reel_max = int(strategy.get("max_duration_s", 60))
+    if trim:
+        reel_dur = min(trim[1] - trim[0], reel_max)
+        cap_offset = trim[0]
+    else:
+        reel_dur = min(float(dur_src), reel_max) if dur_src else reel_max
+        cap_offset = 0.0
+    captions_ass = None
+    cap_cfg = strategy.get("captions", {}) or {}
+    if cap_cfg.get("enabled", True) and transcript and transcript.get("words"):
+        ass_name = "ck_captions.ass"          # written in cwd (clipkroniek); gitignored
+        if captions.build_ass(transcript["words"], os.path.join(os.getcwd(), ass_name),
+                              reel_dur, language=transcript.get("language"),
+                              offset=cap_offset,
+                              font_size=int(cap_cfg.get("font_size", 80)),
+                              pos_y=int(cap_cfg.get("pos_y", 1180))):
+            captions_ass = ass_name
+            print(f"  captions: {len(transcript['words'])} words -> animated "
+                  f"({transcript.get('language')})")
+    credit = _streamer_credit(clip)
+
     reel = os.path.join(tmp, f"ck_reel_{_safe_key(clip['id'])}.mp4")
     print("Reformatting to 9:16 Reel...")
     reformat_reel(raw, reel, strategy, slot, hook_text=hook, trim=trim,
-                  max_s=int(strategy.get("max_duration_s", 60)), facecam=facecam)
+                  max_s=reel_max, facecam=facecam, credit=credit,
+                  captions_ass=captions_ass)
     r_dur = _probe(reel).get("duration_s")
     duration_s = r_dur or (trim[1] - trim[0] if trim else dur_src)
     print(f"Built reel: {reel} ({os.path.getsize(reel) // 1024} KB, {duration_s}s)")
@@ -1735,6 +1791,8 @@ def main():
         "first_comment": first_comment,
         "youtube": yt,
         "facecam": list(facecam) if facecam else None,
+        "captions": bool(captions_ass),
+        "credit": credit,
         "title": clip.get("title"),
         "hook": hook,
         "hashtags": tags,

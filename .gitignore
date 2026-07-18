@@ -7,6 +7,10 @@
 *.mp4
 *.jpg
 
+# Generated caption subtitle files (built per-post in cwd, burned in, never committed)
+*.ass
+*.wav
+
 # Internal work order — do not publish to the public repo
 clipkroniek/PLAN.md
 
