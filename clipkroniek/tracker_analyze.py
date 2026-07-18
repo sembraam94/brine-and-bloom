@@ -113,13 +113,15 @@ def load_active(client, bucket):
     try:
         body = client.get_object(Bucket=bucket, Key=STATE_KEY)["Body"].read().decode("utf-8")
         state = json.loads(body)
-    except Exception:
+    except Exception as e:
+        print(f"[load_active] tracking.json not read ({type(e).__name__}: {e})", file=sys.stderr)
         return []
     recs = []
     for cid, rec in (state.items() if isinstance(state, dict) else []):
         r = dict(rec)
         r.setdefault("clip_id", cid)
         recs.append(r)
+    print(f"[load_active] {len(recs)} in-flight clips loaded from tracking.json", file=sys.stderr)
     return recs
 
 
