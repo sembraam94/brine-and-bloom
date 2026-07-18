@@ -60,6 +60,7 @@ G_LOO = 0.15                  # leave-one-out rho drift tolerance
 
 DATASET_PREFIX = "tracker/dataset-"
 DATE_RE = re.compile(r"tracker/dataset-\d{4}-\d{2}-\d{2}\.jsonl$")
+STATE_KEY = "tracker/tracking.json"     # the tracker's live in-flight state
 READOUT_KEY = "tracker/readout-latest.md"
 SIDECAR_KEY = "tracker/readout-latest.json"
 
