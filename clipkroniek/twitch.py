@@ -120,6 +120,30 @@ def find_game(name, client_id, token, http):
     return None
 
 
+def get_top_games(client_id, token, http, first=20):
+    """The top games right now by viewership (for the platform-wide sweep).
+    Returns [{id, name, ...}]."""
+    r = http("GET", f"{HELIX}/games/top", params={"first": min(int(first), 100)},
+             headers=_headers(client_id, token), timeout=30)
+    r.raise_for_status()
+    return r.json().get("data", [])
+
+
+def get_clips_by_id(ids, client_id, token, http):
+    """Current data (incl. view_count) for specific clip ids, up to 100 per request.
+    Returns {id: clip_dict}."""
+    out = {}
+    ids = [i for i in ids if i]
+    for i in range(0, len(ids), 100):
+        params = [("id", c) for c in ids[i:i + 100]]
+        r = http("GET", f"{HELIX}/clips", params=params,
+                 headers=_headers(client_id, token), timeout=30)
+        r.raise_for_status()
+        for c in r.json().get("data", []):
+            out[c["id"]] = c
+    return out
+
+
 def get_broadcaster_clips(broadcaster_id, started_at, ended_at, client_id, token,
                           http, first=50):
     """A single broadcaster's clips in [started_at, ended_at]. NOTE: returns clips

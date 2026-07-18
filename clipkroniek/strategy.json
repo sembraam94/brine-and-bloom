@@ -344,6 +344,14 @@
   "went_dark_hours": 48,
   "top3_days": 7,
   "top3_seg_s": 10,
+  "tracker": {
+    "enabled": true,
+    "games": ["Grand Theft Auto V", "VALORANT"],
+    "platform_top_games": 20,
+    "per_game_track": 12,
+    "discover_window_min": 45,
+    "milestones_h": [0.5, 1, 4, 8, 12, 24]
+  },
   "youtube": {
     "enabled": true,
     "privacy": "public"

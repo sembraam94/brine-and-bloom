@@ -1,0 +1,44 @@
+# Clipkroniek — clip performance tracker.
+# Every ~30 min: register fresh top Twitch clips (per-game + platform-wide top games)
+# and snapshot each one's view_count at age milestones (0.5/1/4/8/12/24h). Builds a
+# dataset in R2 of how clips develop over their first day. $0 (Twitch + Actions free).
+
+name: Clipkroniek — clip tracker
+
+on:
+  schedule:
+    - cron: "12,42 * * * *"     # every 30 min (offset from the poster's 7,37)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ck-tracker
+  cancel-in-progress: false
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        working-directory: clipkroniek
+        run: pip install -r requirements.txt
+
+      - name: Snapshot top clips
+        working-directory: clipkroniek
+        env:
+          TWITCH_CLIENT_ID:     ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          R2_ACCOUNT_ID:        ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID:     ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET:            ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_BASE_URL:   ${{ secrets.R2_PUBLIC_BASE_URL }}
+        run: python clip_tracker.py
