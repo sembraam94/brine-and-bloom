@@ -310,8 +310,11 @@
   },
   "smart_trim": {
     "mode": "always",
-    "pre_s": 7,
     "post_s": 5,
+    "pre_s": 5,
+    "lead_in_action": 3,
+    "lead_in_min": 3,
+    "lead_in_max": 8,
     "transcript_window_s": 5
   },
   "transcribe": {

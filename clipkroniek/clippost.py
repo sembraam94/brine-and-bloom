@@ -717,10 +717,14 @@ def _window_around(center, dur, pre_s, post_s, min_s):
     return round(start, 2), round(end, 2), round(center, 2)
 
 
-def _suggest_cut_moment(transcript, dur, audio_peak_t):
-    """Claude reads the timestamped transcript and returns the most CLIPPABLE verbal
-    moment (reaction/exclamation/punchline) in seconds, or None. A HELPER only — the
-    audio peak still leads. Handles any language (JP/KR VTubers included)."""
+def _transcript_cut_plan(transcript, dur, audio_peak_t, lead_min, lead_max):
+    """Claude reads the timestamped transcript and returns {moment, lead_in_s}:
+      - moment: the most CLIPPABLE verbal moment (reaction/exclamation/punchline) in
+        seconds, or None if there's no clear verbal highlight.
+      - lead_in_s: how many seconds of context to keep BEFORE the moment — MORE when
+        the talk builds suspense / explains / leads up to what happens, LESS when it's
+        mostly action with little relevant setup (bounded [lead_min, lead_max]).
+    A HELPER only (audio peak still leads); handles any language. None on failure."""
     if not os.environ.get("ANTHROPIC_API_KEY"):
         return None
     segs = transcript.get("segments") or []
@@ -733,19 +737,21 @@ def _suggest_cut_moment(transcript, dur, audio_peak_t):
                 segs.append(cur)
             else:
                 cur["text"] = (cur["text"] + " " + (w.get("word") or "").strip()).strip()
-    if not segs:
-        return None
     lines = "\n".join(f"[{s['start']:.1f}] {s['text']}"
                       for s in segs if s.get("text"))[:2500]
     if not lines.strip():
         return None
     system = (
         "You are given a timestamped transcript of a short gaming clip (any language). "
-        "Find the single most CLIPPABLE verbal moment — a big reaction, exclamation, "
-        "hype line, punchline or funny line — and return the timestamp in seconds where "
-        "it lands. If there is no clear verbal highlight (just calm chatter, callouts, "
-        "or silence), return null. Return JSON ONLY: "
-        '{"moment": <seconds or null>, "why": "<= 8 words"}. '
+        "Return JSON ONLY: "
+        '{"moment": <seconds or null>, "lead_in_s": <number>, "why": "<= 8 words"}.\n'
+        "- moment: the timestamp of the single most CLIPPABLE verbal moment (a big "
+        "reaction, exclamation, hype line or punchline); null if there's no clear "
+        "verbal highlight (calm chatter/callouts/silence).\n"
+        f"- lead_in_s: how many seconds of context to keep BEFORE the moment, between "
+        f"{lead_min:g} and {lead_max:g}. Keep MORE (toward {lead_max:g}) when the talk "
+        "builds suspense, explains, or clearly leads up to what happens. Keep LESS "
+        f"(toward {lead_min:g}) when it's mostly action with little relevant setup.\n"
         f"The clip is {dur:.0f}s; the loudest audio moment is ~{audio_peak_t}s (a hint)."
     )
     try:
@@ -753,7 +759,7 @@ def _suggest_cut_moment(transcript, dur, audio_peak_t):
                     headers={"x-api-key": env("ANTHROPIC_API_KEY"),
                              "anthropic-version": "2023-06-01",
                              "content-type": "application/json"},
-                    json={"model": CLAUDE_MODEL, "max_tokens": 120, "system": system,
+                    json={"model": CLAUDE_MODEL, "max_tokens": 150, "system": system,
                           "messages": [{"role": "user", "content": lines}]},
                     timeout=60)
         resp.raise_for_status()
@@ -764,15 +770,19 @@ def _suggest_cut_moment(transcript, dur, audio_peak_t):
             if text.lstrip().startswith("json"):
                 text = text.lstrip()[4:]
             text = text.strip()
-        m = json.loads(text).get("moment")
-        if m is None:
-            return None
-        m = float(m)
-        if 0 <= m <= dur:
-            return round(m, 2)
+        data = json.loads(text)
+        out = {"moment": None, "lead_in_s": None}
+        m = data.get("moment")
+        if m is not None:
+            m = float(m)
+            out["moment"] = round(m, 2) if 0 <= m <= dur else None
+        li = data.get("lead_in_s")
+        if li is not None:
+            out["lead_in_s"] = max(lead_min, min(lead_max, float(li)))
+        return out
     except Exception as e:
-        print(f"  (cut-moment hint failed: {e})")
-    return None
+        print(f"  (cut-plan hint failed: {e})")
+        return None
 
 
 def _decide_trim(strategy, slot_key, raw_path, dur):
@@ -791,32 +801,48 @@ def _decide_trim(strategy, slot_key, raw_path, dur):
     if not on:
         return None, False, meta
 
-    pre = float(cfg.get("pre_s", 7))
     post = float(cfg.get("post_s", 5))
+    lead_min = float(cfg.get("lead_in_min", 3))
+    lead_max = float(cfg.get("lead_in_max", 8))
+    action_lead = float(cfg.get("lead_in_action", 3))
+    default_lead = float(cfg.get("pre_s", 5))     # used when STT is unavailable
     min_s = float(strategy.get("min_duration_s", 5))
-    peak = _audio_peak_window(raw_path, dur, pre, post, min_s)
+
+    # Pass the SMALLEST lead so short clips still yield a peak; the lead-in is chosen
+    # dynamically below and the window is rebuilt.
+    peak = _audio_peak_window(raw_path, dur, lead_min, post, min_s)
     center = peak[2] if peak else None
     meta["audio_peak"] = center
+    lead = default_lead
 
-    # Transcript-assisted refinement (only if STT is available AND the clip has speech).
     if transcribe.available(strategy):
         tr = transcribe.transcribe(raw_path, strategy)
         if tr and (tr.get("segments") or tr.get("words")):
             meta["language"] = tr.get("language")
-            tv = _suggest_cut_moment(tr, float(dur or 0),
-                                     center if center is not None else float(dur or 0) * 0.5)
-            meta["verbal_moment"] = tv
-            if tv is not None:
-                meta["transcript_used"] = True
-                if center is None:
-                    center = tv                              # no audio peak -> use speech
-                elif abs(tv - center) <= float(cfg.get("transcript_window_s", 5)):
-                    center = round(0.6 * center + 0.4 * tv, 2)  # agree -> refine toward reaction
-                # else: they diverge -> keep the audio peak (it leads)
+            plan = _transcript_cut_plan(
+                tr, float(dur or 0),
+                center if center is not None else float(dur or 0) * 0.5,
+                lead_min, lead_max)
+            if plan:
+                if plan.get("lead_in_s") is not None:
+                    lead = plan["lead_in_s"]              # dynamic lead-in from the talk
+                tv = plan.get("moment")
+                meta["verbal_moment"] = tv
+                if tv is not None:
+                    meta["transcript_used"] = True
+                    if center is None:
+                        center = tv                       # no audio peak -> use speech
+                    elif abs(tv - center) <= float(cfg.get("transcript_window_s", 5)):
+                        center = round(0.6 * center + 0.4 * tv, 2)  # refine toward reaction
+                    # else: they diverge -> keep the audio peak (it leads)
+        else:
+            lead = action_lead                            # no speech -> action clip -> short lead-in
+            meta["no_speech"] = True
+    meta["lead_in_s"] = round(lead, 2)
 
     if center is None:
         return None, False, meta
-    win = _window_around(center, dur, pre, post, min_s)
+    win = _window_around(center, dur, lead, post, min_s)  # dynamic lead-in applied here
     return win, (win is not None), meta
 
 
@@ -1588,9 +1614,10 @@ def main():
     # --- smart-trim A/B (#12): prove it lifts views before defaulting on --
     trim, trimmed, trim_meta = _decide_trim(strategy, key, raw, dur_src)
     if trim:
-        src = ("audio+speech" if trim_meta.get("transcript_used") else "audio")
+        src = ("audio+speech" if trim_meta.get("transcript_used")
+               else "action/no-speech" if trim_meta.get("no_speech") else "audio")
         print(f"  smart-trim ON [{src}]: {trim[0]}-{trim[1]}s (cut @ {trim[2]}s of "
-              f"{dur_src}s)")
+              f"{dur_src}s, lead-in {trim_meta.get('lead_in_s')}s + after {int(strategy.get('smart_trim',{}).get('post_s',5))}s)")
         if trim_meta.get("verbal_moment") is not None:
             print(f"    transcript ({trim_meta.get('language')}): reaction @ "
                   f"{trim_meta.get('verbal_moment')}s vs audio-peak "
