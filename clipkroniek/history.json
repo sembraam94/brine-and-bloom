@@ -238,6 +238,62 @@
       "media_id": "17867074011630366",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-18-w5-20",
+      "date_utc": "2026-07-18T18:36:47.559943+00:00",
+      "local_date": "2026-07-18",
+      "weekday": 5,
+      "slot_hour": 20,
+      "game": "valorant",
+      "region": "asian",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "PunchyTenderAirGuitarKreygasm-I7Yx-kMDSlRPmjt5",
+      "clip_url": "https://www.twitch.tv/cr_arisakaaa/clip/PunchyTenderAirGuitarKreygasm-I7Yx-kMDSlRPmjt5",
+      "broadcaster": "ありさか",
+      "creator": "えびふらいかも",
+      "language": "ja",
+      "clip_views": 396,
+      "clip_velocity": 55.98,
+      "duration_s": 10.0,
+      "trimmed": true,
+      "trim": [
+        8.3,
+        18.3
+      ],
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "Japanese",
+        "verbal_moment": 5.0,
+        "audio_peak": 13.3,
+        "lead_in_s": 5.0
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this play 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#5)",
+      "youtube": {
+        "id": "IZC7vPixjgE",
+        "url": "https://youtu.be/IZC7vPixjgE",
+        "privacy": "public"
+      },
+      "facecam": null,
+      "captions": true,
+      "credit": "ありさか",
+      "title": "強すぎて「おっほ」も出るありさんww",
+      "hook": "",
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#valorantjp"
+      ],
+      "media_id": "17970605675924852",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
