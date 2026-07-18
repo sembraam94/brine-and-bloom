@@ -45,7 +45,7 @@ def main():
     else:
         print("No transcript (no speech / STT unavailable).")
 
-    win, applied, meta = C._decide_trim(strat, "stttest-forced", raw, dur)
+    win, applied, meta, _tr = C._decide_trim(strat, "stttest-forced", raw, dur)
     print("meta: " + json.dumps(meta))
     print(f"RESULT: cut center={win[2] if win else None}s "
           f"(window {win[0]}-{win[1]}s) | audio_peak={meta.get('audio_peak')}s | "
