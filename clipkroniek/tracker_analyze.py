@@ -686,9 +686,11 @@ def _render_early_development(W, ed, active_n=0):
                    f"({lift['lift']:.2f}× chance).")
     holds = ("largely holds" if prim["rho"] >= 0.7 else
              "partly holds" if prim["rho"] >= 0.4 else "reshuffles a lot")
+    chance = " **(but the CI still spans 0 — not yet statistically solid; needs more clips)**" \
+        if _spans(prim.get("ci"), 0.0) else ""
     W(f"**ρ = {prim['rho']:+.2f}** (Spearman, within-game, {plabel}, n={prim['n']}, "
       f"95% CI {_fmt_ci(prim.get('ci'))}) — a **{_strength(prim['rho'])}** rank correlation, "
-      f"so the 30-min order **{holds}** by 1.5h.{liftstr}")
+      f"so the 30-min order **{holds}** by 1.5h.{liftstr}{chance}")
     W("\n_View counts are cumulative (1.5h views ≥ 30-min views by definition), so some "
       "persistence is mechanical — ρ measures how much the RANKING reshuffles between the "
       "two checkpoints, which is the real question._\n")
