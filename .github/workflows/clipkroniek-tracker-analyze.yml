@@ -1,0 +1,44 @@
+# Clipkroniek — tracker dataset analysis.
+# Reads the accumulated clip-trajectory dataset from R2 (tracker/dataset-*.jsonl) and
+# computes whether EARLY view velocity (0.5h/1h) predicts the 24h outcome — per game
+# and platform-wide — using the unbiased control sample as the primary population.
+# Writes a human-readable readout to R2 (tracker/readout-latest.md) and the run log.
+# $0 (Actions on a public repo). Weekly cron + on-demand.
+
+name: Clipkroniek — tracker analysis
+
+on:
+  schedule:
+    - cron: "40 6 * * 1"       # Mondays 06:40 UTC (after a weekend of trajectories bank)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ck-tracker-analyze
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        working-directory: clipkroniek
+        run: pip install -r requirements.txt
+
+      - name: Analyze tracker dataset
+        working-directory: clipkroniek
+        env:
+          R2_ACCOUNT_ID:        ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID:     ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET:            ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_BASE_URL:   ${{ secrets.R2_PUBLIC_BASE_URL }}
+        run: python tracker_analyze.py
