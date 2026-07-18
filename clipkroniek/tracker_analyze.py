@@ -105,6 +105,24 @@ def load_dataset(client, bucket):
     return records, stats
 
 
+def load_active(client, bucket):
+    """The in-flight clips (tracker/tracking.json) — still being tracked, not yet
+    archived. They carry the early snapshots (0.5/1/1.5h) even though they have no 24h
+    completion, so they belong in the EARLY-development analysis (and include the top
+    survivors + control clips that the archived dataset doesn't have yet)."""
+    try:
+        body = client.get_object(Bucket=bucket, Key=STATE_KEY)["Body"].read().decode("utf-8")
+        state = json.loads(body)
+    except Exception:
+        return []
+    recs = []
+    for cid, rec in (state.items() if isinstance(state, dict) else []):
+        r = dict(rec)
+        r.setdefault("clip_id", cid)
+        recs.append(r)
+    return recs
+
+
 def dedupe_clips(records):
     """Keep, per clip_id, the record with the MOST snapshots (tie: latest completed_at)."""
     best = {}
@@ -642,7 +660,7 @@ def _strength(rho):
     return "strong" if a >= 0.7 else "moderate" if a >= 0.4 else "weak"
 
 
-def _render_early_development(W, ed):
+def _render_early_development(W, ed, active_n=0):
     if not ed:
         return
     head = ed.get("0.5->1.5", {})
@@ -651,6 +669,9 @@ def _render_early_development(W, ed):
     prim, plabel = ((c, "control sample") if (c.get("rho") is not None and c.get("n", 0) >= 20)
                     else (a, "all-clips sample"))
     W("## Early development — does the 30-min view leaderboard hold at 1.5h?\n")
+    if active_n:
+        W(f"_Includes {active_n} in-flight clips (still being tracked) alongside the "
+          f"archived ones, so this reflects the full population at these checkpoints._\n")
     if prim.get("rho") is None:
         W("Not enough clips have both a 30-min and a 1.5h snapshot yet — check back shortly.\n")
         return
@@ -692,7 +713,7 @@ def render_readout(ctx):
     W(f"- Usable (any clip with a valid 24h outcome): **{ctx['usable']}** · "
       f"control-with-24h: **{ctx['control24']}**\n")
 
-    _render_early_development(W, ctx.get("early_dev"))
+    _render_early_development(W, ctx.get("early_dev"), ctx.get("active_n", 0))
 
     if not ctx["gate_passed"]:
         W(f"## ⏳ Not enough data yet\n")
@@ -863,16 +884,18 @@ def write_outputs(client, bucket, text, sidecar):
 # ==========================================================================
 # Orchestration
 # ==========================================================================
-def analyze(clips, run_utc, stats, dupes):
-    control, hot, all_early, excluded, inv = partition(clips)
+def analyze(clips, active, run_utc, stats, dupes):
+    control, hot, all_early, excluded, inv = partition(clips)   # 24h analysis: archived only
     usable = len(control) + len(hot)
     control24 = len(control)
     rng = np.random.default_rng(SEED)
 
+    # early development can use in-flight clips too (they have the early snapshots)
+    early_pool, _ = dedupe_clips(clips + active)
     ctx = {"run_utc": run_utc, "inv": inv, "usable": usable, "control24": control24,
            "results": {}, "gate_passed": False, "headline": {"usable": False, "m": None},
-           "stats": stats, "dupes": dupes,
-           "early_dev": early_development(clips, rng)}
+           "stats": stats, "dupes": dupes, "active_n": len(active),
+           "early_dev": early_development(early_pool, rng)}
 
     if usable < FLOOR_USABLE or control24 < FLOOR_CONTROL24:
         return ctx
@@ -946,7 +969,8 @@ def main():
 
     records, stats = load_dataset(client, bucket)
     clips, dupes = dedupe_clips(records)
-    ctx = analyze(clips, run_utc, stats, dupes)
+    active = load_active(client, bucket)
+    ctx = analyze(clips, active, run_utc, stats, dupes)
     text = render_readout(ctx)
     sidecar = build_sidecar(ctx)
     write_outputs(client, bucket, text, sidecar)
