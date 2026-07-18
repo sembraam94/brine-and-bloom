@@ -15,6 +15,11 @@ Design:
     game, ranked by their views AT the prune milestone (a fair same-age comparison), so
     we stop spending snapshots on the dead long tail. Pruned clips are archived with
     their partial trajectory.
+  - EXTENDED follow-up: at the 24h boundary the top `extended.top_n` clips (ranked by
+    their 24h views, platform-wide) keep being snapshotted every `interval_h` up to
+    `until_h` — to see how the durable winners develop past day one. It's a rolling
+    leaderboard: a clip bumped out of the top-N is archived ("extended_bumped"); one
+    followed to the cap is archived ("extended_end"). The rest complete at 24h.
   - DELETED clips (vanish from the API) are marked after N misses (a signal in itself).
   - game_rank (position in the top-games list) is stored so views are comparable across
     a huge game vs a niche one.
@@ -91,6 +96,20 @@ def main():
     keep_top = int(cfg.get("keep_top_per_game", 25))
     del_misses = int(cfg.get("delete_after_misses", 2))
 
+    # Extended follow-up: keep snapshotting the top-N clips (by 24h views) beyond 24h,
+    # every `interval_h`, up to `until_h` — to see how the durable winners develop.
+    ext_cfg = cfg.get("extended", {}) or {}
+    ext_on = bool(ext_cfg.get("enabled", True))
+    ext_top = int(ext_cfg.get("top_n", 10))
+    ext_int = float(ext_cfg.get("interval_h", 2))
+    ext_until = float(ext_cfg.get("until_h", 72))
+    ext_ms = []
+    if ext_on:
+        m = 24.0 + ext_int
+        while m <= ext_until + 1e-9:
+            ext_ms.append(round(m, 3))
+            m += ext_int
+
     tracking = {}
     txt = _r2_get_text(STATE_KEY)          # guarded — raises on a real R2 error (#1)
     if txt:
@@ -153,32 +172,30 @@ def main():
     # --- snapshot every active clip at any passed milestone --------------------
     ids = list(tracking.keys())
     current = twitch.get_clips_by_id(ids, cid, token, http) if ids else {}
-    completed = []                          # (key, reason)
+    done = {}                               # key -> reason
     for k, rec in list(tracking.items()):
         age = _age_h(rec, now)
         if age is None:
-            completed.append((k, "no_created_at"))
+            done[k] = "no_created_at"
             continue
         cur = current.get(k)
         if cur is None:                     # #2: clip not returned -> maybe deleted
             rec["misses"] = rec.get("misses", 0) + 1
             if rec["misses"] >= del_misses:
-                completed.append((k, "deleted"))
+                done[k] = "deleted"
             continue
         rec["misses"] = 0
         vc = int(cur["view_count"]) if cur.get("view_count") is not None else None
+        want = list(milestones) + (ext_ms if rec.get("extended") else [])
         recorded = {s["target_h"] for s in rec["snapshots"]}
-        for m in milestones:
+        for m in want:
             if age >= m and m not in recorded and vc is not None:
                 rec["snapshots"].append({"target_h": m, "age_h": round(age, 3), "views": vc})
-        if age >= milestones[-1]:
-            completed.append((k, "24h"))
 
     # --- prune: keep only the top-N per game past the checkpoint (control exempt) --
-    done_keys = {k for k, _ in completed}
     pool_by_game = {}
     for k, rec in tracking.items():
-        if k in done_keys or rec.get("control"):
+        if k in done or rec.get("control"):
             continue
         age = _age_h(rec, now)
         pv = _snap_views(rec, prune_ms)
@@ -187,16 +204,41 @@ def main():
     for game, lst in pool_by_game.items():
         lst.sort(key=lambda t: t[1], reverse=True)
         for k, _ in lst[keep_top:]:         # everyone below the cut is dropped
-            completed.append((k, "pruned"))
+            done[k] = "pruned"
+
+    # --- 24h boundary: extend the top-N (by 24h views) beyond 24h, else complete --
+    if ext_on:
+        at24 = []
+        for k, rec in tracking.items():
+            if k in done:
+                continue
+            v24 = _snap_views(rec, 24.0)
+            if v24 is None:                 # not at 24h yet -> keep tracking normally
+                continue
+            age = _age_h(rec, now)
+            if age is not None and age >= ext_until:
+                done[k] = "extended_end"    # followed to the cap -> finalise
+                continue
+            at24.append((k, v24))
+        at24.sort(key=lambda t: t[1], reverse=True)
+        keep = set(k for k, _ in at24[:ext_top])
+        for k, _ in at24:
+            if k in keep:
+                tracking[k]["extended"] = True
+            else:
+                done[k] = "extended_bumped" if tracking[k].get("extended") else "24h"
+    else:
+        for k, rec in tracking.items():
+            if k in done:
+                continue
+            age = _age_h(rec, now)
+            if age is not None and age >= milestones[-1]:
+                done[k] = "24h"
 
     # --- archive completed trajectories to the day's dataset -------------------
     n_done = {}
     by_day = {}
-    seen = set()
-    for k, reason in completed:
-        if k in seen:
-            continue
-        seen.add(k)
+    for k, reason in done.items():
         rec = tracking.pop(k, None)
         if not rec:
             continue

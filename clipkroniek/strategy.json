@@ -355,7 +355,13 @@
     "prune_after_h": 1.5,
     "prune_by_milestone": 1.5,
     "keep_top_per_game": 25,
-    "delete_after_misses": 2
+    "delete_after_misses": 2,
+    "extended": {
+      "enabled": true,
+      "top_n": 10,
+      "interval_h": 2,
+      "until_h": 72
+    }
   },
   "youtube": {
     "enabled": true,
