@@ -67,15 +67,17 @@ def _esc(text):
 
 
 def build_ass(words, out_path, reel_dur, *, language=None, offset=0.0,
-              max_words=3, max_chars=18, font_size=80, pos_y=1180):
+              max_words=3, max_chars=18, font_size=80, pos_y=1180, upper=True):
     """words = [{word,start,end}] in SOURCE time. `offset` (the trim start) is
-    subtracted so caption times are reel-relative. Returns out_path, or None if there
-    are no usable words in the reel window."""
+    subtracted so caption times are reel-relative. `upper` renders ALL CAPS (the Anton
+    TikTok look; a no-op for CJK). Returns out_path, or None if no usable words."""
     ws = []
     for w in words or []:
         st = float(w.get("start") or 0.0) - offset
         en = float(w.get("end") or st) - offset
         tok = _esc(w.get("word"))
+        if upper:
+            tok = tok.upper()
         if not tok or en <= 0 or st >= reel_dur:
             continue
         ws.append({"t": tok, "s": max(0.0, st), "e": min(reel_dur, max(en, st + 0.05))})

@@ -1691,7 +1691,8 @@ def main():
                               reel_dur, language=transcript.get("language"),
                               offset=cap_offset,
                               font_size=int(cap_cfg.get("font_size", 80)),
-                              pos_y=int(cap_cfg.get("pos_y", 1180))):
+                              pos_y=int(cap_cfg.get("pos_y", 1180)),
+                              upper=bool(cap_cfg.get("uppercase", True))):
             captions_ass = ass_name
             print(f"  captions: {len(transcript['words'])} words -> animated "
                   f"({transcript.get('language')})")

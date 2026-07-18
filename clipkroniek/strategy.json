@@ -327,7 +327,8 @@
   "captions": {
     "enabled": true,
     "font_size": 80,
-    "pos_y": 1180
+    "pos_y": 1180,
+    "uppercase": true
   },
   "facecam_stack": {
     "enabled": true
