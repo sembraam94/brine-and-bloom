@@ -1,0 +1,46 @@
+# Clipkroniek — captions test (manual only).
+# Renders one clip WITH animated captions + credit and hosts a preview + stills.
+
+name: Clipkroniek — captions test
+
+on:
+  workflow_dispatch:
+    inputs:
+      clip_url:
+        description: "Twitch clip URL"
+        required: true
+      clip_id:
+        description: "clip id (filename)"
+        required: false
+        default: "captest"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        working-directory: clipkroniek
+        run: pip install -r requirements.txt
+
+      - name: Render captions + credit
+        working-directory: clipkroniek
+        env:
+          GROQ_API_KEY:         ${{ secrets.GROQ_API_KEY }}
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
+          R2_ACCOUNT_ID:        ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID:     ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET:            ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_BASE_URL:   ${{ secrets.R2_PUBLIC_BASE_URL }}
+          CLIP_URL:             ${{ github.event.inputs.clip_url }}
+          CLIP_ID:              ${{ github.event.inputs.clip_id }}
+        run: python captions_test.py
