@@ -173,6 +173,20 @@ DRY_RUN=1 python analyze.py --strategize     # show proposed learnings, write no
    waves (e.g. an AC remaster); glance at the weekly `[rotation]` log line before
    trusting a swap.
 
+## Clip performance tracker (`clip_tracker.py`)
+
+A standalone data-collection subsystem (separate from the poster): every ~30 min
+(`clipkroniek-tracker.yml`, cron `12,42 * * * *`) it registers the top FRESH Twitch
+clips — per configured game AND across the current top games (platform-wide sweep,
+`twitch.get_top_games`) — and snapshots each clip's `view_count` at age milestones
+(`strategy.tracker.milestones_h` = 0.5/1/4/8/12/24h, via `twitch.get_clips_by_id`),
+building a dataset of how clips DEVELOP over their first day (does early velocity
+predict virality → a sharper selection signal than one snapshot). State + dataset
+live in **R2**, not git: `tracker/tracking.json` (active clips in their 24h window) +
+`tracker/dataset-<date>.jsonl` (completed trajectories, one clip/line). $0 (Twitch +
+public-repo Actions free). Config: `strategy.tracker`. Dataset URL:
+`<R2_PUBLIC_BASE_URL>/tracker/dataset-<date>.jsonl`.
+
 ## YouTube Shorts cross-post (optional)
 
 `youtube.py` uploads the same reel to the Clipkroniek YouTube channel as a Short,
