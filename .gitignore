@@ -14,6 +14,12 @@
 # Internal work order — do not publish to the public repo
 clipkroniek/PLAN.md
 
+# Local Claude Code state (per-machine, not project code)
+.claude/
+
+# YouTube tutorial transcripts — research artifacts / third-party content, kept local
+clipkroniek/transcripts/
+
 # Python
 __pycache__/
 *.pyc
