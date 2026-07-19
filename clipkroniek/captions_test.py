@@ -32,7 +32,9 @@ def main():
                             "lead_in_action": 3, "lead_in_min": 3, "lead_in_max": 8,
                             "transcript_window_s": 5},
              "transcribe": {"enabled": True},
-             "captions": {"enabled": True, "font_size": 80, "pos_y": 1180}}
+             "captions": {"enabled": True, "font_size": 80, "pos_y": 1180,
+                          "translate": True, "translate_font_size": 52,
+                          "translate_pos_y": 1330}}
     slot = {"game": "valorant", "region": "western"}
 
     trim, trimmed, meta, tr = C._decide_trim(strat, "captest-forced", raw, dur)
@@ -48,10 +50,13 @@ def main():
     ass = None
     if tr and tr.get("words"):
         name = "ck_captions.ass"
+        en_seg = tr.get("en_segments")
         if CAP.build_ass(tr["words"], os.path.join(os.getcwd(), name), reel_dur,
-                         language=tr.get("language"), offset=off):
+                         language=tr.get("language"), offset=off,
+                         translation=en_seg):
             ass = name
-            print(f"captions: {len(tr['words'])} words -> {name}")
+            print(f"captions: {len(tr['words'])} words -> {name}"
+                  + (f" + {len(en_seg)} EN translation lines" if en_seg else " (no translation)"))
     credit = C._streamer_credit({"url": url})
     print(f"credit: {credit}")
 

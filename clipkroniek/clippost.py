@@ -1684,18 +1684,25 @@ def main():
         reel_dur = min(float(dur_src), reel_max) if dur_src else reel_max
         cap_offset = 0.0
     captions_ass = None
+    translated = False
     cap_cfg = strategy.get("captions", {}) or {}
     if cap_cfg.get("enabled", True) and transcript and transcript.get("words"):
         ass_name = "ck_captions.ass"          # written in cwd (clipkroniek); gitignored
+        en_seg = transcript.get("en_segments") if cap_cfg.get("translate", True) else None
         if captions.build_ass(transcript["words"], os.path.join(os.getcwd(), ass_name),
                               reel_dur, language=transcript.get("language"),
                               offset=cap_offset,
                               font_size=int(cap_cfg.get("font_size", 80)),
                               pos_y=int(cap_cfg.get("pos_y", 1180)),
-                              upper=bool(cap_cfg.get("uppercase", True))):
+                              upper=bool(cap_cfg.get("uppercase", True)),
+                              translation=en_seg,
+                              trans_font_size=int(cap_cfg.get("translate_font_size", 52)),
+                              trans_pos_y=int(cap_cfg.get("translate_pos_y", 1330))):
             captions_ass = ass_name
+            translated = bool(en_seg)
             print(f"  captions: {len(transcript['words'])} words -> animated "
-                  f"({transcript.get('language')})")
+                  f"({transcript.get('language')})"
+                  + (f" + {len(en_seg)} EN translation lines" if en_seg else ""))
     credit = _streamer_credit(clip)
 
     reel = os.path.join(tmp, f"ck_reel_{_safe_key(clip['id'])}.mp4")
@@ -1793,6 +1800,7 @@ def main():
         "youtube": yt,
         "facecam": list(facecam) if facecam else None,
         "captions": bool(captions_ass),
+        "translated": translated,
         "credit": credit,
         "title": clip.get("title"),
         "hook": hook,

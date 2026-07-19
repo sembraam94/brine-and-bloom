@@ -66,11 +66,39 @@ def _esc(text):
     return " ".join(t.split()).strip()
 
 
+def _wrap(text, max_chars, max_lines=2):
+    """Greedy word-wrap into <=max_lines lines of ~max_chars, joined with ASS \\N (the
+    script uses WrapStyle 2 = manual breaks only). Overflow past max_lines is dropped
+    with an ellipsis so the translation never covers the frame."""
+    words = _esc(text).split()
+    lines, cur = [], ""
+    for w in words:
+        if cur and len(cur) + 1 + len(w) > max_chars:
+            lines.append(cur)
+            cur = w
+            if len(lines) >= max_lines:
+                break
+        else:
+            cur = (cur + " " + w).strip()
+    if cur and len(lines) < max_lines:
+        lines.append(cur)
+    if len(lines) == max_lines and (len(" ".join(words)) > sum(len(x) for x in lines) + max_lines):
+        lines[-1] = lines[-1].rstrip(".,") + "…"
+    return "\\N".join(lines[:max_lines])
+
+
 def build_ass(words, out_path, reel_dur, *, language=None, offset=0.0,
-              max_words=3, max_chars=18, font_size=80, pos_y=1180, upper=True):
+              max_words=3, max_chars=18, font_size=80, pos_y=1180, upper=True,
+              translation=None, trans_font_size=52, trans_pos_y=1330, trans_max_chars=42):
     """words = [{word,start,end}] in SOURCE time. `offset` (the trim start) is
     subtracted so caption times are reel-relative. `upper` renders ALL CAPS (the Anton
-    TikTok look; a no-op for CJK). Returns out_path, or None if no usable words."""
+    TikTok look; a no-op for CJK).
+
+    `translation` = [{text,start,end}] English segments (from Whisper's translate task)
+    for a non-English clip. When present, a plain readable English line is rendered a bit
+    LOWER (trans_pos_y) so a western viewer can follow the JP/KR speech. It's segment-
+    level (whole phrase for the segment's span), not word-by-word — translated word order
+    doesn't map onto the source word timings. Returns out_path, or None if nothing usable."""
     ws = []
     for w in words or []:
         st = float(w.get("start") or 0.0) - offset
@@ -81,8 +109,6 @@ def build_ass(words, out_path, reel_dur, *, language=None, offset=0.0,
         if not tok or en <= 0 or st >= reel_dur:
             continue
         ws.append({"t": tok, "s": max(0.0, st), "e": min(reel_dur, max(en, st + 0.05))})
-    if not ws:
-        return None
 
     # group into lines of <= max_words / max_chars
     lines, cur, curlen = [], [], 0
@@ -121,6 +147,23 @@ def build_ass(words, out_path, reel_dur, *, language=None, offset=0.0,
                     parts.append(tok)
             events.append((start, end, pre + " ".join(parts)))
 
+    # English translation line (segment-level), rendered lower so it sits UNDER the
+    # original-language animated captions. Plain readable Latin font (DejaVu is on the
+    # runner); no per-word pop — it's a follow-along translation, not a karaoke line.
+    trans_events = []
+    for s in (translation or []):
+        st = float(s.get("start") or 0.0) - offset
+        en = float(s.get("end") or st) - offset
+        txt = _wrap(s.get("text"), trans_max_chars)
+        if not txt or en <= 0 or st >= reel_dur:
+            continue
+        st = max(0.0, st)
+        en = min(reel_dur, max(en, st + 0.4))
+        trans_events.append((st, en, f"{{\\an5\\pos(540,{trans_pos_y})}}{txt}"))
+
+    if not events and not trans_events:
+        return None
+
     header = (
         "[Script Info]\nScriptType: v4.00+\nPlayResX: 1080\nPlayResY: 1920\n"
         "WrapStyle: 2\nScaledBorderAndShadow: yes\nYCbCr Matrix: TV.709\n\n"
@@ -130,13 +173,17 @@ def build_ass(words, out_path, reel_dur, *, language=None, offset=0.0,
         "ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, "
         "MarginR, MarginV, Encoding\n"
         f"Style: Cap,{font},{font_size},&H00FFFFFF,&H0000FFFF,&H00000000,&H64000000,"
-        "-1,0,0,0,100,100,0,0,1,4,1,5,60,60,0,1\n\n"
+        "-1,0,0,0,100,100,0,0,1,4,1,5,60,60,0,1\n"
+        f"Style: Trans,DejaVu Sans,{trans_font_size},&H00FFFFFF,&H000000FF,&H00000000,"
+        "&HA0000000,0,0,0,0,100,100,0,0,1,3,1,5,80,80,0,1\n\n"
         "[Events]\n"
         "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, "
         "Text\n"
     )
     body = "".join(f"Dialogue: 0,{_ts(s)},{_ts(e)},Cap,,0,0,0,,{txt}\n"
                    for s, e, txt in events)
+    body += "".join(f"Dialogue: 0,{_ts(s)},{_ts(e)},Trans,,0,0,0,,{txt}\n"
+                    for s, e, txt in trans_events)
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(header + body)
     return out_path

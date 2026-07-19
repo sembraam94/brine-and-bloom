@@ -21,6 +21,13 @@ import subprocess
 import requests
 
 GROQ_URL = "https://api.groq.com/openai/v1/audio/transcriptions"
+GROQ_TRANSLATE_URL = "https://api.groq.com/openai/v1/audio/translations"
+
+_EN = ("en", "english")
+
+
+def _is_english(lang):
+    return (lang or "").strip().lower() in _EN or (lang or "").strip().lower().startswith("en")
 
 
 def available(strategy):
@@ -77,6 +84,33 @@ def _groq(wav):
         return None
 
 
+def _groq_translate(wav):
+    """Whisper 'translate' task: any language -> ENGLISH, with segment timestamps.
+    Used to render an English subtitle line under the original-language captions so a
+    western audience can follow a JP/KR clip. Segment-level (word order differs from the
+    source, so word-by-word sync would be meaningless). Non-fatal -> None on any failure."""
+    model = os.environ.get("GROQ_TRANSLATE_MODEL", "whisper-large-v3")   # turbo has no translate task
+    try:
+        with open(wav, "rb") as f:
+            r = requests.post(
+                GROQ_TRANSLATE_URL,
+                headers={"Authorization": f"Bearer {os.environ['GROQ_API_KEY']}"},
+                files={"file": (os.path.basename(wav), f, "audio/wav")},
+                data=[("model", model), ("response_format", "verbose_json")],
+                timeout=120)
+        if r.status_code >= 400:
+            print(f"  groq translate failed {r.status_code}: {r.text[:160]}")
+            return None
+        segs = [{"text": (s.get("text") or "").strip(),
+                 "start": float(s.get("start") or 0.0),
+                 "end": float(s.get("end") or 0.0)}
+                for s in (r.json().get("segments") or [])]
+        return [s for s in segs if s["text"]] or None
+    except Exception as e:
+        print(f"  groq translate error: {e}")
+        return None
+
+
 def _faster_whisper(wav, cfg):
     try:
         try:
@@ -112,15 +146,25 @@ def transcribe(video_path, strategy):
     if not wav:
         return None
     try:
+        result = None
         if os.environ.get("GROQ_API_KEY"):
             result = _groq(wav)
             if result is None and cfg.get("self_host", True):
                 print("  (groq failed -> self-hosted whisper fallback)")
                 result = _faster_whisper(wav, cfg)
-            return result
-        if cfg.get("self_host_standalone", False):
-            return _faster_whisper(wav, cfg)
-        return None
+        elif cfg.get("self_host_standalone", False):
+            result = _faster_whisper(wav, cfg)
+
+        # English translation line for non-English clips (needs Groq's translate task).
+        cap = strategy.get("captions", {}) or {}
+        if (result and cap.get("translate", True) and os.environ.get("GROQ_API_KEY")
+                and not _is_english(result.get("language"))):
+            en = _groq_translate(wav)
+            if en:
+                result["en_segments"] = en
+                print(f"  translate: {len(en)} English segments "
+                      f"({result.get('language')} -> en)")
+        return result
     finally:
         try:
             os.remove(wav)
