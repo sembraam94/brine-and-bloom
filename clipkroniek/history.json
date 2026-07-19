@@ -37,7 +37,7 @@
         "views": 130,
         "ig_reels_avg_watch_time": 5855
       },
-      "measured_at": "2026-07-18T08:12:17.166268+00:00",
+      "measured_at": "2026-07-19T07:28:41.649631+00:00",
       "metrics_24h": {
         "reach": 115,
         "likes": 0,
@@ -90,7 +90,7 @@
           "averageViewPercentage": 0,
           "subscribersGained": 0
         },
-        "measured_at": "2026-07-18T08:12:21.601756+00:00"
+        "measured_at": "2026-07-19T07:28:47.884988+00:00"
       },
       "title": "救急隊の業務手順書に驚くジュリウス・ベッキー",
       "hook": "",
@@ -112,7 +112,7 @@
         "views": 0,
         "ig_reels_avg_watch_time": 18045
       },
-      "measured_at": "2026-07-18T08:12:17.166268+00:00"
+      "measured_at": "2026-07-19T07:28:41.649631+00:00"
     },
     {
       "slot_key": "2026-07-16-w3-23",
@@ -144,7 +144,7 @@
         "url": "https://youtu.be/gyi3s9Vyj8A",
         "privacy": "public",
         "metrics": {
-          "views": 1,
+          "views": 6,
           "likes": 0,
           "comments": 0,
           "estimatedMinutesWatched": 0,
@@ -152,7 +152,7 @@
           "averageViewPercentage": 0,
           "subscribersGained": 0
         },
-        "measured_at": "2026-07-18T08:12:21.601756+00:00"
+        "measured_at": "2026-07-19T07:28:47.884988+00:00"
       },
       "title": "Hanzo aim but make it valorant",
       "hook": "",
@@ -174,7 +174,7 @@
         "views": 183,
         "ig_reels_avg_watch_time": 9929
       },
-      "measured_at": "2026-07-18T08:12:17.166268+00:00",
+      "measured_at": "2026-07-19T07:28:41.649631+00:00",
       "metrics_24h": {
         "reach": 140,
         "likes": 0,
@@ -223,7 +223,17 @@
       "youtube": {
         "id": "Dp9IGCgOR6Q",
         "url": "https://youtu.be/Dp9IGCgOR6Q",
-        "privacy": "public"
+        "privacy": "public",
+        "metrics": {
+          "views": 2,
+          "likes": 0,
+          "comments": 0,
+          "estimatedMinutesWatched": 0,
+          "averageViewDuration": 0,
+          "averageViewPercentage": 0,
+          "subscribersGained": 0
+        },
+        "measured_at": "2026-07-19T07:28:47.884988+00:00"
       },
       "facecam": null,
       "title": "what lmfaoooooo",
@@ -236,8 +246,17 @@
         "#gtaroleplay"
       ],
       "media_id": "17867074011630366",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 117,
+        "likes": 0,
+        "comments": 1,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 1,
+        "views": 151,
+        "ig_reels_avg_watch_time": 4525
+      },
+      "measured_at": "2026-07-19T07:28:41.649631+00:00"
     },
     {
       "slot_key": "2026-07-18-w5-20",
