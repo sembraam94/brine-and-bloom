@@ -277,6 +277,40 @@
       "media_id": "17970605675924852",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "top3-2026-07-19",
+      "date_utc": "2026-07-19T12:18:02.651225+00:00",
+      "local_date": "2026-07-19",
+      "weekday": 6,
+      "slot_hour": 14,
+      "game": "gta",
+      "region": "mixed",
+      "source": "compilation",
+      "format": "top3",
+      "clip_id": "top3-2026-07-19",
+      "clip_ids": [
+        "SplendidFamousTrayPeteZaroll-YYbaZbrrhxwmTJsH",
+        "StylishLaconicCoffeeKappa-iXKu3IBOxLXpNgSI",
+        "CallousUninterestedRuffArsonNoSexy-lzd9D150MDC4vCiP"
+      ],
+      "duration_s": 26.68,
+      "cover": "cover_url",
+      "youtube": {
+        "id": "Z8ggJBvkutE",
+        "url": "https://youtu.be/Z8ggJBvkutE",
+        "privacy": "public"
+      },
+      "hashtags": [
+        "#gtarp",
+        "#gta6",
+        "#gtaonline",
+        "#gtaclips",
+        "#nopixel"
+      ],
+      "media_id": "17948170479226418",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
