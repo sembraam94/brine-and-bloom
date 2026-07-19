@@ -576,11 +576,19 @@ def survivorship_diagnostics(control, hot, all_early):
 # ==========================================================================
 # Early development (answerable NOW — needs no 24h completion)
 # ==========================================================================
-EARLY_PAIRS = [(0.5, 1.5), (0.5, 1.0), (1.0, 1.5)]
+# 30-min (and 1h) view rank vs progressively LATER checkpoints the in-flight clips have
+# already reached (4/8/12h) — shows how far out the early order keeps predicting.
+EARLY_PAIRS = [(0.5, 1.5), (0.5, 4.0), (0.5, 8.0), (0.5, 12.0), (1.0, 12.0)]
+
+
+def _ms_tol(target_h):
+    # snapshots are recorded at the first scan where age >= target_h, so age_h sits just
+    # above target_h; a tolerance that scales gently with the milestone is plenty.
+    return max(0.5, 0.1 * target_h)
 
 
 def _milestone_views(rec, target_h):
-    m = get_milestone(rec, target_h, _early_tol(target_h))
+    m = get_milestone(rec, target_h, _ms_tol(target_h))
     return m[0] if m else None
 
 
@@ -694,7 +702,7 @@ def _render_early_development(W, ed, active_n=0):
     W("\n_View counts are cumulative (1.5h views ≥ 30-min views by definition), so some "
       "persistence is mechanical — ρ measures how much the RANKING reshuffles between the "
       "two checkpoints, which is the real question._\n")
-    W("| Interval | control ρ (n) | all-clips ρ (n) |")
+    W("| Early → later | control ρ (n) | all-clips ρ (n) |")
     W("|---|---|---|")
     for me, ml in EARLY_PAIRS:
         r = ed.get(f"{me}->{ml}", {})
@@ -704,6 +712,24 @@ def _render_early_development(W, ed, active_n=0):
     W("\n_control = mid-ranked clips (a clean read); all-clips also includes clips "
       "discovered FOR their high early views (range-restricted), so treat that column as "
       "descriptive, not a clean estimate._\n")
+
+    # how far out does the 30-min order still predict? (longest horizon with a solid read)
+    longest = None
+    for me, ml in EARLY_PAIRS:
+        if me != 0.5:
+            continue
+        r = ed.get(f"{me}->{ml}", {})
+        cc = r.get("control", {}); aa = r.get("all", {})
+        pick = cc if (cc.get("rho") is not None and cc.get("n", 0) >= 20) else aa
+        if pick and pick.get("rho") is not None and pick.get("n", 0) >= 20:
+            longest = (ml, pick, pick is cc)
+    if longest:
+        ml, b, is_ctrl = longest
+        noisy = " — CI still spans 0, so noisy" if _spans(b.get("ci"), 0.0) else ""
+        W(f"\n_Furthest we can currently see: at **{ml}h** out the 30-min order still "
+          f"correlates at **ρ={b['rho']:+.2f}** ({'control' if is_ctrl else 'all-clips'}, "
+          f"n={b['n']}){noisy}. The full 24h outcome isn't available yet — it needs clips "
+          f"that have completed a clean 24h, which are still in flight._\n")
 
 
 def render_readout(ctx):
