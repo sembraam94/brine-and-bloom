@@ -99,9 +99,13 @@ auto-posts (Claude picks among the candidates) so the slot is never missed.
 
 Design guarantees: **fallback-first** — any failure (no R2, Telegram send fails, <2
 previewable clips, can't save pending) posts autonomously right then. **At most one
-pending** (`_pending_exists()` blocks overlap). **Idempotent** — fulfill skips a slot
-already in history; both workflows share the `ck-state` concurrency group so posting/
-history are never concurrent. `force`/`dry`/`discover_only` and the Top-3/longform
+pending** (`_pending_exists()` blocks overlap). **Idempotent** — a **durable R2 marker**
+(`review/posted-<slot>.json`, `_mark_posted` at publish time) plus the history slot_key
+mean a lost git push can't re-propose/double-post; propose and fulfill both check it.
+**Never drops a slot** — fulfill keeps the pending (retries; deadline still forces a post)
+if a post attempt raises, rather than clearing it in a `finally`. Both workflows share the
+`ck-state` concurrency group so posting/history are never concurrent; the `review/` R2
+prefix is swept (6h) so orphan previews / stuck pendings / old markers self-heal. `force`/`dry`/`discover_only` and the Top-3/longform
 overrides bypass review. Code: `propose_review` / `fulfill_reviews` / `_produce_and_post`
 (the shared build+publish body) in clippost.py; `telegram.py` (send + poll); one-time
 `telegram_setup.py` prints your chat_id. Secrets: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.

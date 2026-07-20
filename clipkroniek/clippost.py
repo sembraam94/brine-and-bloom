@@ -1328,7 +1328,7 @@ def delete_from_r2(keys):
         print(f"(R2 cleanup skipped: {e})")
 
 
-def sweep_r2_orphans(prefixes=("previews/", "reels/", "covers/"), older_than_h=6):
+def sweep_r2_orphans(prefixes=("previews/", "reels/", "covers/", "review/"), older_than_h=6):
     """#22c housekeeping: delete stray R2 objects — dry-run previews, or reel/cover
     objects a crashed run failed to clean up. A live post deletes its objects within
     seconds, so anything older than a few hours is an orphan. Best-effort, never
@@ -1628,6 +1628,32 @@ def _pending_exists():
         return False
 
 
+def _posted_key(slot_key):
+    return f"review/posted-{_safe_key(slot_key)}.json"
+
+
+def _mark_posted(slot_key, media_id):
+    """Durable 'this slot was published' flag in R2, written at publish time. Because it
+    does NOT depend on the git push landing history.json, it stops a lost/failed push from
+    letting the next cron re-propose (and thus double-post) the same slot."""
+    try:
+        _r2_client().put_object(
+            Bucket=env("R2_BUCKET"), Key=_posted_key(slot_key),
+            Body=json.dumps({"slot_key": slot_key, "media_id": media_id,
+                             "posted_utc": now_utc().isoformat()}).encode("utf-8"),
+            ContentType="application/json")
+    except Exception as e:
+        print(f"  (posted-marker write skipped: {e})")
+
+
+def _already_posted(slot_key):
+    try:
+        _r2_client().get_object(Bucket=env("R2_BUCKET"), Key=_posted_key(slot_key))
+        return True
+    except Exception:
+        return False                    # 404 (or transient) -> treat as not-yet-posted
+
+
 def propose_review(strategy, history, slot, key, pool):
     """PROPOSE step: send the top candidates to the owner's phone and stash a pending
     decision in R2. The fulfill step posts the owner's pick (or auto-picks after the
@@ -1638,6 +1664,9 @@ def propose_review(strategy, history, slot, key, pool):
     if not r2_configured():
         print("  human-review needs R2 — falling back to autonomous.")
         return _produce_and_post(strategy, history, slot, key, pool)
+    if _already_posted(key):
+        print("  slot already posted (durable marker) — skipping (guards a lost git push).")
+        return
     if _pending_exists():
         print("  a review is already pending — skipping this slot to avoid overlap.")
         return
@@ -1697,10 +1726,15 @@ def fulfill_reviews(strategy, history, dry=False):
         return
     for pkey in _list_pending_keys():
         state = _load_pending(pkey)
-        if not state:
+        if not state:                                 # unreadable/corrupt -> GC so it can't wedge
+            try:
+                _r2_client().delete_object(Bucket=env("R2_BUCKET"), Key=pkey)
+            except Exception:
+                pass
             continue
         slot_key = state.get("key")
-        if any(p.get("slot_key") == slot_key for p in history.get("posts", [])):
+        if _already_posted(slot_key) or any(p.get("slot_key") == slot_key
+                                            for p in history.get("posts", [])):
             _clear_pending(state)                     # already posted -> stale pending
             delete_from_r2(state.get("preview_keys", []))
             continue
@@ -1721,7 +1755,11 @@ def fulfill_reviews(strategy, history, dry=False):
         try:
             _produce_and_post(strategy, history, state["slot"], slot_key, pool,
                               dry=dry, chosen_index=chosen, human_desc=human_desc)
-        finally:
+        except (Exception, SystemExit) as e:          # leave pending -> retry / deadline fallback
+            print(f"  fulfill: post attempt failed ({e}) — keeping pending for retry.")
+            telegram.send_message("⚠️ That post attempt failed; I'll retry shortly.")
+            continue
+        if not dry:                                   # tear down only after a real successful post
             delete_from_r2(state.get("preview_keys", []))
             _clear_pending(state)
 
@@ -1957,6 +1995,9 @@ def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
     media_id, cover_method = post_reel_to_instagram(
         video_url, caption, cover_url=cover_url, thumb_offset=thumb_ms)
     print(f"Published reel — media_id={media_id} (cover={cover_method})")
+    # Durable 'this slot is posted' flag (survives a lost git push) — review mode only.
+    if (strategy.get("human_review", {}) or {}).get("enabled") and r2_configured():
+        _mark_posted(key, media_id)
 
     # --- pinned first comment (#4) --------------------------------------
     first_comment = None
