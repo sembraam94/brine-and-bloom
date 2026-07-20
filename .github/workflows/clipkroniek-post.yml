@@ -105,6 +105,10 @@ jobs:
           # Optional clip transcription (helps pick the cut moment). Groq primary
           # (free); without it, STT stays off unless self_host_standalone is set.
           GROQ_API_KEY:         ${{ secrets.GROQ_API_KEY }}
+          # Optional human-in-the-loop review — no-op unless human_review.enabled AND
+          # both Telegram secrets are set (then the poster PROPOSES instead of posting).
+          TELEGRAM_BOT_TOKEN:   ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:     ${{ secrets.TELEGRAM_CHAT_ID }}
           FORCE:         ${{ github.event.inputs.force == 'yes' && '1' || '' }}
           DRY_RUN:       ${{ github.event.inputs.dry_run == 'yes' && '1' || '' }}
           DISCOVER_ONLY: ${{ github.event.inputs.discover_only == 'yes' && '1' || '' }}

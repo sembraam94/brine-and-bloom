@@ -347,6 +347,11 @@
   "went_dark_hours": 48,
   "top3_days": 7,
   "top3_seg_s": 10,
+  "human_review": {
+    "enabled": true,
+    "respond_window_min": 30,
+    "candidates": 3
+  },
   "tracker": {
     "enabled": true,
     "games": ["Grand Theft Auto V", "VALORANT"],

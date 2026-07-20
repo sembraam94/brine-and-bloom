@@ -1,0 +1,81 @@
+# Clipkroniek — human-review FULFILL step.
+# Every ~10 min during the slot window it checks Telegram for the owner's reply to a
+# pending review and posts their pick (grounding the caption with their one-liner), or
+# auto-posts the top pick once the response window has passed. No-op unless a review is
+# pending. Shares the ck-state concurrency group with the poster so posting/history are
+# never touched concurrently.
+
+name: Clipkroniek — review fulfill
+
+on:
+  schedule:
+    - cron: "*/10 15-23 * * *"    # evening slot window (UTC)
+    - cron: "*/10 0-2 * * *"      # catch late-window replies past midnight
+  workflow_dispatch:
+
+concurrency:
+  group: ck-state
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  fulfill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        working-directory: clipkroniek
+        run: pip install -r requirements.txt
+
+      - name: Cache Whisper model (STT fallback)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: fw-large-v3-turbo-v1
+
+      - name: Fulfill pending review (no-op if none)
+        working-directory: clipkroniek
+        env:
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
+          IG_ACCESS_TOKEN:      ${{ secrets.CK_IG_ACCESS_TOKEN }}
+          TWITCH_CLIENT_ID:     ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          REDDIT_CLIENT_ID:     ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USER_AGENT:    ${{ secrets.REDDIT_USER_AGENT }}
+          R2_ACCOUNT_ID:        ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID:     ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET:            ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_BASE_URL:   ${{ secrets.R2_PUBLIC_BASE_URL }}
+          YT_CLIENT_ID:         ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET:     ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN:     ${{ secrets.YT_REFRESH_TOKEN }}
+          GROQ_API_KEY:         ${{ secrets.GROQ_API_KEY }}
+          TELEGRAM_BOT_TOKEN:   ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:     ${{ secrets.TELEGRAM_CHAT_ID }}
+          REVIEW_FULFILL: "1"
+        run: python clippost.py
+
+      - name: Commit post history
+        run: |
+          git config user.name  "clipkroniek-bot"
+          git config user.email "actions@github.com"
+          git add clipkroniek/
+          if git diff --cached --quiet; then
+            echo "No post this run (no pending / still waiting) — nothing to commit."
+            exit 0
+          fi
+          git commit -m "clipkroniek: review post $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash && git push && exit 0
+            echo "push failed (attempt $i), retrying..."; sleep $((RANDOM % 8 + 2))
+          done
+          echo "Could not push history after retries" >&2; exit 1

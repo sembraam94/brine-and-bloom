@@ -83,6 +83,29 @@ runs the game **rotation**. If the newest post is older than `went_dark_hours` (
 the analyzer **exits non-zero** to alarm the owner (#21). The slot GRID is still
 tuned by a human from the readout, not auto-rewritten.
 
+## Human-in-the-loop review (Telegram, optional)
+
+When `strategy.human_review.enabled` AND both `TELEGRAM_*` secrets are set, the poster
+does NOT post at a due slot — it **PROPOSES**: discovers the pool, hosts the top-N
+(`candidates`, default 3) raw clips on R2, sends them as playable videos to the owner's
+Telegram, and writes a pending record to R2 (`review/pending-<slot_key>.json`: the
+candidate clips, a baseline Telegram update_id, and a `respond_window_min` deadline).
+It does not touch history. A separate **FULFILL** cron (`clipkroniek-review-fulfill.yml`,
+`REVIEW_FULFILL=1`, every ~10 min) reads the owner's reply (`"<1/2/3> <one-line
+description>"`, latest valid pick wins) and builds+posts THAT clip — the one-liner is
+passed to `call_claude(chosen_index=…, human_desc=…)` to ground a SPECIFIC caption (the
+one case where naming the moment is allowed). If the window passes with no reply, it
+auto-posts (Claude picks among the candidates) so the slot is never missed.
+
+Design guarantees: **fallback-first** — any failure (no R2, Telegram send fails, <2
+previewable clips, can't save pending) posts autonomously right then. **At most one
+pending** (`_pending_exists()` blocks overlap). **Idempotent** — fulfill skips a slot
+already in history; both workflows share the `ck-state` concurrency group so posting/
+history are never concurrent. `force`/`dry`/`discover_only` and the Top-3/longform
+overrides bypass review. Code: `propose_review` / `fulfill_reviews` / `_produce_and_post`
+(the shared build+publish body) in clippost.py; `telegram.py` (send + poll); one-time
+`telegram_setup.py` prints your chat_id. Secrets: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
+
 ## Files
 
 ```

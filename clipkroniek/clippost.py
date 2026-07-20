@@ -55,6 +55,7 @@ import youtube
 import vision
 import transcribe
 import captions
+import telegram
 
 # =============================================================================
 # CONFIG — brand/knobs live here; timing/cadence/mix live in strategy.json.
@@ -1070,12 +1071,17 @@ def _game_hashtags(strategy, game):
             or GAME_HASHTAGS.get(game, []))
 
 
-def call_claude(pool, slot, strategy):
+def call_claude(pool, slot, strategy, human_desc=None, chosen_index=None):
     """One call does two jobs: (#7) JUDGE the candidate clips by metadata and pick
     the most viral-looking gameplay clip, and write the post copy — an SEO caption
     (#19a), a generic hook, niche hashtags, and a first-comment question (#4).
     Claude CANNOT watch the videos, so it stays general. Learnings + caption
-    strategy are fed in as advisory (#16)."""
+    strategy are fed in as advisory (#16).
+
+    Human-in-the-loop: when `chosen_index` is set, that clip is ALREADY picked by the
+    owner; Claude just writes the copy for it. If `human_desc` is given (the owner
+    watched it and described the moment), Claude MAY write a SPECIFIC caption about that
+    exact moment — the one case where naming what happens is allowed and encouraged."""
     game_name = strategy["games"][slot["game"]]
     tags_pool = " ".join(_game_hashtags(strategy, slot["game"]))
     cands = [{
@@ -1126,8 +1132,20 @@ def call_claude(pool, slot, strategy):
         if learnings:
             system += f"- learnings: {learnings}\n"
 
-    user = json.dumps({"game": game_name, "region": slot["region"],
-                       "candidates": cands}, ensure_ascii=False)
+    if chosen_index is not None:
+        system += (f"\n\nOVERRIDE: the owner has ALREADY chosen clip index {chosen_index}. "
+                   f"Set pick_index to exactly {chosen_index} and write the copy for THAT clip only.")
+        if human_desc:
+            system += (f" The owner WATCHED it and describes the moment as: \"{human_desc}\". "
+                       "You MAY write a SPECIFIC, punchy caption about that exact moment — this "
+                       "overrides the 'stay general / never name events' rule, but ONLY for facts "
+                       "in the owner's description; do not invent anything beyond it.")
+    payload = {"game": game_name, "region": slot["region"], "candidates": cands}
+    if chosen_index is not None:
+        payload["chosen_index"] = chosen_index
+        if human_desc:
+            payload["owner_description"] = human_desc
+    user = json.dumps(payload, ensure_ascii=False)
     body = {"model": CLAUDE_MODEL, "max_tokens": 700, "system": system,
             "messages": [{"role": "user",
                           "content": "Pick the best clip and write the JSON:\n" + user}]}
@@ -1557,6 +1575,158 @@ def post_top3(strategy, history, dry=False):
 
 
 # =============================================================================
+# Human-in-the-loop review (Telegram) — propose top-3 -> owner picks -> fulfill
+# =============================================================================
+PENDING_PREFIX = "review/pending-"
+
+
+def _pending_key(slot_key):
+    return f"{PENDING_PREFIX}{_safe_key(slot_key)}.json"
+
+
+def _save_pending(state):
+    _r2_client().put_object(Bucket=env("R2_BUCKET"), Key=_pending_key(state["key"]),
+                            Body=json.dumps(state, ensure_ascii=False).encode("utf-8"),
+                            ContentType="application/json")
+
+
+def _load_pending(key):
+    try:
+        b = _r2_client().get_object(Bucket=env("R2_BUCKET"), Key=key)["Body"].read()
+        return json.loads(b.decode("utf-8"))
+    except Exception:
+        return None
+
+
+def _clear_pending(state):
+    try:
+        _r2_client().delete_object(Bucket=env("R2_BUCKET"), Key=_pending_key(state["key"]))
+    except Exception as e:
+        print(f"  (pending clear skipped: {e})")
+
+
+def _list_pending_keys():
+    keys, token = [], None
+    client, bucket = _r2_client(), env("R2_BUCKET")
+    while True:
+        kw = {"Bucket": bucket, "Prefix": PENDING_PREFIX, "MaxKeys": 1000}
+        if token:
+            kw["ContinuationToken"] = token
+        resp = client.list_objects_v2(**kw)
+        keys += [o["Key"] for o in resp.get("Contents", []) if o["Key"].endswith(".json")]
+        if resp.get("IsTruncated"):
+            token = resp.get("NextContinuationToken")
+        else:
+            break
+    return keys
+
+
+def _pending_exists():
+    try:
+        return bool(_list_pending_keys())
+    except Exception:
+        return False
+
+
+def propose_review(strategy, history, slot, key, pool):
+    """PROPOSE step: send the top candidates to the owner's phone and stash a pending
+    decision in R2. The fulfill step posts the owner's pick (or auto-picks after the
+    window). ANY failure falls back to an autonomous post now, so a slot is never lost."""
+    hr = strategy.get("human_review", {}) or {}
+    ncand = max(2, int(hr.get("candidates", 3)))
+    window = int(hr.get("respond_window_min", 30))
+    if not r2_configured():
+        print("  human-review needs R2 — falling back to autonomous.")
+        return _produce_and_post(strategy, history, slot, key, pool)
+    if _pending_exists():
+        print("  a review is already pending — skipping this slot to avoid overlap.")
+        return
+
+    tmp = tempfile.gettempdir()
+    game_label = strategy["games"].get(slot["game"], slot["game"])
+    cands, previews, preview_keys = [], [], []
+    for c in pool:
+        if len(cands) >= ncand:
+            break
+        rawp = os.path.join(tmp, f"ck_rev_{_safe_key(c['id'])}.mp4")
+        try:
+            download_clip(c, rawp)
+            pkey = f"review/{_safe_key(c['id'])}.mp4"
+            url = host_file_r2(rawp, pkey, "video/mp4")
+        except Exception as e:
+            print(f"  review preview failed ({c.get('id')}): "
+                  f"{(str(e).splitlines() or [''])[-1][:100]}")
+            continue
+        cands.append(c)
+        preview_keys.append(pkey)
+        previews.append({"n": len(cands), "url": url, "title": c.get("title"),
+                         "broadcaster": c.get("broadcaster_name"), "game": game_label,
+                         "views": c.get("view_count")})
+
+    if len(cands) < 2:
+        print("  <2 previewable candidates — falling back to autonomous post.")
+        delete_from_r2(preview_keys)
+        return _produce_and_post(strategy, history, slot, key, pool)
+
+    baseline = telegram.send_candidates(previews, f"{game_label} {slot.get('region', '')}".strip())
+    if baseline is None:
+        print("  Telegram send failed — falling back to autonomous post.")
+        delete_from_r2(preview_keys)
+        return _produce_and_post(strategy, history, slot, key, pool)
+
+    state = {"key": key, "slot": slot, "pool": cands, "preview_keys": preview_keys,
+             "baseline_update_id": baseline,
+             "deadline_utc": (now_utc() + datetime.timedelta(minutes=window)).isoformat(),
+             "created_utc": now_utc().isoformat()}
+    try:
+        _save_pending(state)
+    except Exception as e:
+        print(f"  could not save pending ({e}) — falling back to autonomous post.")
+        delete_from_r2(preview_keys)
+        return _produce_and_post(strategy, history, slot, key, pool)
+    print(f"  proposed {len(cands)} clips to Telegram; {window}m window "
+          f"(deadline {state['deadline_utc']}).")
+
+
+def fulfill_reviews(strategy, history, dry=False):
+    """FULFILL step (own cron): read the owner's Telegram reply and post their pick, or
+    auto-post once the window has passed. Idempotent per slot_key; at most one pending."""
+    if not (strategy.get("human_review", {}) or {}).get("enabled"):
+        return
+    if not (r2_configured() and telegram.configured()):
+        return
+    for pkey in _list_pending_keys():
+        state = _load_pending(pkey)
+        if not state:
+            continue
+        slot_key = state.get("key")
+        if any(p.get("slot_key") == slot_key for p in history.get("posts", [])):
+            _clear_pending(state)                     # already posted -> stale pending
+            delete_from_r2(state.get("preview_keys", []))
+            continue
+        pool = state.get("pool") or []
+        choice, desc, last = telegram.poll_decision(state.get("baseline_update_id", 0), len(pool))
+        deadline = _parse_ts(state.get("deadline_utc"))
+        chosen = human_desc = None
+        if choice is not None:
+            chosen, human_desc = choice - 1, desc
+            telegram.send_message(f"✅ Posting #{choice}" + (f" — {desc}" if desc else "") + " now …")
+        elif deadline and now_utc() >= deadline:
+            telegram.send_message("⏰ No reply in the window — auto-posting my pick.")
+            # chosen stays None -> Claude picks among the candidates (autonomous)
+        else:
+            state["baseline_update_id"] = last        # remember progress, keep waiting
+            _save_pending(state)
+            continue
+        try:
+            _produce_and_post(strategy, history, state["slot"], slot_key, pool,
+                              dry=dry, chosen_index=chosen, human_desc=human_desc)
+        finally:
+            delete_from_r2(state.get("preview_keys", []))
+            _clear_pending(state)
+
+
+# =============================================================================
 # Orchestration
 # =============================================================================
 def main():
@@ -1565,6 +1735,10 @@ def main():
     dry = os.environ.get("DRY_RUN") == "1"
     discover_only = os.environ.get("DISCOVER_ONLY") == "1"
     force = os.environ.get("FORCE") == "1"
+
+    if os.environ.get("REVIEW_FULFILL") == "1":
+        fulfill_reviews(strategy, history, dry=dry)
+        return
 
     if not (dry or discover_only):
         sweep_r2_orphans()          # #22c: clean up any crash-orphaned R2 objects
@@ -1606,9 +1780,22 @@ def main():
         print("No fresh qualifying clip for this slot — skipping (no post).")
         return
 
+    hr = strategy.get("human_review", {}) or {}
+    if hr.get("enabled") and telegram.configured() and not (force or dry or discover_only):
+        propose_review(strategy, history, slot, key, pool)
+        return
+    _produce_and_post(strategy, history, slot, key, pool, dry=dry,
+                      discover_only=discover_only)
+
+
+def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
+                      discover_only=False, human_desc=None, chosen_index=None):
+    """Build and publish ONE post from `pool`. Normally Claude picks; in the human-in-
+    the-loop path `chosen_index` (the owner's pick) is forced and `human_desc` (what the
+    owner said the clip is about) grounds a sharper caption."""
     # #7: let Claude judge the metadata and pick; fall back to the top-ranked clip.
-    ai = call_claude(pool, slot, strategy)
-    pick = ai.get("pick_index", 0)
+    ai = call_claude(pool, slot, strategy, human_desc=human_desc, chosen_index=chosen_index)
+    pick = chosen_index if chosen_index is not None else ai.get("pick_index", 0)
     try:
         pick = int(pick)
         if not (0 <= pick < len(pool)):
@@ -1648,6 +1835,8 @@ def main():
     if raw is None:
         sys.exit("All candidate downloads failed for this slot.")
     if clip is not ordered[0]:                    # fallback changed the clip -> recaption
+        if human_desc or chosen_index is not None:  # owner's description no longer applies
+            ai = call_claude([clip], slot, strategy)
         caption, tags = assemble_caption(ai, clip, slot, strategy)
 
     dur_src = _probe(raw).get("duration_s")
