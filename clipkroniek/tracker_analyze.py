@@ -910,22 +910,21 @@ def _render_trajectory(W, tr):
 def _render_top_clip(W, tops):
     if not tops:
         return
-    t = tops[0]
-    title = (t.get("title") or "").strip() or "(no title)"
-    W("## The single biggest clip in the pool\n")
-    tail = (f", then kept climbing to **{t['peak']:,}** by {t['peak_h']:g}h"
-            if t["peak"] > int(t["v24"] * 1.02) else "")
-    W(f"**{title}** — {t.get('broadcaster') or '?'} · {t.get('game') or '?'} · "
-      f"**{t['v24']:,} views at 24h**{tail}. Its real view build:\n")
-    W("| clip age | views | % of 24h |")
-    W("|---|---|---|")
-    for s in t["traj"]:
-        pct = f"{s['views'] / t['v24']:.0%}" if t["v24"] else "–"
-        W(f"| {s['h']:g}h | {s['views']:,} | {pct} |")
-    if len(tops) > 1:
-        W("\n_Runners-up (24h views): " + "; ".join(
-            f"{((x.get('title') or '').strip()[:32] or x.get('broadcaster') or '?')} — {x['v24']:,}"
-            for x in tops[1:]) + "._")
+    CORE = [0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 8.0, 12.0, 24.0]
+    W("## The biggest clips in the pool — their real view builds\n")
+    for i, t in enumerate(tops, 1):
+        title = (t.get("title") or "").strip() or "(no title)"
+        peak = (f" → {t['peak']:,} by {t['peak_h']:g}h"
+                if t["peak"] > int(t["v24"] * 1.02) else "")
+        W(f"{i}. **{title}** — {t.get('broadcaster') or '?'} · {t.get('game') or '?'} · "
+          f"**{t['v24']:,}** views at 24h{peak}")
+    W("")
+    lut = [{s["h"]: s["views"] for s in t["traj"]} for t in tops]
+    W("| clip age | " + " | ".join(f"#{i}" for i in range(1, len(tops) + 1)) + " |")
+    W("|" + "---|" * (len(tops) + 1))
+    for m in CORE:
+        cells = [f"{d[m]:,}" if m in d else "–" for d in lut]
+        W(f"| {m:g}h | " + " | ".join(cells) + " |")
     W("")
 
 
@@ -1128,7 +1127,7 @@ def analyze(clips, active, run_utc, stats, dupes):
            "early_dev": early_development(early_pool, rng),
            "trajectory": trajectory_shape(early_pool,
                                           top_frac=float(os.environ.get("TRAJ_TOP_PCT") or 25) / 100.0),
-           "top_clip": top_clip_trajectory(early_pool)}
+           "top_clip": top_clip_trajectory(early_pool, k=5)}
 
     if usable < FLOOR_USABLE or control24 < FLOOR_CONTROL24:
         return ctx
