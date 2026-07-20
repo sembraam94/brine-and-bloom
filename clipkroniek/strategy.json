@@ -354,7 +354,7 @@
     "per_game_track": 12,
     "control_per_game": 5,
     "discover_window_min": 45,
-    "milestones_h": [0.5, 1, 1.5, 2, 3, 4, 8, 12, 24],
+    "milestones_h": [0.5, 1, 1.5, 2, 3, 4, 8, 12, 14, 16, 18, 20, 22, 24],
     "prune_after_h": 1.5,
     "prune_by_milestone": 1.5,
     "keep_top_per_game": 25,

@@ -179,7 +179,7 @@ A standalone data-collection subsystem (separate from the poster): every ~30 min
 (`clipkroniek-tracker.yml`, cron `12,42 * * * *`) it registers the top FRESH Twitch
 clips — per configured game AND across the current top games (platform-wide sweep,
 `twitch.get_top_games`) — and snapshots each clip's `view_count` at age milestones
-(`strategy.tracker.milestones_h` = 0.5/1/4/8/12/24h, via `twitch.get_clips_by_id`),
+(`strategy.tracker.milestones_h` = 0.5/1/1.5/2/3/4/8/12/14/16/18/20/22/24h, via `twitch.get_clips_by_id`),
 building a dataset of how clips DEVELOP over their first day (does early velocity
 predict virality → a sharper selection signal than one snapshot). State + dataset
 live in **R2**, not git: `tracker/tracking.json` (active clips in their 24h window) +

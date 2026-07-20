@@ -624,7 +624,7 @@ def early_development(clips, rng):
 # ==========================================================================
 # Trajectory shape — what does a 24h winner's view build actually look like?
 # ==========================================================================
-TRAJ_MS = [0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 8.0, 12.0, 24.0]
+TRAJ_MS = [0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 8.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0]
 
 
 def _pct(vals, p):
@@ -910,7 +910,7 @@ def _render_trajectory(W, tr):
 def _render_top_clip(W, tops):
     if not tops:
         return
-    CORE = [0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 8.0, 12.0, 24.0]
+    CORE = [0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 8.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0]
     W("## The biggest clips in the pool — their real view builds\n")
     for i, t in enumerate(tops, 1):
         title = (t.get("title") or "").strip() or "(no title)"

@@ -8,7 +8,8 @@ milestones, building a dataset of how a clip's views DEVELOP over its first day 
 test whether early velocity predicts virality → a sharper selection signal).
 
 Design:
-  - Denser EARLY milestones (0.5/1/1.5/2/3h) where virality is decided, then 4/8/12/24h.
+  - Denser EARLY milestones (0.5/1/1.5/2/3h) where virality is decided, then 4/8/12h, then
+    a denser LATE leg (14/16/18/20/22/24h) to resolve the big 12->24h build the top clips show.
   - CONTROL sample: a small standing set of mid-ranked clips per game, tracked full 24h
     and EXEMPT from pruning, so we can compare "hot start" vs "mid start" (a baseline).
   - PRUNE after `prune_after_h` (1.5h): keep only the top `keep_top_per_game` clips per
@@ -87,7 +88,8 @@ def main():
     token = twitch.get_app_token(cid, secret, http)
     now = now_utc()
 
-    milestones = sorted(float(m) for m in cfg.get("milestones_h", [0.5, 1, 1.5, 2, 3, 4, 8, 12, 24]))
+    milestones = sorted(float(m) for m in cfg.get(
+        "milestones_h", [0.5, 1, 1.5, 2, 3, 4, 8, 12, 14, 16, 18, 20, 22, 24]))
     per_game = int(cfg.get("per_game_track", 12))
     control_target = int(cfg.get("control_per_game", 5))
     win_min = int(cfg.get("discover_window_min", 45))

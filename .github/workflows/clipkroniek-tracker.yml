@@ -1,6 +1,7 @@
 # Clipkroniek — clip performance tracker.
 # Every ~30 min: register fresh top Twitch clips (per-game + platform-wide top games)
-# and snapshot each one's view_count at age milestones (0.5/1/4/8/12/24h). Builds a
+# and snapshot each one's view_count at age milestones (0.5..4h early, 8/12h, then a
+# denser 14/16/18/20/22/24h late leg). Builds a
 # dataset in R2 of how clips develop over their first day. $0 (Twitch + Actions free).
 
 name: Clipkroniek — clip tracker
