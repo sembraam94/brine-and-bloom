@@ -622,6 +622,105 @@ def early_development(clips, rng):
 
 
 # ==========================================================================
+# Trajectory shape — what does a 24h winner's view build actually look like?
+# ==========================================================================
+TRAJ_MS = [0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 8.0, 12.0, 24.0]
+
+
+def _pct(vals, p):
+    return float(np.percentile(vals, p)) if len(vals) else None
+
+
+def trajectory_shape(clips, min_ms=5, min_winners=15):
+    """Do the 24h winners share a common BUILD, or is every clip different — and is there
+    a takeoff point? For each game we take the top quartile by 24h views (the actual
+    winners), normalize each clip's cumulative views to its OWN 24h total (fraction of
+    final reached at each checkpoint = shape, not size), then report the median build +
+    spread, where growth peaks, and how winners' shape differs from everyone else's.
+    Population = any clip with a valid 24h snapshot (in-flight extended clips included)."""
+    by_game = defaultdict(list)
+    for r in clips:
+        y24 = _milestone_views(r, 24.0)
+        if not y24 or y24 <= 0:
+            continue
+        frac = {}
+        for m in TRAJ_MS:
+            v = _milestone_views(r, m)
+            if v is not None and v >= 0:
+                frac[m] = min(1.0, v / y24)          # cumulative -> capped at 1.0
+        if len(frac) >= min_ms and 24.0 in frac:
+            by_game[r.get("game_id") or r.get("game") or "?"].append({"y24": y24, "frac": frac})
+
+    winners, others = [], []
+    for game, lst in by_game.items():
+        if len(lst) < 4:
+            continue
+        cut = sorted(l["y24"] for l in lst)[int(len(lst) * 0.75)]
+        for l in lst:
+            (winners if l["y24"] >= cut else others).append(l)
+    if len(winners) < min_winners:
+        return None
+
+    build = {}
+    for m in TRAJ_MS:
+        vals = [w["frac"][m] for w in winners if m in w["frac"]]
+        if len(vals) >= min_winners:
+            build[m] = {"median": _pct(vals, 50), "p25": _pct(vals, 25),
+                        "p75": _pct(vals, 75), "n": len(vals)}
+
+    # growth-rate profile: normalized views/hour per interval (median across winners)
+    prof = []
+    for a, b in zip(TRAJ_MS[:-1], TRAJ_MS[1:]):
+        rates = [(w["frac"][b] - w["frac"][a]) / (b - a)
+                 for w in winners if a in w["frac"] and b in w["frac"]]
+        if len(rates) >= min_winners:
+            prof.append({"lo": a, "hi": b, "rate": _pct(rates, 50), "n": len(rates)})
+    peak = max(prof, key=lambda p: p["rate"]) if prof else None
+
+    # how often a winner's OWN peak-growth interval == the global peak interval
+    peak_share = None
+    if peak:
+        hits = tot = 0
+        for w in winners:
+            ints = [(a, b, (w["frac"][b] - w["frac"][a]) / (b - a))
+                    for a, b in zip(TRAJ_MS[:-1], TRAJ_MS[1:]) if a in w["frac"] and b in w["frac"]]
+            if ints:
+                tot += 1
+                pk = max(ints, key=lambda t: t[2])
+                if pk[0] == peak["lo"] and pk[1] == peak["hi"]:
+                    hits += 1
+        peak_share = hits / tot if tot else None
+
+    # median hour at which winners bank 50/80/90% of their final views (interpolated)
+    def hour_to(target):
+        hrs = []
+        for w in winners:
+            prev_m = prev_f = 0.0
+            for m in TRAJ_MS:
+                if m in w["frac"]:
+                    f = w["frac"][m]
+                    if f >= target:
+                        hrs.append(prev_m + (target - prev_f) * (m - prev_m) / (f - prev_f)
+                                   if f > prev_f else m)
+                        break
+                    prev_m, prev_f = m, f
+        return _pct(hrs, 50) if len(hrs) >= min_winners else None
+    banked = {int(t * 100): hour_to(t) for t in (0.5, 0.8, 0.9)}
+
+    def med_frac(pop, m):
+        vals = [x["frac"][m] for x in pop if m in x["frac"]]
+        return _pct(vals, 50) if len(vals) >= 10 else None
+    compare = {"win_1h": med_frac(winners, 1.0), "other_1h": med_frac(others, 1.0),
+               "win_4h": med_frac(winners, 4.0), "other_4h": med_frac(others, 4.0)}
+
+    widths = [build[m]["p75"] - build[m]["p25"] for m in build if m <= 4.0]
+    return {"build": build, "profile": prof, "peak": peak, "peak_share": peak_share,
+            "banked": banked, "compare": compare,
+            "consistency": _pct(widths, 50) if widths else None,
+            "n_winners": len(winners), "n_others": len(others)}
+
+
+# ==========================================================================
 # Headline decision
 # ==========================================================================
 def decide_earliest_usable(results):
@@ -735,6 +834,43 @@ def _render_early_development(W, ed, active_n=0):
           f"below._\n")
 
 
+def _render_trajectory(W, tr):
+    if not tr:
+        return
+    W("## Do the 24h winners share the same build?\n")
+    W(f"_Top-quartile-by-24h clips within each game ({tr['n_winners']} winners), each clip's "
+      f"views normalized to its OWN 24h total — so this is the SHAPE of the build, not size._\n")
+    W("| By | % of 24h views banked (median) | spread (IQR across winners) |")
+    W("|---|---|---|")
+    for m in TRAJ_MS:
+        b = tr["build"].get(m)
+        if b:
+            W(f"| {m}h | {b['median']:.0%} | {b['p25']:.0%}–{b['p75']:.0%} |")
+
+    if tr["peak"]:
+        pk = tr["peak"]; ps = tr["peak_share"]
+        W(f"\n**Hottest window:** the fastest accumulation is **{pk['lo']}–{pk['hi']}h** "
+          f"(median {pk['rate']:.0%} of the 24h total banked per hour)"
+          + (f"; **{ps:.0%}** of winners peak in that same window." if ps is not None else "."))
+    parts = [f"**{k}%** by ~{v:.1f}h" for k, v in tr["banked"].items() if v is not None]
+    if parts:
+        W(f"\n**Winners bank** " + ", ".join(parts) + " of their final views (median).")
+    if tr["consistency"] is not None:
+        cons = tr["consistency"]
+        verdict = ("**tight** — winners follow a very similar build" if cons <= 0.20 else
+                   "**moderate** — a common build with real clip-to-clip variation" if cons <= 0.40 else
+                   "**wide** — the build differs a lot from clip to clip")
+        W(f"\n**Consistency:** the early spread (IQR) is ≈{cons:.0%} of final views — {verdict}.")
+    c = tr["compare"]
+    if c["win_1h"] is not None and c["other_1h"] is not None:
+        d = c["win_1h"] - c["other_1h"]
+        rel = ("**more front-loaded** than the rest" if d > 0.03 else
+               "a **slower burn** than the rest" if d < -0.03 else "a **similar shape** to the rest")
+        W(f"\n**Winners vs the rest:** by 1h a winner has banked {c['win_1h']:.0%} of its 24h "
+          f"views vs {c['other_1h']:.0%} for non-winners — winners are {rel}.")
+    W("")
+
+
 def render_readout(ctx):
     L = []
     W = L.append
@@ -748,6 +884,7 @@ def render_readout(ctx):
       f"control-with-24h: **{ctx['control24']}**\n")
 
     _render_early_development(W, ctx.get("early_dev"), ctx.get("active_n", 0))
+    _render_trajectory(W, ctx.get("trajectory"))
 
     if not ctx["gate_passed"]:
         W(f"## ⏳ Not enough data yet\n")
@@ -929,7 +1066,8 @@ def analyze(clips, active, run_utc, stats, dupes):
     ctx = {"run_utc": run_utc, "inv": inv, "usable": usable, "control24": control24,
            "results": {}, "gate_passed": False, "headline": {"usable": False, "m": None},
            "stats": stats, "dupes": dupes, "active_n": len(active),
-           "early_dev": early_development(early_pool, rng)}
+           "early_dev": early_development(early_pool, rng),
+           "trajectory": trajectory_shape(early_pool)}
 
     if usable < FLOOR_USABLE or control24 < FLOOR_CONTROL24:
         return ctx
