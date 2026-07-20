@@ -1517,6 +1517,12 @@ def post_top3(strategy, history, dry=False):
         video_url, caption, cover_url=cover_url, thumb_offset=500)
     print(f"Published Top-3 reel — media_id={media_id} (cover={cover_method})")
 
+    # --- pinned first comment (#4) — same engagement play as the daily posts ------
+    first_comment = (f"Which clip gets your #1 vote? 👇\n\n"
+                     f"Best-of {label} clips every day — drop a follow 🎮")
+    if not post_comment(media_id, first_comment):
+        first_comment = None
+
     yt = None
     if youtube.configured():
         yt = crosspost_youtube(comp, strategy, {"game": None, "region": "mixed"},
@@ -1539,6 +1545,7 @@ def post_top3(strategy, history, dry=False):
         "clip_ids": [p["clip_id"] for p in picks],
         "duration_s": round(float(duration_s), 2) if duration_s else None,
         "cover": cover_method,
+        "first_comment": first_comment,
         "youtube": yt,
         "hashtags": tags,
         "media_id": media_id,
