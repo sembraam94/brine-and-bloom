@@ -631,7 +631,7 @@ def _pct(vals, p):
     return float(np.percentile(vals, p)) if len(vals) else None
 
 
-def trajectory_shape(clips, top_frac=0.25, min_ms=5, min_winners=15):
+def trajectory_shape(clips, top_frac=0.25, min_ms=5, min_winners=12):
     """Do the 24h winners share a common BUILD, or is every clip different — and is there
     a takeoff point? For each game we take the top `top_frac` by 24h views (the actual
     winners — top 25% by default), normalize each clip's cumulative views to its OWN 24h
@@ -651,7 +651,7 @@ def trajectory_shape(clips, top_frac=0.25, min_ms=5, min_winners=15):
         if len(frac) >= min_ms and 24.0 in frac:
             by_game[r.get("game_id") or r.get("game") or "?"].append({"y24": y24, "frac": frac})
 
-    min_game = max(4, round(1.0 / top_frac))          # a game needs enough clips for the slice
+    min_game = max(4, round(0.5 / top_frac))          # a game needs enough clips for the slice
     winners, others = [], []
     for game, lst in by_game.items():
         if len(lst) < min_game:
