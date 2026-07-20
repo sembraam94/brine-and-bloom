@@ -578,7 +578,7 @@ def survivorship_diagnostics(control, hot, all_early):
 # ==========================================================================
 # 30-min (and 1h) view rank vs progressively LATER checkpoints the in-flight clips have
 # already reached (4/8/12h) — shows how far out the early order keeps predicting.
-EARLY_PAIRS = [(0.5, 1.5), (0.5, 4.0), (0.5, 8.0), (0.5, 12.0), (1.0, 12.0)]
+EARLY_PAIRS = [(0.5, 1.5), (0.5, 4.0), (0.5, 8.0), (0.5, 12.0), (0.5, 24.0), (1.0, 12.0)]
 
 
 def _ms_tol(target_h):
@@ -702,16 +702,19 @@ def _render_early_development(W, ed, active_n=0):
     W("\n_View counts are cumulative (1.5h views ≥ 30-min views by definition), so some "
       "persistence is mechanical — ρ measures how much the RANKING reshuffles between the "
       "two checkpoints, which is the real question._\n")
-    W("| Early → later | control ρ (n) | all-clips ρ (n) |")
-    W("|---|---|---|")
+    W("| Early → later | control ρ (n) | all-clips ρ (n) | top-early still top-⅓ \\* |")
+    W("|---|---|---|---|")
     for me, ml in EARLY_PAIRS:
         r = ed.get(f"{me}->{ml}", {})
         cc = r.get("control", {}); aa = r.get("all", {})
+        pl = aa.get("lift") or cc.get("lift")     # all-clips has the n for a stable precision
+        pstr = f"{pl['precision']:.0%} (n={pl['cell']})" if pl else "–"
         W(f"| {me}h→{ml}h | {_fmt(cc.get('rho'))} ({cc.get('n', 0)}) | "
-          f"{_fmt(aa.get('rho'))} ({aa.get('n', 0)}) |")
-    W("\n_control = mid-ranked clips (a clean read); all-clips also includes clips "
-      "discovered FOR their high early views (range-restricted), so treat that column as "
-      "descriptive, not a clean estimate._\n")
+          f"{_fmt(aa.get('rho'))} ({aa.get('n', 0)}) | {pstr} |")
+    W("\n_\\* share of the top-third-by-early-views clips still in the top third at that "
+      "checkpoint (all clips; **~33% = pure chance**). control = mid-ranked clean read; "
+      "all-clips includes clips discovered FOR their high early views, so treat as "
+      "descriptive._\n")
 
     # how far out does the 30-min order still predict? (longest horizon with a solid read)
     longest = None
@@ -728,8 +731,8 @@ def _render_early_development(W, ed, active_n=0):
         noisy = " — CI still spans 0, so noisy" if _spans(b.get("ci"), 0.0) else ""
         W(f"\n_Furthest we can currently see: at **{ml}h** out the 30-min order still "
           f"correlates at **ρ={b['rho']:+.2f}** ({'control' if is_ctrl else 'all-clips'}, "
-          f"n={b['n']}){noisy}. The full 24h outcome isn't available yet — it needs clips "
-          f"that have completed a clean 24h, which are still in flight._\n")
+          f"n={b['n']}){noisy}. See the rigorous control-only 24h estimate in the section "
+          f"below._\n")
 
 
 def render_readout(ctx):
