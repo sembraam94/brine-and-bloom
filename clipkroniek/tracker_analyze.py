@@ -725,6 +725,33 @@ def trajectory_shape(clips, top_frac=0.25, min_ms=5, min_winners=12):
             "n_winners": len(winners), "n_others": len(others)}
 
 
+def top_clip_trajectory(clips, k=3):
+    """The single highest-viewed clip in the WHOLE pool (all games together), by 24h
+    views, with its real raw view trajectory (every snapshot it has, incl. any extended
+    26-72h tail). Returns the top k so runners-up give context."""
+    ranked = []
+    for r in clips:
+        v24 = _milestone_views(r, 24.0)
+        if v24 and v24 > 0:
+            ranked.append((v24, r))
+    if not ranked:
+        return None
+    ranked.sort(key=lambda t: t[0], reverse=True)
+    out = []
+    for v24, r in ranked[:k]:
+        snaps = sorted(({"h": float(s.get("target_h")), "views": int(s.get("views"))}
+                        for s in (r.get("snapshots") or [])
+                        if s.get("views") is not None and s.get("target_h") is not None),
+                       key=lambda s: s["h"])
+        out.append({"v24": int(round(v24)), "game": r.get("game"),
+                    "broadcaster": r.get("broadcaster"), "creator": r.get("creator"),
+                    "title": r.get("title"), "clip_id": r.get("clip_id"),
+                    "reason": r.get("reason"), "extended": bool(r.get("extended")),
+                    "peak": snaps[-1]["views"] if snaps else int(round(v24)),
+                    "peak_h": snaps[-1]["h"] if snaps else 24.0, "traj": snaps})
+    return out
+
+
 # ==========================================================================
 # Headline decision
 # ==========================================================================
@@ -880,6 +907,28 @@ def _render_trajectory(W, tr):
     W("")
 
 
+def _render_top_clip(W, tops):
+    if not tops:
+        return
+    t = tops[0]
+    title = (t.get("title") or "").strip() or "(no title)"
+    W("## The single biggest clip in the pool\n")
+    tail = (f", then kept climbing to **{t['peak']:,}** by {t['peak_h']:g}h"
+            if t["peak"] > int(t["v24"] * 1.02) else "")
+    W(f"**{title}** — {t.get('broadcaster') or '?'} · {t.get('game') or '?'} · "
+      f"**{t['v24']:,} views at 24h**{tail}. Its real view build:\n")
+    W("| clip age | views | % of 24h |")
+    W("|---|---|---|")
+    for s in t["traj"]:
+        pct = f"{s['views'] / t['v24']:.0%}" if t["v24"] else "–"
+        W(f"| {s['h']:g}h | {s['views']:,} | {pct} |")
+    if len(tops) > 1:
+        W("\n_Runners-up (24h views): " + "; ".join(
+            f"{((x.get('title') or '').strip()[:32] or x.get('broadcaster') or '?')} — {x['v24']:,}"
+            for x in tops[1:]) + "._")
+    W("")
+
+
 def render_readout(ctx):
     L = []
     W = L.append
@@ -894,6 +943,7 @@ def render_readout(ctx):
 
     _render_early_development(W, ctx.get("early_dev"), ctx.get("active_n", 0))
     _render_trajectory(W, ctx.get("trajectory"))
+    _render_top_clip(W, ctx.get("top_clip"))
 
     if not ctx["gate_passed"]:
         W(f"## ⏳ Not enough data yet\n")
@@ -1077,7 +1127,8 @@ def analyze(clips, active, run_utc, stats, dupes):
            "stats": stats, "dupes": dupes, "active_n": len(active),
            "early_dev": early_development(early_pool, rng),
            "trajectory": trajectory_shape(early_pool,
-                                          top_frac=float(os.environ.get("TRAJ_TOP_PCT") or 25) / 100.0)}
+                                          top_frac=float(os.environ.get("TRAJ_TOP_PCT") or 25) / 100.0),
+           "top_clip": top_clip_trajectory(early_pool)}
 
     if usable < FLOOR_USABLE or control24 < FLOOR_CONTROL24:
         return ctx
