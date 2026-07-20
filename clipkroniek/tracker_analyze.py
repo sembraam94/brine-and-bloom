@@ -661,12 +661,16 @@ def trajectory_shape(clips, min_ms=5, min_winners=15):
     if len(winners) < min_winners:
         return None
 
-    build = {}
-    for m in TRAJ_MS:
-        vals = [w["frac"][m] for w in winners if m in w["frac"]]
-        if len(vals) >= min_winners:
-            build[m] = {"median": _pct(vals, 50), "p25": _pct(vals, 25),
-                        "p75": _pct(vals, 75), "n": len(vals)}
+    def build_curve(pop):
+        out = {}
+        for m in TRAJ_MS:
+            vals = [x["frac"][m] for x in pop if m in x["frac"]]
+            if len(vals) >= min_winners:
+                out[m] = {"median": _pct(vals, 50), "p25": _pct(vals, 25),
+                          "p75": _pct(vals, 75), "n": len(vals)}
+        return out
+    build = build_curve(winners)
+    others_build = build_curve(others)
 
     # growth-rate profile: normalized views/hour per interval (median across winners)
     prof = []
@@ -714,8 +718,8 @@ def trajectory_shape(clips, min_ms=5, min_winners=15):
                "win_4h": med_frac(winners, 4.0), "other_4h": med_frac(others, 4.0)}
 
     widths = [build[m]["p75"] - build[m]["p25"] for m in build if m <= 4.0]
-    return {"build": build, "profile": prof, "peak": peak, "peak_share": peak_share,
-            "banked": banked, "compare": compare,
+    return {"build": build, "others_build": others_build, "profile": prof, "peak": peak,
+            "peak_share": peak_share, "banked": banked, "compare": compare,
             "consistency": _pct(widths, 50) if widths else None,
             "n_winners": len(winners), "n_others": len(others)}
 
@@ -840,12 +844,15 @@ def _render_trajectory(W, tr):
     W("## Do the 24h winners share the same build?\n")
     W(f"_Top-quartile-by-24h clips within each game ({tr['n_winners']} winners), each clip's "
       f"views normalized to its OWN 24h total — so this is the SHAPE of the build, not size._\n")
-    W("| By | % of 24h views banked (median) | spread (IQR across winners) |")
-    W("|---|---|---|")
+    W("| By | winners: % of 24h banked (median) | IQR | the rest: % banked |")
+    W("|---|---|---|---|")
     for m in TRAJ_MS:
         b = tr["build"].get(m)
         if b:
-            W(f"| {m}h | {b['median']:.0%} | {b['p25']:.0%}–{b['p75']:.0%} |")
+            ob = (tr.get("others_build") or {}).get(m)
+            W(f"| {m}h | {b['median']:.0%} | {b['p25']:.0%}–{b['p75']:.0%} | "
+              f"{ob['median']:.0%} |" if ob else
+              f"| {m}h | {b['median']:.0%} | {b['p25']:.0%}–{b['p75']:.0%} | – |")
 
     if tr["peak"]:
         pk = tr["peak"]; ps = tr["peak_share"]
