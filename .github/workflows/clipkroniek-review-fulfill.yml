@@ -12,6 +12,12 @@ on:
     - cron: "*/10 15-23 * * *"    # evening slot window (UTC)
     - cron: "*/10 0-2 * * *"      # catch late-window replies past midnight
   workflow_dispatch:
+    inputs:
+      ping:
+        description: "Send a one-off Telegram connectivity test (posts nothing)?"
+        type: choice
+        options: ["no", "yes"]
+        default: "no"
 
 concurrency:
   group: ck-state
@@ -61,7 +67,8 @@ jobs:
           GROQ_API_KEY:         ${{ secrets.GROQ_API_KEY }}
           TELEGRAM_BOT_TOKEN:   ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID:     ${{ secrets.TELEGRAM_CHAT_ID }}
-          REVIEW_FULFILL: "1"
+          REVIEW_FULFILL: ${{ github.event.inputs.ping == 'yes' && '' || '1' }}
+          REVIEW_PING:    ${{ github.event.inputs.ping == 'yes' && '1' || '' }}
         run: python clippost.py
 
       - name: Commit post history

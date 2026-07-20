@@ -1736,6 +1736,17 @@ def main():
     discover_only = os.environ.get("DISCOVER_ONLY") == "1"
     force = os.environ.get("FORCE") == "1"
 
+    if os.environ.get("REVIEW_PING") == "1":     # one-off Telegram connectivity check
+        if telegram.configured():
+            ok = telegram.send_message(
+                "✅ Clipkroniek connected. At each slot I'll send you the top 3 clips — "
+                "reply like:  2 - insane 1v4 clutch  (number = your pick, rest = a one-line "
+                "hint for the caption). No reply in 30 min → I auto-post so nothing's missed.")
+            print("telegram ping:", "sent ✓" if ok.get("ok") else "FAILED (check the token/chat_id)")
+        else:
+            print("telegram not configured — TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID missing.")
+        return
+
     if os.environ.get("REVIEW_FULFILL") == "1":
         fulfill_reviews(strategy, history, dry=dry)
         return
