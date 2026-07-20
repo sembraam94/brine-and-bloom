@@ -11,6 +11,11 @@ on:
   schedule:
     - cron: "40 6 * * 1"       # Mondays 06:40 UTC (after a weekend of trajectories bank)
   workflow_dispatch:
+    inputs:
+      top_pct:
+        description: "Winner tier for the trajectory-shape section (top N% by 24h views)"
+        required: false
+        default: "25"
 
 permissions:
   contents: read
@@ -41,4 +46,5 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET:            ${{ secrets.R2_BUCKET }}
           R2_PUBLIC_BASE_URL:   ${{ secrets.R2_PUBLIC_BASE_URL }}
+          TRAJ_TOP_PCT:         ${{ github.event.inputs.top_pct || '25' }}
         run: python tracker_analyze.py

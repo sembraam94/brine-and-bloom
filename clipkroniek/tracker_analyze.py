@@ -631,12 +631,12 @@ def _pct(vals, p):
     return float(np.percentile(vals, p)) if len(vals) else None
 
 
-def trajectory_shape(clips, min_ms=5, min_winners=15):
+def trajectory_shape(clips, top_frac=0.25, min_ms=5, min_winners=15):
     """Do the 24h winners share a common BUILD, or is every clip different — and is there
-    a takeoff point? For each game we take the top quartile by 24h views (the actual
-    winners), normalize each clip's cumulative views to its OWN 24h total (fraction of
-    final reached at each checkpoint = shape, not size), then report the median build +
-    spread, where growth peaks, and how winners' shape differs from everyone else's.
+    a takeoff point? For each game we take the top `top_frac` by 24h views (the actual
+    winners — top 25% by default), normalize each clip's cumulative views to its OWN 24h
+    total (fraction of final reached at each checkpoint = shape, not size), then report the
+    median build + spread, where growth peaks, and how winners' shape differs from the rest.
     Population = any clip with a valid 24h snapshot (in-flight extended clips included)."""
     by_game = defaultdict(list)
     for r in clips:
@@ -651,11 +651,12 @@ def trajectory_shape(clips, min_ms=5, min_winners=15):
         if len(frac) >= min_ms and 24.0 in frac:
             by_game[r.get("game_id") or r.get("game") or "?"].append({"y24": y24, "frac": frac})
 
+    min_game = max(4, round(1.0 / top_frac))          # a game needs enough clips for the slice
     winners, others = [], []
     for game, lst in by_game.items():
-        if len(lst) < 4:
+        if len(lst) < min_game:
             continue
-        cut = sorted(l["y24"] for l in lst)[int(len(lst) * 0.75)]
+        cut = sorted(l["y24"] for l in lst)[int(len(lst) * (1.0 - top_frac))]
         for l in lst:
             (winners if l["y24"] >= cut else others).append(l)
     if len(winners) < min_winners:
@@ -720,7 +721,7 @@ def trajectory_shape(clips, min_ms=5, min_winners=15):
     widths = [build[m]["p75"] - build[m]["p25"] for m in build if m <= 4.0]
     return {"build": build, "others_build": others_build, "profile": prof, "peak": peak,
             "peak_share": peak_share, "banked": banked, "compare": compare,
-            "consistency": _pct(widths, 50) if widths else None,
+            "consistency": _pct(widths, 50) if widths else None, "top_pct": round(top_frac * 100),
             "n_winners": len(winners), "n_others": len(others)}
 
 
@@ -841,8 +842,9 @@ def _render_early_development(W, ed, active_n=0):
 def _render_trajectory(W, tr):
     if not tr:
         return
+    tp = tr.get("top_pct", 25)
     W("## Do the 24h winners share the same build?\n")
-    W(f"_Top-quartile-by-24h clips within each game ({tr['n_winners']} winners), each clip's "
+    W(f"_Top-{tp}%-by-24h clips within each game ({tr['n_winners']} winners), each clip's "
       f"views normalized to its OWN 24h total — so this is the SHAPE of the build, not size._\n")
     W("| By | winners: % of 24h banked (median) | IQR | the rest: % banked |")
     W("|---|---|---|---|")
@@ -1074,7 +1076,8 @@ def analyze(clips, active, run_utc, stats, dupes):
            "results": {}, "gate_passed": False, "headline": {"usable": False, "m": None},
            "stats": stats, "dupes": dupes, "active_n": len(active),
            "early_dev": early_development(early_pool, rng),
-           "trajectory": trajectory_shape(early_pool)}
+           "trajectory": trajectory_shape(early_pool,
+                                          top_frac=float(os.environ.get("TRAJ_TOP_PCT") or 25) / 100.0)}
 
     if usable < FLOOR_USABLE or control24 < FLOOR_CONTROL24:
         return ctx
