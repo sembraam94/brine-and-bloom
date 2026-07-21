@@ -435,10 +435,8 @@
       "nl"
     ],
     "games": [],
-    "platform_top_games": 20,
-    "pages": 3,
-    "discover_window_min": 180,
-    "per_game_track": 5,
+    "discover_window_min": 360,
+    "per_game_track": 3,
     "control_per_game": 1,
     "milestones_h": [
       0.5,
@@ -466,7 +464,9 @@
       "top_n": 10,
       "interval_h": 2,
       "until_h": 72
-    }
+    },
+    "stream_language": "nl",
+    "max_broadcasters": 100
   },
   "youtube": {
     "enabled": true,

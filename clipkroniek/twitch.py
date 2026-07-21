@@ -129,6 +129,28 @@ def get_top_games(client_id, token, http, first=20):
     return r.json().get("data", [])
 
 
+def get_streams_by_language(language, client_id, token, http, first=100):
+    """LIVE streams in a given language, ordered by viewers. This is the only reliable way
+    to find a language niche: clip search is ranked by view count, so a small-language clip
+    never surfaces in a big game's top pages (Just Chatting's top 285 clips contained zero
+    'nl'). Discover the language's broadcasters here, then pull THEIR clips."""
+    out, cursor = [], None
+    while len(out) < first:
+        params = {"language": language, "first": min(100, first - len(out))}
+        if cursor:
+            params["after"] = cursor
+        r = http("GET", f"{HELIX}/streams", params=params,
+                 headers=_headers(client_id, token), timeout=30)
+        r.raise_for_status()
+        j = r.json()
+        data = j.get("data") or []
+        out.extend(data)
+        cursor = (j.get("pagination") or {}).get("cursor")
+        if not data or not cursor:
+            break
+    return out[:first]
+
+
 def get_clips_by_id(ids, client_id, token, http):
     """Current data (incl. view_count) for specific clip ids, up to 100 per request.
     Returns {id: clip_dict}."""

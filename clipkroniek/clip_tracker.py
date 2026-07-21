@@ -109,6 +109,10 @@ def main():
     max_lag = float(cfg.get("max_milestone_lag_h", 3.0))
     pages = int(cfg.get("pages", 1))          # widen the net for a rare language
     langs = {str(l).lower() for l in (cfg.get("languages") or [])}
+    # A language niche is discovered from LIVE STREAMS in that language (clip search is
+    # view-ranked, so nl clips never appear in a big game's top pages).
+    stream_lang = str(cfg.get("stream_language") or "").strip().lower()
+    max_bc = int(cfg.get("max_broadcasters", 100))
 
     # Extended follow-up: keep snapshotting the top-N clips (by 24h views) beyond 24h,
     # every `interval_h`, up to `until_h` — to see how the durable winners develop.
@@ -129,18 +133,27 @@ def main():
     if txt:
         tracking = json.loads(txt)
 
-    # --- games to scan, with rank (#5: rank = popularity proxy) -----------------
-    scan = {}                              # name -> {"id","set","rank"}
-    for i, g in enumerate(twitch.get_top_games(
-            cid, token, http, first=int(cfg.get("platform_top_games", 20)))):
-        if g.get("id") and g.get("name"):
-            scan[g["name"]] = {"id": g["id"], "set": "platform", "rank": i + 1}
-    for name in cfg.get("games", []):
-        found = twitch.find_game(name, cid, token, http)
-        if found:
-            existing = scan.get(found[1], {})
-            scan[found[1]] = {"id": found[0], "set": "game",
-                              "rank": existing.get("rank")}
+    # --- what to scan, with rank (#5: rank = popularity proxy) ------------------
+    scan = {}                              # label -> {"id","set","rank"[,"game"]}
+    if stream_lang:
+        for i, st in enumerate(twitch.get_streams_by_language(
+                stream_lang, cid, token, http, first=max_bc)):
+            uid, uname = st.get("user_id"), st.get("user_name")
+            if uid and uname:
+                scan[uname] = {"id": uid, "set": "broadcaster", "rank": i + 1,
+                               "game": st.get("game_name") or "?"}
+        print(f"  {stream_lang}: {len(scan)} live broadcasters to pull clips from")
+    else:
+        for i, g in enumerate(twitch.get_top_games(
+                cid, token, http, first=int(cfg.get("platform_top_games", 20)))):
+            if g.get("id") and g.get("name"):
+                scan[g["name"]] = {"id": g["id"], "set": "platform", "rank": i + 1}
+        for name in cfg.get("games", []):
+            found = twitch.find_game(name, cid, token, http)
+            if found:
+                existing = scan.get(found[1], {})
+                scan[found[1]] = {"id": found[0], "set": "game",
+                                  "rank": existing.get("rank")}
 
     started = (now - datetime.timedelta(minutes=win_min)).strftime("%Y-%m-%dT%H:%M:%SZ")
     ended = now.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -155,7 +168,8 @@ def main():
         k = c.get("id")
         if not k or k in tracking:
             return False
-        tracking[k] = {"game": name, "game_id": meta["id"], "set": meta["set"],
+        tracking[k] = {"game": meta.get("game") or name, "game_id": meta["id"],
+                       "set": meta["set"],
                        "game_rank": meta["rank"], "broadcaster": c.get("broadcaster_name"),
                        "creator": c.get("creator_name"), "title": c.get("title"),
                        "language": c.get("language"), "created_at": c.get("created_at"),
@@ -165,8 +179,12 @@ def main():
     registered = ctrl_added = 0
     for name, meta in scan.items():
         try:
-            clips = twitch.get_recent_clips(meta["id"], started, ended, cid, token, http,
-                                            pages=pages)
+            if meta["set"] == "broadcaster":
+                clips = twitch.get_broadcaster_clips(meta["id"], started, ended,
+                                                     cid, token, http)
+            else:
+                clips = twitch.get_recent_clips(meta["id"], started, ended, cid, token,
+                                                http, pages=pages)
             if langs:      # language niche (e.g. nl): keep only clips in those languages
                 clips = [c for c in clips if (c.get("language") or "").lower() in langs]
         except Exception as e:
