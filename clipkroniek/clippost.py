@@ -1368,6 +1368,34 @@ def _safe_key(s):
 # =============================================================================
 # YouTube Shorts cross-post (optional — only fires if YT_* secrets are present)
 # =============================================================================
+def _yt_allowed(strategy, history, slot):
+    """Gate the YouTube cross-post so YT can run at a SLOWER, NARROWER cadence than
+    Instagram: an optional game allowlist (`youtube.games`) plus a rolling 7-day cap
+    (`youtube.max_per_week`). Absent config = cross-post everything (previous behaviour)."""
+    cfg = strategy.get("youtube", {}) or {}
+    if not cfg.get("enabled", True):
+        return False
+    games = cfg.get("games")
+    if games and (slot or {}).get("game") not in games:
+        print(f"  youtube: skipped — game {(slot or {}).get('game')!r} not in {games}")
+        return False
+    cap = cfg.get("max_per_week")
+    if cap:
+        cutoff = now_utc() - datetime.timedelta(days=7)
+        n = 0
+        for p in history.get("posts", []):
+            yt = p.get("youtube")
+            if isinstance(yt, dict) and yt.get("id"):
+                t = _parse_ts(p.get("date_utc"))
+                if t and t >= cutoff:
+                    n += 1
+        if n >= int(cap):
+            print(f"  youtube: skipped — {n}/{cap} cross-posts already in the last 7 days")
+            return False
+        print(f"  youtube: {n}/{cap} used in the last 7 days — cross-posting")
+    return True
+
+
 def crosspost_youtube(reel_path, strategy, slot, title_base, credit, tags):
     """Push the same reel to YouTube as a Short. Non-fatal: any failure is logged
     and returns None so it can never break the IG flow. Skips silently unless the
@@ -1542,7 +1570,7 @@ def post_top3(strategy, history, dry=False):
         first_comment = None
 
     yt = None
-    if youtube.configured():
+    if youtube.configured() and _yt_allowed(strategy, history, {"game": None}):
         yt = crosspost_youtube(comp, strategy, {"game": None, "region": "mixed"},
                                f"Top 3 {label} clips of the week", credit_line, tags)
 
@@ -2029,7 +2057,7 @@ def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
 
     # --- YouTube Shorts cross-post (optional; reuses the same reel) ------
     yt = None
-    if youtube.configured():
+    if youtube.configured() and _yt_allowed(strategy, history, slot):
         title_base = ((caption.split("\n", 1)[0].strip() if caption else "")
                       or clip.get("title") or "Insane gaming clip")
         credit = clip.get("broadcaster_name") or clip.get("author")

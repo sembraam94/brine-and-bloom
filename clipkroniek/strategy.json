@@ -295,17 +295,51 @@
   ],
   "curated_boost": 1.25,
   "prune_broadcasters": [
-    "riotgames", "valorant", "rainbow6", "playapex", "rocketleague", "warframe",
-    "worldoftanks", "eslcs", "lck", "lolesportstw", "ow_esports", "ow_esports_jp",
-    "pgl_dota2", "betboom_dota_ru", "dota2_paragon_ru", "cs2_paragon_ru",
-    "fissure_cs_a", "evo", "gamesdonequick", "alveussanctuary"
+    "riotgames",
+    "valorant",
+    "rainbow6",
+    "playapex",
+    "rocketleague",
+    "warframe",
+    "worldoftanks",
+    "eslcs",
+    "lck",
+    "lolesportstw",
+    "ow_esports",
+    "ow_esports_jp",
+    "pgl_dota2",
+    "betboom_dota_ru",
+    "dota2_paragon_ru",
+    "cs2_paragon_ru",
+    "fissure_cs_a",
+    "evo",
+    "gamesdonequick",
+    "alveussanctuary"
   ],
   "asian_streamers": [
-    "fps_shaka", "k4sen", "stylishnoob4", "kato_junichi0817", "yaritaiji",
-    "chche999", "roger9527", "gon_vl", "meiy_vl", "deepins02", "yuyuta0702",
-    "hiiragitsurugi", "gocchanmikey", "dmf_kyochan", "shinjifromjapanxd"
+    "fps_shaka",
+    "k4sen",
+    "stylishnoob4",
+    "kato_junichi0817",
+    "yaritaiji",
+    "chche999",
+    "roger9527",
+    "gon_vl",
+    "meiy_vl",
+    "deepins02",
+    "yuyuta0702",
+    "hiiragitsurugi",
+    "gocchanmikey",
+    "dmf_kyochan",
+    "shinjifromjapanxd"
   ],
-  "wide_langs": ["en", "de", "fr", "es", "pt"],
+  "wide_langs": [
+    "en",
+    "de",
+    "fr",
+    "es",
+    "pt"
+  ],
   "discover_pages_asian": 20,
   "fg_zoom": {
     "gta": 1.25,
@@ -359,12 +393,30 @@
   },
   "tracker": {
     "enabled": true,
-    "games": ["Grand Theft Auto V", "VALORANT"],
+    "games": [
+      "Grand Theft Auto V",
+      "VALORANT"
+    ],
     "platform_top_games": 20,
     "per_game_track": 12,
     "control_per_game": 5,
     "discover_window_min": 45,
-    "milestones_h": [0.5, 1, 1.5, 2, 3, 4, 8, 12, 14, 16, 18, 20, 22, 24],
+    "milestones_h": [
+      0.5,
+      1,
+      1.5,
+      2,
+      3,
+      4,
+      8,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      24
+    ],
     "prune_after_h": 1.5,
     "prune_by_milestone": 1.5,
     "keep_top_per_game": 25,
@@ -377,9 +429,52 @@
       "until_h": 72
     }
   },
+  "tracker_nl": {
+    "enabled": true,
+    "languages": [
+      "nl"
+    ],
+    "games": [],
+    "platform_top_games": 20,
+    "pages": 3,
+    "discover_window_min": 180,
+    "per_game_track": 5,
+    "control_per_game": 1,
+    "milestones_h": [
+      0.5,
+      1,
+      1.5,
+      2,
+      3,
+      4,
+      8,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      24
+    ],
+    "prune_after_h": 1.5,
+    "prune_by_milestone": 1.5,
+    "keep_top_per_game": 15,
+    "delete_after_misses": 2,
+    "max_milestone_lag_h": 3.0,
+    "extended": {
+      "enabled": true,
+      "top_n": 10,
+      "interval_h": 2,
+      "until_h": 72
+    }
+  },
   "youtube": {
     "enabled": true,
-    "privacy": "public"
+    "privacy": "public",
+    "games": [
+      "gta"
+    ],
+    "max_per_week": 3
   },
   "longform": {
     "enabled": false,

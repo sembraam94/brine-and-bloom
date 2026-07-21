@@ -39,7 +39,14 @@ import twitch
 from clippost import (env, http, now_utc, _parse_ts, _r2_client, r2_configured,
                       load_strategy)
 
-STATE_KEY = "tracker/tracking.json"
+# A VARIANT runs the same tracker as an independent stream: its own R2 state + dataset
+# and its own strategy block (e.g. TRACKER_VARIANT=nl -> strategy["tracker_nl"],
+# tracker-nl/tracking.json, tracker-nl/dataset-<date>.jsonl). Used to track a language
+# niche (Dutch) separately from the main game stream.
+VARIANT = (os.environ.get("TRACKER_VARIANT") or "").strip().lower()
+PREFIX = f"tracker-{VARIANT}/" if VARIANT else "tracker/"
+CFG_KEY = f"tracker_{VARIANT}" if VARIANT else "tracker"
+STATE_KEY = PREFIX + "tracking.json"
 
 
 def _r2_get_text(key):
@@ -76,7 +83,7 @@ def _snap_views(rec, milestone):
 
 def main():
     strategy = load_strategy()
-    cfg = strategy.get("tracker", {}) or {}
+    cfg = strategy.get(CFG_KEY, {}) or {}
     if not cfg.get("enabled", True):
         print("tracker: disabled in strategy.json")
         return
@@ -100,6 +107,8 @@ def main():
     # how long after a milestone we'll still accept a snapshot for it (tracker runs every
     # ~30 min; GitHub can delay a run, so allow a few hours, but never a stale back-fill)
     max_lag = float(cfg.get("max_milestone_lag_h", 3.0))
+    pages = int(cfg.get("pages", 1))          # widen the net for a rare language
+    langs = {str(l).lower() for l in (cfg.get("languages") or [])}
 
     # Extended follow-up: keep snapshotting the top-N clips (by 24h views) beyond 24h,
     # every `interval_h`, up to `until_h` — to see how the durable winners develop.
@@ -156,7 +165,10 @@ def main():
     registered = ctrl_added = 0
     for name, meta in scan.items():
         try:
-            clips = twitch.get_recent_clips(meta["id"], started, ended, cid, token, http, pages=1)
+            clips = twitch.get_recent_clips(meta["id"], started, ended, cid, token, http,
+                                            pages=pages)
+            if langs:      # language niche (e.g. nl): keep only clips in those languages
+                clips = [c for c in clips if (c.get("language") or "").lower() in langs]
         except Exception as e:
             print(f"  (discover {name} failed: {e})")
             continue
@@ -258,14 +270,14 @@ def main():
             {"clip_id": k, "completed_at": now.isoformat(), "reason": reason, **rec},
             ensure_ascii=False))
     for day, lines in by_day.items():
-        key = f"tracker/dataset-{day}.jsonl"
+        key = f"{PREFIX}dataset-{day}.jsonl"
         existing = _r2_get_text(key)
         _r2_put_text(key, existing + "\n".join(lines) + "\n", "application/x-ndjson")
 
     _r2_put_text(STATE_KEY, json.dumps(tracking, ensure_ascii=False))
     base = env("R2_PUBLIC_BASE_URL").rstrip("/")
     print(f"tracker: +{registered} new (+{ctrl_added} control), {len(tracking)} active, "
-          f"completed {dict(n_done)} | games {len(scan)} | {base}/tracker/dataset-<date>.jsonl")
+          f"completed {dict(n_done)} | games {len(scan)} | {base}/{PREFIX}dataset-<date>.jsonl")
 
 
 if __name__ == "__main__":
