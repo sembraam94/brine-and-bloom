@@ -1773,6 +1773,10 @@ def main():
     dry = os.environ.get("DRY_RUN") == "1"
     discover_only = os.environ.get("DISCOVER_ONLY") == "1"
     force = os.environ.get("FORCE") == "1"
+    # REVIEW_FORCE: bypass the SCHEDULE like FORCE, but still go through the Telegram
+    # review (FORCE alone posts autonomously). Used to test/run the human-in-the-loop
+    # flow on demand.
+    review_force = os.environ.get("REVIEW_FORCE") == "1"
 
     if os.environ.get("REVIEW_PING") == "1":     # one-off Telegram connectivity check
         if telegram.configured():
@@ -1803,9 +1807,10 @@ def main():
         longform.run(strategy, history, dry=dry)
         return
 
-    if force:
+    if force or review_force:
         slot, key = forced_slot(strategy)
-        print("FORCE=1 — bypassing the schedule for this run.")
+        print(f"{'REVIEW_FORCE' if review_force else 'FORCE'}=1 — bypassing the schedule "
+              f"for this run{' (still goes through Telegram review)' if review_force else ''}.")
     else:
         slot, key = find_due_slot(strategy, history)
 

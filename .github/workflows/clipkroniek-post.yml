@@ -24,6 +24,11 @@ on:
         type: choice
         options: ["no", "yes"]
         default: "no"
+      review_force:
+        description: "Run NOW through the Telegram review (sends you the top 3 to pick)?"
+        type: choice
+        options: ["no", "yes"]
+        default: "no"
       dry_run:
         description: "Dry run (discover + build the reel, do NOT publish)?"
         type: choice
@@ -110,6 +115,7 @@ jobs:
           TELEGRAM_BOT_TOKEN:   ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID:     ${{ secrets.TELEGRAM_CHAT_ID }}
           FORCE:         ${{ github.event.inputs.force == 'yes' && '1' || '' }}
+          REVIEW_FORCE:  ${{ github.event.inputs.review_force == 'yes' && '1' || '' }}
           DRY_RUN:       ${{ github.event.inputs.dry_run == 'yes' && '1' || '' }}
           DISCOVER_ONLY: ${{ github.event.inputs.discover_only == 'yes' && '1' || '' }}
           # Weekly Sunday crons select the format; manual dispatch can override.
