@@ -494,7 +494,10 @@
     "max_active": 3,
     "min_posts_to_judge": 4,
     "add_momentum": 65,
-    "note": "Weekly: worst-performing active game's slots get reassigned to the best news-scan candidate (recent/imminent releases jump the queue). 1 swap/cycle. Dropped games stay in `games` (benched) and can return if the scanner flags momentum. New games are Twitch-validated before activation."
+    "note": "Weekly: worst-performing active game's slots get reassigned to the best news-scan candidate (recent/imminent releases jump the queue). 1 swap/cycle. Dropped games stay in `games` (benched) and can return if the scanner flags momentum. New games are Twitch-validated before activation.",
+    "protected": {
+      "halo_campaign_evolved": "2026-08-25"
+    }
   },
   "slots": [
     {

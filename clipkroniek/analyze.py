@@ -392,6 +392,26 @@ def _active_games(strategy):
     return sorted({s.get("game") for s in strategy.get("slots", []) if s.get("game")})
 
 
+def _protected_games(strategy):
+    """Games the rotation may NOT drop or share slots away from. Config accepts either a
+    list of keys (protected indefinitely) or {key: "YYYY-MM-DD"} (protected until then).
+    Purpose: a game rotated in AHEAD of its release must survive the weekly cycle that
+    lands during/just after launch, when it has little or no measured data yet."""
+    prot = (strategy.get("game_rotation", {}) or {}).get("protected") or {}
+    today = now_utc().date()
+    out = set()
+    if isinstance(prot, dict):
+        for g, until in prot.items():
+            try:
+                if until in (True, "", None) or today <= datetime.date.fromisoformat(str(until)):
+                    out.add(g)
+            except Exception:
+                out.add(g)
+    else:
+        out = {g for g in prot}
+    return out
+
+
 def _most_slotted(strategy, games):
     counts = {}
     for s in strategy.get("slots", []):
@@ -494,13 +514,16 @@ def rotate_games(strategy, history, dry):
 
     top = cands[0]
     is_release = rank(top)[0] > 0
-    elig = [g for g in active if npost.get(g, 0) >= min_posts]
+    protected = _protected_games(strategy)
+    if protected:
+        print(f"  [rotation] protected (cannot be dropped): {sorted(protected)}")
+    elig = [g for g in active if npost.get(g, 0) >= min_posts and g not in protected]
     worst = min(elig, key=lambda g: sc[g]) if elig else None
     share = False   # share = give the new game SOME slots (don't fully drop a game)
 
     if worst is None:
         if is_release and len(active) < max_active:
-            worst = _most_slotted(strategy, active)
+            worst = _most_slotted(strategy, [g for g in active if g not in protected])
             share = True   # no perf data yet: ride the launch wave without dropping a proven game
             reason = f"launch wave (no data yet): give {top['key']} some of {worst}'s slots"
         else:
