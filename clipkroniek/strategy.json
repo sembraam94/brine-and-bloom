@@ -354,7 +354,8 @@
     "lead_in_action": 3,
     "lead_in_min": 3,
     "lead_in_max": 8,
-    "transcript_window_s": 5
+    "transcript_window_s": 5,
+    "min_source_s": 35
   },
   "transcribe": {
     "enabled": true,

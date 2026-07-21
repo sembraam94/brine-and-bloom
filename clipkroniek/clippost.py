@@ -1975,6 +1975,18 @@ def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
         print(f"  NO_TRIM=1 — posting the FULL clip ({dur_src}s), no smart-trim")
         trim, trimmed = None, False
         trim_meta = dict(trim_meta or {}, no_trim=True)
+    else:
+        # Smart-trim exists to cut a LONG clip down to its best moment. A clip that
+        # already fits the Reel budget has nothing to gain from it and everything to
+        # lose: centring on the audio peak keeps the punchline and drops the setup, which
+        # is how a 30s Jynxzi clip shipped as a context-free 9s fragment. Leave short
+        # clips whole.
+        keep_whole = float((strategy.get("smart_trim", {}) or {}).get("min_source_s", 35))
+        if trim and dur_src and float(dur_src) <= keep_whole:
+            print(f"  smart-trim: SKIPPED — source is {dur_src}s (<= {keep_whole}s), "
+                  f"already fits the reel; posting it whole")
+            trim, trimmed = None, False
+            trim_meta = dict(trim_meta or {}, skipped_short_source=True)
     if trim:
         src = ("audio+speech" if trim_meta.get("transcript_used")
                else "action/no-speech" if trim_meta.get("no_speech") else "audio")
