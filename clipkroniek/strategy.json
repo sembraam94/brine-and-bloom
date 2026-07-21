@@ -335,7 +335,8 @@
     "uppercase": true,
     "translate": true,
     "translate_font_size": 52,
-    "translate_pos_y": 1330
+    "translate_pos_y": 1330,
+    "min_confidence": -0.75
   },
   "facecam_stack": {
     "enabled": true

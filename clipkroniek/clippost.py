@@ -1940,6 +1940,16 @@ def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
     captions_ass = None
     translated = False
     cap_cfg = strategy.get("captions", {}) or {}
+    # Low-confidence transcript => Whisper probably picked the WRONG LANGUAGE and spelled
+    # the audio phonetically (nonsense). Burning that into a reel is worse than no
+    # captions at all, so skip them entirely rather than ship garbage text.
+    _conf = (transcript or {}).get("confidence")
+    _min_conf = float(cap_cfg.get("min_confidence", -0.75))
+    if transcript and _conf is not None and _conf < _min_conf:
+        print(f"  captions: SKIPPED — transcript confidence {_conf:.2f} < {_min_conf} "
+              f"(detected '{transcript.get('language')}' is unreliable; would burn nonsense)")
+        transcript = dict(transcript, words=[], en_segments=None)
+
     if cap_cfg.get("enabled", True) and transcript and transcript.get("words"):
         ass_name = "ck_captions.ass"          # written in cwd (clipkroniek); gitignored
         en_seg = transcript.get("en_segments") if cap_cfg.get("translate", True) else None

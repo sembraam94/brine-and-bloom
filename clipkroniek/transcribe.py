@@ -50,14 +50,23 @@ def _extract_wav(video_path):
 
 
 def _norm(text, segments, words, language):
+    segs = [{"text": (s.get("text") or "").strip(),
+             "start": float(s.get("start") or 0.0),
+             "end": float(s.get("end") or 0.0),
+             "avg_logprob": s.get("avg_logprob"),
+             "no_speech_prob": s.get("no_speech_prob")} for s in (segments or [])]
+    # Mean avg_logprob = Whisper's own confidence. It stays around -0.1..-0.4 on a clean
+    # transcription and craters when the model picked the WRONG LANGUAGE (it then spells
+    # the audio phonetically in that language = nonsense). Gating captions on this stops
+    # us burning garbage text into a reel.
+    lps = [s["avg_logprob"] for s in segs if isinstance(s.get("avg_logprob"), (int, float))]
     return {
         "text": (text or "").strip(),
-        "segments": [{"text": (s.get("text") or "").strip(),
-                      "start": float(s.get("start") or 0.0),
-                      "end": float(s.get("end") or 0.0)} for s in (segments or [])],
+        "segments": segs,
         "words": [{"word": w.get("word"), "start": float(w.get("start") or 0.0),
                    "end": float(w.get("end") or 0.0)} for w in (words or [])],
         "language": language,
+        "confidence": (sum(lps) / len(lps)) if lps else None,
     }
 
 
@@ -127,7 +136,9 @@ def _faster_whisper(wav, cfg):
                                       condition_on_previous_text=False)
         segments, words, texts = [], [], []
         for s in segs:
-            segments.append({"text": s.text, "start": s.start, "end": s.end})
+            segments.append({"text": s.text, "start": s.start, "end": s.end,
+                             "avg_logprob": getattr(s, "avg_logprob", None),
+                             "no_speech_prob": getattr(s, "no_speech_prob", None)})
             texts.append(s.text or "")
             for w in (s.words or []):
                 words.append({"word": w.word, "start": w.start, "end": w.end})
@@ -156,8 +167,17 @@ def transcribe(video_path, strategy):
             result = _faster_whisper(wav, cfg)
 
         # English translation line for non-English clips (needs Groq's translate task).
+        # Skipped when the transcription itself is low-confidence: a wrong-language
+        # detection produces nonsense, and "translating" nonsense yields a wrong line.
         cap = strategy.get("captions", {}) or {}
-        if (result and cap.get("translate", True) and os.environ.get("GROQ_API_KEY")
+        min_conf = float(cap.get("min_confidence", -0.75))
+        conf = result.get("confidence") if result else None
+        trustworthy = conf is None or conf >= min_conf
+        if result and not trustworthy:
+            print(f"  transcript confidence {conf:.2f} < {min_conf} — language detection "
+                  f"({result.get('language')}) is unreliable; skipping translation.")
+        if (result and trustworthy and cap.get("translate", True)
+                and os.environ.get("GROQ_API_KEY")
                 and not _is_english(result.get("language"))):
             en = _groq_translate(wav)
             if en:
