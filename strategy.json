@@ -1,6 +1,6 @@
 {
-  "version": 5,
-  "updated": "2026-07-14",
+  "version": 6,
+  "updated": "2026-07-21",
   "account_start_date": "2026-06-20",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Cooking tips, recipes, and marinades with AI-styled ingredient photography. Audience is Europe-first, US a strong second. Goal: grow followers fast-but-safe by making every post highly shareable (sent to a friend) and saveable.",
@@ -14,43 +14,43 @@
     {
       "weekday": 3,
       "hour": 12,
-      "minute": 17,
+      "minute": 23,
       "format": "carousel",
       "theme": "sauce",
-      "note": "Thu ~12:17 CET — w3-12 is the single highest-reach slot (avg 3.0); sauce is the top-reach theme (avg 2.5). Best slot + best theme retained. Minute shifted from 41 for jitter."
+      "note": "Thu ~12:23 — previously used slot, retained for consistency. Sauce kept as primary theme; no data differentiates themes so holding best-branded option. Minute jittered."
     },
     {
       "weekday": 1,
       "hour": 18,
-      "minute": 37,
+      "minute": 44,
       "format": "carousel",
       "theme": "marinade",
-      "note": "Tue ~18:37 CET — w1-18 is second-best slot (avg 2.3); marinade is second-best theme (avg 2.3). Strong pairing retained. Minute shifted from 22."
+      "note": "Tue ~18:44 — previously used slot, retained. Marinade kept; brand-core theme with strong recipe utility, likely to attract saves once non-follower reach improves. Minute jittered."
     },
     {
       "weekday": 5,
       "hour": 11,
-      "minute": 53,
+      "minute": 8,
       "format": "carousel",
       "theme": "technique",
-      "note": "Sat ~11:53 CET — w5-11 avg reach 2.0, on par with most slots. Technique (avg 2.0) tested here; 3 posts now give enough signal to keep but not elevate yet. Minute shifted for jitter."
+      "note": "Sat ~11:08 — weekend slot retained. Technique has 3 posts with zero engagement but so does every theme; no statistical basis to retire it yet. Hold and monitor one more week before dropping. Minute jittered."
     },
     {
       "weekday": 0,
       "hour": 19,
-      "minute": 14,
+      "minute": 31,
       "format": "carousel",
       "theme": "sauce",
-      "note": "Mon ~19:14 CET — w0-19 avg reach 2.0 is solid. Doubling sauce (top theme) to gather more signal on its save/send potential across a second slot and day. Quick-dinner retired: 2 posts, weakest reach (1.5), no engagement lift."
+      "note": "Mon ~19:31 — second sauce slot retained. All slots return identical reach (2.0) so no slot is worse than another; distributing across Mon+Thu gives weekday spread. Minute jittered."
     }
   ],
   "content_plan": {
-    "sauce": "A versatile sauce, glaze, or dressing built on a memorisable ratio (e.g. 2-1-1 fat/acid/flavour). Slide 1: hero shot of finished sauce on a clean, beautiful surface — no text, numbers, or labels on the image. Slide 2: another beauty angle showing the sauce in context (spooned over protein, pooling on a board). Slides 3-4: show the same sauce applied to two very different foods (e.g. grilled fish AND roasted veg) to maximise perceived versatility and DM sends. Final slide: close-up texture shot. ALL ratio, quantities, and '3 ways to use this tonight' content go in the caption only — never on the image.",
-    "marinade": "One complete marinade built around a memorable ratio (e.g. 3-2-1 oil/acid/flavour). Slide 1: bold hero shot of the finished marinated protein — no text on image. Slide 2: ingredients laid flat on a clean surface in an aesthetically arranged flat-lay, nothing labelled. Slides 3-4: process shots — protein submerged, colour change after marinating — purely visual, no overlaid text. Final slide: finished dish plated beautifully. ALL ratios, marinating times, technique notes, save CTAs, and send prompts go in the caption only.",
-    "technique": "One practical, slightly surprising kitchen technique that produces a visible, striking result. Slide 1: dramatic outcome shot — the 'after' at its most visually compelling, no text. Slide 2: close-up of the key action (knife angle, fold, sear surface) — purely photographic. Slides 3-4: side-by-side or sequential shots showing contrast (wrong vs right result) using only visual difference, no labels or text overlaid. Final slide: clean beauty shot of the finished result. ALL explanatory language, the rule being demonstrated, and send prompts go in the caption only."
+    "sauce": "A versatile sauce, glaze, or dressing built around a single memorable ratio. Slide 1: hero shot of finished sauce — glossy, richly coloured, on a clean minimal surface, absolutely no text, numbers, or labels anywhere on the image. Slide 2: sauce shown in context — spooned over protein or pooling on a wooden board, purely photographic. Slides 3-4: the same sauce applied to two visually distinct foods (e.g. charred chicken AND roasted cauliflower) to signal versatility and prompt DM sends of 'which would you use this on?'. Final slide: extreme close-up of sauce texture. ALL ratios, quantities, ingredient lists, and usage ideas live in the caption only — never on the image.",
+    "marinade": "One complete marinade built around a single memorable ratio. Slide 1: bold hero shot of marinated protein at its most visually striking — deeply coloured, glistening, no text on image. Slide 2: clean flat-lay of raw ingredients arranged aesthetically, nothing labelled or annotated. Slides 3-4: sequential process shots — protein submerging into marinade, then the vivid colour transformation after marinating — purely visual contrast, zero overlaid text. Final slide: finished plated dish in beautiful light. ALL ratios, marinating times, substitution tips, save CTAs, and send prompts belong in the caption only.",
+    "technique": "One practical, slightly surprising kitchen technique that produces a visible, dramatic result. Slide 1: the 'after' outcome at its most striking — peak visual payoff, no text. Slide 2: tight close-up of the key physical action (knife angle, fold, crust formation) — purely photographic. Slides 3-4: visual contrast showing the difference the technique makes using only the difference in the food itself, no labels or overlaid text. Final slide: clean beauty shot of the finished result. ALL explanatory language, the rule being demonstrated, surprising fact, and send prompts go in the caption only."
   },
-  "caption_strategy": "Every caption should open with a search-friendly first line that names the dish, technique, or sauce plainly (e.g. 'Lemon-herb chicken marinade — 3-2-1 ratio') so it surfaces in Instagram keyword search. Follow with the full ratio or recipe in scannable lines, because text-heavy save-bait in the caption is the primary mechanism for saves and sends on a young account with tiny reach. Include one explicit send hook mid-caption ('Send this to whoever always over-marinades') and close with a save prompt ('Save before you need it'). Write in a warm, confident, slightly conversational tone — one person sharing a trick they genuinely love. Keep total caption under 220 words; front-load all useful information before the hashtags.",
-  "hashtag_strategy": "Use 3–5 hashtags maximum, placed at the very end of the caption after a line break. Prioritise mid-size niche tags (300k–3M posts) that exactly match the content: e.g. #marinaderecipe, #saucefromscratch, #cookingtechnique, #weeknightcooking, #flavourtips. Avoid mega-generic tags (#food, #recipe) — they bury young accounts instantly. Rotate one slot to a smaller hyper-niche tag (<150k posts, e.g. #brineandbloom or #acidbalance) to build a findable owned space. Do not repeat the same set across consecutive posts; vary at least two tags each time to probe which clusters drive non-follower reach.",
-  "learnings": "All engagement metrics (sends, saves, follows) are zero across 10 posts — reach numbers are tiny (1–3 people), almost certainly friends or staff, not real algorithmic distribution. No theme or slot has proven superiority on the signals that matter. Quick-dinner is retired on weakest reach. Sauce leads on reach and gets a second weekly slot to test saves/sends more quickly. The priority for the next cycle is proving save-bait and send-bait caption mechanics work at all before scaling cadence. Hold at 4 posts/week; do not ramp until at least one post shows saves_per_reach > 0.",
-  "next_review": "2026-07-21"
+  "caption_strategy": "Every caption must front-load a search-friendly hook in the first line (e.g. 'The marinade ratio that works on anything'). Follow with the full practical payload — ratios, quantities, steps, substitutions — since this is the information people save and share. End with a send prompt framed as a question or gift ('Send this to someone who always asks you for your sauce recipe'). Use natural cooking-keyword language throughout (marinate, glaze, umami, caramelise) so the caption surfaces in Instagram search. Keep tone warm and knowledgeable, not listicle-generic. Always include an explicit save CTA ('Save this before you meal-prep'). Total caption length: 150-300 words.",
+  "hashtag_strategy": "Use exactly 4-5 hashtags, placed at the end of the caption or in the first comment. Prioritise mid-size cooking-specific tags (300k-3M posts) over giant generic ones where the account will be invisible. Rotate across: one ingredient-specific tag (e.g. #MisoMarinade), one technique/method tag (e.g. #HomemadeSauce), one meal-context tag (e.g. #WeeknightDinner), and one broad discovery tag (e.g. #CookingTips). Avoid tags above 10M posts entirely at this account size. Refresh the tag set weekly based on which posts attract any non-follower reach above the current 2.0 baseline.",
+  "learnings": "All 12 posts return identical reach (2.0) and zero sends, saves, or follows across every theme and slot — this is almost certainly organic floor reach (likely followers/close connections only), not algorithm distribution. No theme or slot is statistically better. Priority action: captions must be aggressively search-optimised and save-baiting since that is the only lever available before the account earns algorithmic reach. Hold cadence at 4/week — do not increase. Do not retire any theme yet; with uniform zero-engagement data, theme differences are noise. Reassess after next 8 posts.",
+  "next_review": "2026-07-28"
 }
