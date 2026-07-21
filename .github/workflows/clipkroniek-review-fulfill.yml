@@ -9,6 +9,7 @@ name: Clipkroniek — review fulfill
 
 on:
   schedule:
+    - cron: "*/10 7-13 * * *"     # morning slot window (UTC)
     - cron: "*/10 15-23 * * *"    # evening slot window (UTC)
     - cron: "*/10 0-2 * * *"      # catch late-window replies past midnight
   workflow_dispatch:

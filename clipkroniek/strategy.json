@@ -6,7 +6,7 @@
   "brand_focus": "Daily reposts of the best FRESH GTA V and VALORANT clips (with creator credit). Western/English-first audience; running a geo A/B (Western vs Asian-language source clips) to learn which converts. Optimize for reach and shares.",
   "cta": "Follow @clipkroniek for daily clips 🎮",
   "cadence": {
-    "posts_per_week": 7,
+    "posts_per_week": 14,
     "max_posts_per_day": 2
   },
   "tolerance_minutes": 150,
@@ -499,12 +499,28 @@
   "slots": [
     {
       "weekday": 0,
+      "hour": 10,
+      "minute": 12,
+      "game": "valorant",
+      "region": "western",
+      "source": "twitch"
+    },
+    {
+      "weekday": 0,
       "hour": 21,
       "minute": 18,
       "game": "gta",
       "region": "western",
       "source": "twitch",
       "note": "Mon - GTA western, US-evening slot (23:18 CET ~= 17:18 EST) - timing A/B vs the EU-evening slots"
+    },
+    {
+      "weekday": 1,
+      "hour": 9,
+      "minute": 48,
+      "game": "gta",
+      "region": "western",
+      "source": "twitch"
     },
     {
       "weekday": 1,
@@ -517,12 +533,28 @@
     },
     {
       "weekday": 2,
+      "hour": 11,
+      "minute": 5,
+      "game": "valorant",
+      "region": "western",
+      "source": "twitch"
+    },
+    {
+      "weekday": 2,
       "hour": 20,
       "minute": 8,
       "game": "gta",
       "region": "asian",
       "source": "twitch",
       "note": "Wed - GTA Asian-source A/B probe (Twitch)"
+    },
+    {
+      "weekday": 3,
+      "hour": 10,
+      "minute": 27,
+      "game": "gta",
+      "region": "asian",
+      "source": "twitch"
     },
     {
       "weekday": 3,
@@ -535,6 +567,14 @@
     },
     {
       "weekday": 4,
+      "hour": 9,
+      "minute": 39,
+      "game": "valorant",
+      "region": "western",
+      "source": "twitch"
+    },
+    {
+      "weekday": 4,
       "hour": 18,
       "minute": 23,
       "game": "gta",
@@ -544,12 +584,28 @@
     },
     {
       "weekday": 5,
+      "hour": 11,
+      "minute": 18,
+      "game": "gta",
+      "region": "western",
+      "source": "twitch"
+    },
+    {
+      "weekday": 5,
       "hour": 20,
       "minute": 15,
       "game": "valorant",
       "region": "asian",
       "source": "twitch",
       "note": "Sat - VALORANT Asian-source A/B probe (Twitch)"
+    },
+    {
+      "weekday": 6,
+      "hour": 10,
+      "minute": 41,
+      "game": "valorant",
+      "region": "asian",
+      "source": "twitch"
     },
     {
       "weekday": 6,
