@@ -1368,6 +1368,26 @@ def _safe_key(s):
 # =============================================================================
 # YouTube Shorts cross-post (optional — only fires if YT_* secrets are present)
 # =============================================================================
+def _clip_from_url(url):
+    """Build a ONE-CLIP pool from a Twitch clip URL — the manual repost path, for when a
+    clip needs to go out exactly as-is (e.g. smart-trim cut the setup off and the post was
+    taken down). Skips discovery entirely."""
+    slug = url.rstrip("/").split("/clip/")[-1].split("?")[0]
+    cid, secret = env("TWITCH_CLIENT_ID"), env("TWITCH_CLIENT_SECRET")
+    tok = twitch.get_app_token(cid, secret, http)
+    got = twitch.get_clips_by_id([slug], cid, tok, http)
+    c = got.get(slug)
+    if not c:
+        sys.exit(f"Could not fetch clip {slug!r} from Twitch.")
+    c = dict(c)
+    c.setdefault("source", "twitch")
+    c["is_curated"] = False
+    created = _parse_ts(c.get("created_at"))
+    hours = max(0.25, (now_utc() - created).total_seconds() / 3600.0) if created else 1.0
+    c["velocity"] = round(float(c.get("view_count") or 0) / hours, 2)
+    return [c]
+
+
 def _yt_allowed(strategy, history, slot):
     """Gate the YouTube cross-post so YT can run at a SLOWER, NARROWER cadence than
     Instagram: an optional game allowlist (`youtube.games`) plus a rolling 7-day cap
@@ -1857,7 +1877,14 @@ def main():
     print(f"[{BRAND_NAME}] slot {key} — game={slot['game']} "
           f"region={slot['region']} source={slot.get('source', 'twitch')}")
 
-    pool = discover_clip(strategy, slot, history)
+    repost_url = (os.environ.get("CLIP_URL") or "").strip()
+    if repost_url:
+        pool = _clip_from_url(repost_url)
+        c0 = pool[0]
+        print(f"CLIP_URL override — reposting {c0.get('title')!r} by "
+              f"{c0.get('broadcaster_name')} ({c0.get('duration')}s, {c0.get('view_count')} views)")
+    else:
+        pool = discover_clip(strategy, slot, history)
     if not pool:
         # A rotated-in game can have (almost) no clips yet — a launch wave the scanner
         # flagged before the game actually took off. Don't let that dark a slot: retry
@@ -1884,9 +1911,10 @@ def main():
     # PICK_INDEX forces a specific pool rank (0 = top-ranked) instead of letting Claude
     # judge — used when the owner wants the highest-momentum clip regardless of title.
     _pi = (os.environ.get("PICK_INDEX") or "").strip()
+    _idx = int(_pi) if _pi.isdigit() else (0 if repost_url else None)
     _produce_and_post(strategy, history, slot, key, pool, dry=dry,
-                      discover_only=discover_only,
-                      chosen_index=int(_pi) if _pi.isdigit() else None)
+                      discover_only=discover_only, chosen_index=_idx,
+                      human_desc=(os.environ.get("HUMAN_DESC") or "").strip() or None)
 
 
 def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
@@ -1943,6 +1971,10 @@ def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
     dur_src = _probe(raw).get("duration_s")
     # --- smart-trim (#12): audio peak + transcript-assisted cut moment ---------
     trim, trimmed, trim_meta, transcript = _decide_trim(strategy, key, raw, dur_src)
+    if os.environ.get("NO_TRIM") == "1":
+        print(f"  NO_TRIM=1 — posting the FULL clip ({dur_src}s), no smart-trim")
+        trim, trimmed = None, False
+        trim_meta = dict(trim_meta or {}, no_trim=True)
     if trim:
         src = ("audio+speech" if trim_meta.get("transcript_used")
                else "action/no-speech" if trim_meta.get("no_speech") else "audio")

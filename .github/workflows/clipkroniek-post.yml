@@ -45,6 +45,19 @@ on:
         type: choice
         options: ["", "top3", "longform"]
         default: ""
+      clip_url:
+        description: "Repost this exact Twitch clip URL (skips discovery)"
+        required: false
+        default: ""
+      no_trim:
+        description: "Post the WHOLE clip (disable smart-trim)?"
+        type: choice
+        options: ["no", "yes"]
+        default: "no"
+      human_desc:
+        description: "One-line hint for the caption (what the clip is about)"
+        required: false
+        default: ""
       pick_index:
         description: "Force a pool rank instead of Claude's pick (0 = top-ranked; blank = judge)"
         required: false
@@ -126,6 +139,9 @@ jobs:
           # Weekly Sunday crons select the format; manual dispatch can override.
           FORMAT_OVERRIDE: ${{ github.event.inputs.format_override || (github.event.schedule == '30 11 * * 0' && 'top3') || (github.event.schedule == '30 12 * * 0' && 'longform') || '' }}
           PICK_INDEX:    ${{ github.event.inputs.pick_index }}
+          CLIP_URL:      ${{ github.event.inputs.clip_url }}
+          NO_TRIM:       ${{ github.event.inputs.no_trim == 'yes' && '1' || '' }}
+          HUMAN_DESC:    ${{ github.event.inputs.human_desc }}
           SLOT_GAME:     ${{ github.event.inputs.slot_game }}
           SLOT_REGION:   ${{ github.event.inputs.slot_region }}
           SLOT_SOURCE:   ${{ github.event.inputs.slot_source }}
