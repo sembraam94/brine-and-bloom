@@ -395,6 +395,68 @@
         "views": 116,
         "ig_reels_avg_watch_time": 4636
       }
+    },
+    {
+      "slot_key": "2026-07-21-w1-18-forced",
+      "date_utc": "2026-07-21T07:09:23.409738+00:00",
+      "local_date": "2026-07-21",
+      "weekday": 1,
+      "slot_hour": 18,
+      "game": "valorant",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "EphemeralZanyAlfalfaTheThing-yL04KJXPP003BvRd",
+      "clip_url": "https://www.twitch.tv/luk_xoxo/clip/EphemeralZanyAlfalfaTheThing-yL04KJXPP003BvRd",
+      "broadcaster": "luk_xoxo",
+      "creator": "luk_xoxo",
+      "language": "pt",
+      "clip_views": 1639,
+      "clip_velocity": 116.53,
+      "duration_s": 13.0,
+      "trimmed": true,
+      "trim": [
+        0.8,
+        13.8
+      ],
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "Portuguese",
+        "verbal_moment": 21.0,
+        "audio_peak": 8.8,
+        "lead_in_s": 8.0
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#7)",
+      "youtube": {
+        "id": "20mrNr6KRD0",
+        "url": "https://youtu.be/20mrNr6KRD0",
+        "privacy": "public"
+      },
+      "facecam": [
+        0.04,
+        0.04,
+        0.21,
+        0.24
+      ],
+      "captions": true,
+      "translated": true,
+      "credit": "luk_xoxo",
+      "title": "kkkkkkkkkk",
+      "hook": "",
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#valorantbr"
+      ],
+      "media_id": "18126977452578096",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
