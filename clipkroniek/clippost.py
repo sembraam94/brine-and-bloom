@@ -1859,6 +1859,21 @@ def main():
 
     pool = discover_clip(strategy, slot, history)
     if not pool:
+        # A rotated-in game can have (almost) no clips yet — a launch wave the scanner
+        # flagged before the game actually took off. Don't let that dark a slot: retry
+        # with the other slotted games, most-established first.
+        counts = {}
+        for s in strategy.get("slots", []):
+            g = s.get("game")
+            if g and g != slot.get("game"):
+                counts[g] = counts.get(g, 0) + 1
+        for alt in sorted(counts, key=counts.get, reverse=True):
+            print(f"  no qualifying clip for {slot.get('game')!r} — falling back to {alt!r}")
+            slot = dict(slot, game=alt)
+            pool = discover_clip(strategy, slot, history)
+            if pool:
+                break
+    if not pool:
         print("No fresh qualifying clip for this slot — skipping (no post).")
         return
 
