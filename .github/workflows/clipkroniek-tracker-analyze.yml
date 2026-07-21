@@ -16,6 +16,14 @@ on:
         description: "Winner tier for the trajectory-shape section (top N% by 24h views)"
         required: false
         default: "25"
+      traj_game:
+        description: "Limit trajectory + top-clip sections to one category (e.g. Just Chatting)"
+        required: false
+        default: ""
+      top_k:
+        description: "How many individual top clips to dump trajectories for"
+        required: false
+        default: "5"
 
 permissions:
   contents: read
@@ -47,4 +55,6 @@ jobs:
           R2_BUCKET:            ${{ secrets.R2_BUCKET }}
           R2_PUBLIC_BASE_URL:   ${{ secrets.R2_PUBLIC_BASE_URL }}
           TRAJ_TOP_PCT:         ${{ github.event.inputs.top_pct || '25' }}
+          TRAJ_GAME:            ${{ github.event.inputs.traj_game }}
+          TRAJ_TOP_K:           ${{ github.event.inputs.top_k || '5' }}
         run: python tracker_analyze.py

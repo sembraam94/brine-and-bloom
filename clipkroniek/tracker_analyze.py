@@ -1124,10 +1124,19 @@ def analyze(clips, active, run_utc, stats, dupes):
     ctx = {"run_utc": run_utc, "inv": inv, "usable": usable, "control24": control24,
            "results": {}, "gate_passed": False, "headline": {"usable": False, "m": None},
            "stats": stats, "dupes": dupes, "active_n": len(active),
-           "early_dev": early_development(early_pool, rng),
-           "trajectory": trajectory_shape(early_pool,
-                                          top_frac=float(os.environ.get("TRAJ_TOP_PCT") or 25) / 100.0),
-           "top_clip": top_clip_trajectory(early_pool, k=5)}
+           "early_dev": early_development(early_pool, rng)}
+
+    # TRAJ_GAME narrows the trajectory + top-clip sections to one category (e.g.
+    # "Just Chatting") so a niche can be evaluated on its own.
+    gf = (os.environ.get("TRAJ_GAME") or "").strip().lower()
+    traj_pool = early_pool
+    if gf:
+        traj_pool = [r for r in early_pool if gf in str(r.get("game") or "").lower()]
+        print(f"[TRAJ_GAME] '{gf}' -> {len(traj_pool)} of {len(early_pool)} clips")
+    ctx["game_filter"] = gf or None
+    ctx["trajectory"] = trajectory_shape(
+        traj_pool, top_frac=float(os.environ.get("TRAJ_TOP_PCT") or 25) / 100.0)
+    ctx["top_clip"] = top_clip_trajectory(traj_pool, k=int(os.environ.get("TRAJ_TOP_K") or 5))
 
     if usable < FLOOR_USABLE or control24 < FLOOR_CONTROL24:
         return ctx
