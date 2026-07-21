@@ -1838,8 +1838,12 @@ def main():
     if hr.get("enabled") and telegram.configured() and not (force or dry or discover_only):
         propose_review(strategy, history, slot, key, pool)
         return
+    # PICK_INDEX forces a specific pool rank (0 = top-ranked) instead of letting Claude
+    # judge — used when the owner wants the highest-momentum clip regardless of title.
+    _pi = (os.environ.get("PICK_INDEX") or "").strip()
     _produce_and_post(strategy, history, slot, key, pool, dry=dry,
-                      discover_only=discover_only)
+                      discover_only=discover_only,
+                      chosen_index=int(_pi) if _pi.isdigit() else None)
 
 
 def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,

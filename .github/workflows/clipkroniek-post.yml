@@ -44,6 +44,10 @@ on:
         type: choice
         options: ["", "top3", "longform"]
         default: ""
+      pick_index:
+        description: "Force a pool rank instead of Claude's pick (0 = top-ranked; blank = judge)"
+        required: false
+        default: ""
       slot_game:
         description: "Override game (blank = slot's): gta | valorant"
         required: false
@@ -120,6 +124,7 @@ jobs:
           DISCOVER_ONLY: ${{ github.event.inputs.discover_only == 'yes' && '1' || '' }}
           # Weekly Sunday crons select the format; manual dispatch can override.
           FORMAT_OVERRIDE: ${{ github.event.inputs.format_override || (github.event.schedule == '30 11 * * 0' && 'top3') || (github.event.schedule == '30 12 * * 0' && 'longform') || '' }}
+          PICK_INDEX:    ${{ github.event.inputs.pick_index }}
           SLOT_GAME:     ${{ github.event.inputs.slot_game }}
           SLOT_REGION:   ${{ github.event.inputs.slot_region }}
           SLOT_SOURCE:   ${{ github.event.inputs.slot_source }}
