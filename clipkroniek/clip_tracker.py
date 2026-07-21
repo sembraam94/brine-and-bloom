@@ -97,6 +97,9 @@ def main():
     prune_ms = float(cfg.get("prune_by_milestone", 1.5))
     keep_top = int(cfg.get("keep_top_per_game", 25))
     del_misses = int(cfg.get("delete_after_misses", 2))
+    # how long after a milestone we'll still accept a snapshot for it (tracker runs every
+    # ~30 min; GitHub can delay a run, so allow a few hours, but never a stale back-fill)
+    max_lag = float(cfg.get("max_milestone_lag_h", 3.0))
 
     # Extended follow-up: keep snapshotting the top-N clips (by 24h views) beyond 24h,
     # every `interval_h`, up to `until_h` — to see how the durable winners develop.
@@ -191,7 +194,12 @@ def main():
         want = list(milestones) + (ext_ms if rec.get("extended") else [])
         recorded = {s["target_h"] for s in rec["snapshots"]}
         for m in want:
-            if age >= m and m not in recorded and vc is not None:
+            # Only record a milestone the clip crossed RECENTLY. Without the upper bound,
+            # adding a new milestone (or a tracker outage) back-fills it on clips already
+            # far past that age, stamping today's view count with an old label — e.g. a
+            # 40h-old clip writing its current count as its "14h" value. A gap is fine;
+            # a wrong data point is not.
+            if m not in recorded and vc is not None and m <= age <= m + max_lag:
                 rec["snapshots"].append({"target_h": m, "age_h": round(age, 3), "views": vc})
 
     # --- prune: keep only the top-N per game past the checkpoint (control exempt) --

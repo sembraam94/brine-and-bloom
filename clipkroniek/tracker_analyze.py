@@ -739,9 +739,15 @@ def top_clip_trajectory(clips, k=3):
     ranked.sort(key=lambda t: t[0], reverse=True)
     out = []
     for v24, r in ranked[:k]:
-        snaps = sorted(({"h": float(s.get("target_h")), "views": int(s.get("views"))}
+        # Validate age against the label: a snapshot taken long after its milestone (a
+        # back-filled point from before the tracker's max-lag guard) carries a much later
+        # view count under an early label — drop it rather than plot a wrong value.
+        snaps = sorted(({"h": float(s["target_h"]), "views": int(s["views"])}
                         for s in (r.get("snapshots") or [])
-                        if s.get("views") is not None and s.get("target_h") is not None),
+                        if s.get("views") is not None and s.get("target_h") is not None
+                        and s.get("age_h") is not None
+                        and abs(float(s["age_h"]) - float(s["target_h"]))
+                        <= _ms_tol(float(s["target_h"]))),
                        key=lambda s: s["h"])
         out.append({"v24": int(round(v24)), "game": r.get("game"),
                     "broadcaster": r.get("broadcaster"), "creator": r.get("creator"),

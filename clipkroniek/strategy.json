@@ -369,6 +369,7 @@
     "prune_by_milestone": 1.5,
     "keep_top_per_game": 25,
     "delete_after_misses": 2,
+    "max_milestone_lag_h": 3.0,
     "extended": {
       "enabled": true,
       "top_n": 10,
