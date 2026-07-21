@@ -111,30 +111,70 @@ def send_candidates(candidates, slot_label):
             print(f"  could not deliver clip #{c['n']} to Telegram")
     if not sent:
         return None                                   # nothing arrived -> caller falls back
-    send_message("Reply like:  2 - clutch 1v4 with a knife\n"
-                 "(the number is your pick; the rest becomes a one-line hint for the caption).\n"
-                 "No reply in time → I'll auto-pick and post so the slot isn't missed.")
+    send_message("Reply with your pick, optionally a CUT, then a one-line hint:\n"
+                 "  2 - clutch 1v4 with a knife        (I choose the cut)\n"
+                 "  2 15-28 clutch 1v4                 (keep 15s → 28s)\n"
+                 "  2 0:15-0:28 clutch 1v4             (mm:ss also works)\n"
+                 "  2 full clutch 1v4                  (post the whole clip)\n"
+                 "The hint becomes the caption. No reply in time → I auto-pick and post "
+                 "so the slot isn't missed.")
     return baseline
 
 
 _PICK_RE = re.compile(r"^\s*#?\s*([1-9])\b[\s\-:.)]*\s*(.*)$", re.S)
+# an optional cut right after the number: "15-28", "0:15-0:28", "15 to 28"
+_SPAN_RE = re.compile(r"^\s*(\d{1,3}(?::\d{2})?(?:\.\d+)?)\s*(?:-|–|—|to)\s*"
+                      r"(\d{1,3}(?::\d{2})?(?:\.\d+)?)\s*(.*)$", re.S | re.I)
+# ...or an explicit "keep it whole"
+_WHOLE_RE = re.compile(r"^\s*(full|whole|all|alles|heel)\b[\s\-:.,]*(.*)$", re.S | re.I)
+
+
+def _to_sec(tok):
+    tok = tok.strip()
+    if ":" in tok:
+        m, s = tok.split(":", 1)
+        return int(m) * 60 + float(s)
+    return float(tok)
+
+
+def parse_reply(text, n_candidates):
+    """Parse '<n> [cut] [description]'. Returns (choice, span, description) where span is
+    (start_s, end_s) for an explicit cut, the string 'whole' to disable trimming, or None
+    to let the pipeline decide. Lets the owner say WHICH PART to keep, since they're
+    watching the clip anyway and the auto-trim can pick the wrong moment."""
+    m = _PICK_RE.match((text or "").strip())
+    if not m or not (1 <= int(m.group(1)) <= n_candidates):
+        return None, None, None
+    choice, rest = int(m.group(1)), (m.group(2) or "")
+    span = None
+    w = _WHOLE_RE.match(rest)
+    sp = _SPAN_RE.match(rest)
+    if w:
+        span, rest = "whole", w.group(2)
+    elif sp:
+        try:
+            a, b = _to_sec(sp.group(1)), _to_sec(sp.group(2))
+            if b > a >= 0:
+                span, rest = (a, b), sp.group(3)
+        except Exception:
+            pass
+    return choice, span, (rest or "").strip() or None
 
 
 def poll_decision(after_update_id, n_candidates):
-    """Read the owner's reply picking a candidate. Returns (choice:int|None,
+    """Read the owner's reply picking a candidate. Returns (choice:int|None, span,
     description:str|None, last_update_id). Only messages from the configured chat that
     start with a valid candidate number count; the LATEST such reply wins."""
     j = _call("getUpdates", {"offset": (after_update_id or 0) + 1, "timeout": 0})
     ups = j.get("result") or []
     last = after_update_id or 0
-    choice = desc = None
+    choice = span = desc = None
     for u in ups:
         last = max(last, u["update_id"])
         msg = u.get("message") or u.get("edited_message") or {}
         if str((msg.get("chat") or {}).get("id")) != str(_chat()):
             continue
-        m = _PICK_RE.match((msg.get("text") or "").strip())
-        if m and 1 <= int(m.group(1)) <= n_candidates:
-            choice = int(m.group(1))
-            desc = (m.group(2) or "").strip() or None
-    return choice, desc, last
+        c, sp, d = parse_reply(msg.get("text") or "", n_candidates)
+        if c is not None:
+            choice, span, desc = c, sp, d
+    return choice, span, desc, last

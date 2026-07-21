@@ -1787,12 +1787,16 @@ def fulfill_reviews(strategy, history, dry=False):
             delete_from_r2(state.get("preview_keys", []))
             continue
         pool = state.get("pool") or []
-        choice, desc, last = telegram.poll_decision(state.get("baseline_update_id", 0), len(pool))
+        choice, span, desc, last = telegram.poll_decision(
+            state.get("baseline_update_id", 0), len(pool))
         deadline = _parse_ts(state.get("deadline_utc"))
-        chosen = human_desc = None
+        chosen = human_desc = cut = None
         if choice is not None:
-            chosen, human_desc = choice - 1, desc
-            telegram.send_message(f"✅ Posting #{choice}" + (f" — {desc}" if desc else "") + " now …")
+            chosen, human_desc, cut = choice - 1, desc, span
+            cutmsg = (" (whole clip)" if span == "whole"
+                      else f" (cut {span[0]:g}-{span[1]:g}s)" if span else "")
+            telegram.send_message(f"✅ Posting #{choice}{cutmsg}"
+                                  + (f" — {desc}" if desc else "") + " now …")
         elif deadline and now_utc() >= deadline:
             telegram.send_message("⏰ No reply in the window — auto-posting my pick.")
             # chosen stays None -> Claude picks among the candidates (autonomous)
@@ -1802,7 +1806,8 @@ def fulfill_reviews(strategy, history, dry=False):
             continue
         try:
             _produce_and_post(strategy, history, state["slot"], slot_key, pool,
-                              dry=dry, chosen_index=chosen, human_desc=human_desc)
+                              dry=dry, chosen_index=chosen, human_desc=human_desc,
+                              trim_override=cut)
         except (Exception, SystemExit) as e:          # leave pending -> retry / deadline fallback
             print(f"  fulfill: post attempt failed ({e}) — keeping pending for retry.")
             telegram.send_message("⚠️ That post attempt failed; I'll retry shortly.")
@@ -1918,7 +1923,8 @@ def main():
 
 
 def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
-                      discover_only=False, human_desc=None, chosen_index=None):
+                      discover_only=False, human_desc=None, chosen_index=None,
+                      trim_override=None):
     """Build and publish ONE post from `pool`. Normally Claude picks; in the human-in-
     the-loop path `chosen_index` (the owner's pick) is forced and `human_desc` (what the
     owner said the clip is about) grounds a sharper caption."""
@@ -1971,6 +1977,20 @@ def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
     dur_src = _probe(raw).get("duration_s")
     # --- smart-trim (#12): audio peak + transcript-assisted cut moment ---------
     trim, trimmed, trim_meta, transcript = _decide_trim(strategy, key, raw, dur_src)
+    if trim_override == "whole":
+        print(f"  owner said KEEP WHOLE — posting the full clip ({dur_src}s)")
+        trim, trimmed = None, False
+        trim_meta = dict(trim_meta or {}, owner_cut="whole")
+    elif isinstance(trim_override, (list, tuple)) and len(trim_override) == 2:
+        a_s, b_s = float(trim_override[0]), float(trim_override[1])
+        if dur_src:
+            b_s = min(b_s, float(dur_src))
+        if b_s > a_s >= 0:
+            trim, trimmed = (round(a_s, 2), round(b_s, 2), round((a_s + b_s) / 2, 2)), True
+            trim_meta = dict(trim_meta or {}, owner_cut=[round(a_s, 2), round(b_s, 2)])
+            print(f"  owner CUT {trim[0]}-{trim[1]}s (overrides smart-trim)")
+        else:
+            print(f"  owner cut {trim_override} is invalid for a {dur_src}s clip — ignoring")
     if os.environ.get("NO_TRIM") == "1":
         print(f"  NO_TRIM=1 — posting the FULL clip ({dur_src}s), no smart-trim")
         trim, trimmed = None, False
