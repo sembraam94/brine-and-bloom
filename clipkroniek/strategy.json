@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "updated": "2026-07-14",
+  "version": 2,
+  "updated": "2026-07-21",
   "account_start_date": "2025-10-10",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Daily reposts of the best FRESH GTA V and VALORANT clips (with creator credit). Western/English-first audience; running a geo A/B (Western vs Asian-language source clips) to learn which converts. Optimize for reach and shares.",
@@ -41,7 +41,8 @@
   },
   "games": {
     "gta": "Grand Theft Auto V",
-    "valorant": "VALORANT"
+    "valorant": "VALORANT",
+    "halo_campaign_evolved": "Halo: Campaign Evolved"
   },
   "reddit_subreddits": {
     "gta": [
@@ -507,9 +508,10 @@
       "weekday": 0,
       "hour": 10,
       "minute": 12,
-      "game": "valorant",
+      "game": "halo_campaign_evolved",
       "region": "western",
-      "source": "twitch"
+      "source": "twitch",
+      "note": "western halo_campaign_evolved (rotated in 2026-07-21: Full remake launching July 28; first Halo campaign)"
     },
     {
       "weekday": 0,
@@ -532,18 +534,19 @@
       "weekday": 1,
       "hour": 18,
       "minute": 37,
-      "game": "valorant",
+      "game": "halo_campaign_evolved",
       "region": "western",
       "source": "twitch",
-      "note": "Tue - VALORANT western (Twitch)"
+      "note": "western halo_campaign_evolved (rotated in 2026-07-21: Full remake launching July 28; first Halo campaign)"
     },
     {
       "weekday": 2,
       "hour": 11,
       "minute": 5,
-      "game": "valorant",
+      "game": "halo_campaign_evolved",
       "region": "western",
-      "source": "twitch"
+      "source": "twitch",
+      "note": "western halo_campaign_evolved (rotated in 2026-07-21: Full remake launching July 28; first Halo campaign)"
     },
     {
       "weekday": 2,
@@ -625,7 +628,17 @@
   ],
   "caption_strategy": "Lead with a curiosity/hype hook that makes a non-follower stop. Name the game plainly for search. Keep it 1-2 short lines. Always credit the streamer/clipper. End with the follow CTA. No generic mega-tags.",
   "hashtag_strategy": "4-5 niche tags matching the game (e.g. #gtarp #gta6 #nopixel for GTA; #valorant #valorantclips for VALORANT). Vary two per post. Avoid #gaming/#viral mega-tags.",
-  "learnings": "Fresh account revival (Direction A). Prior run: 332K reach on reposts but ~0 follows (reach-without-identity). This cycle: consistency (never go dark), tight GTA+VALORANT niche, Western-first with a 2x/week Asian-source A/B probe. Watch follows_per_reach and shares_per_reach by region+game; retire the weaker region/game once signal is clear.",
-  "next_review": "2026-07-21",
-  "discover_pages": 8
+  "learnings": "Data is too thin to draw conclusions — nearly every cell is under 8 posts, and zero follows or profile visits have been recorded across all 5 posts live so far. The funnel is leaking at the very first step (visits_per_reach = 0.0 everywhere), meaning captions and hooks are not compelling viewers to tap the profile at all. The one directional signal worth noting: GTA retention (0.33) is noticeably weaker than Valorant (0.62) and Twitch singles (0.58), and the compilation format cratered at 0.17 — avoid compilations and prioritise single Twitch clips. For captions, your immediate focus is profile-tap triggers: end every caption with a direct CTA (\"Follow for daily clips 🎮\") and open with a reaction hook (\"bro actually did this 😭\"). Keep the smart-trim test running but do not read it yet. Hold all region, hour, and game conclusions until cells hit 8+ posts — likely another 2–3 weeks at current cadence.",
+  "next_review": "2026-07-28",
+  "discover_pages": 8,
+  "game_hashtags": {
+    "halo_campaign_evolved": [
+      "#haloclips",
+      "#masterchief",
+      "#fpsclips",
+      "#haloremake",
+      "#fpsgaming",
+      "#tactical"
+    ]
+  }
 }
