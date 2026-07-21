@@ -398,7 +398,7 @@
   "slots": [
     {
       "weekday": 0,
-      "hour": 23,
+      "hour": 21,
       "minute": 18,
       "game": "gta",
       "region": "western",
@@ -425,7 +425,7 @@
     },
     {
       "weekday": 3,
-      "hour": 23,
+      "hour": 21,
       "minute": 22,
       "game": "valorant",
       "region": "western",
