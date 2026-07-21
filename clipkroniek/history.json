@@ -515,6 +515,62 @@
       "media_id": "18169553647444832",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-21-w1-09-forced",
+      "date_utc": "2026-07-21T18:48:13.920371+00:00",
+      "local_date": "2026-07-21",
+      "weekday": 1,
+      "slot_hour": 9,
+      "game": "gta",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "OilyDirtyBaguetteAMPEnergy-vW8FnWGmrEGvjqau",
+      "clip_url": "https://www.twitch.tv/jynxzi/clip/OilyDirtyBaguetteAMPEnergy-vW8FnWGmrEGvjqau",
+      "broadcaster": "Jynxzi",
+      "creator": "pureIife",
+      "language": "en",
+      "clip_views": 2575,
+      "clip_velocity": 127.43,
+      "duration_s": 30.1,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 25.9,
+        "audio_peak": 25.9,
+        "lead_in_s": 5.0,
+        "no_trim": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate his reaction 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#9)",
+      "youtube": null,
+      "facecam": [
+        0.0,
+        0.42,
+        0.26,
+        0.48
+      ],
+      "captions": true,
+      "translated": false,
+      "credit": "@jynxzi",
+      "title": "HARD R",
+      "hook": "",
+      "hashtags": [
+        "#jynxzi",
+        "#gtaclips",
+        "#gtarp",
+        "#grandtheftautov",
+        "#twitchclips"
+      ],
+      "media_id": "18118588954680608",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
