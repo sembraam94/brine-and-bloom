@@ -19,7 +19,11 @@
   "burn_hook": false,
   "regions": {
     "western": [
-      "en"
+      "en",
+      "de",
+      "fr",
+      "es",
+      "pt"
     ],
     "asian": [
       "ko",
@@ -289,7 +293,7 @@
     "shinjifromjapanxd",
     "kaysan"
   ],
-  "curated_boost": 2.0,
+  "curated_boost": 1.25,
   "prune_broadcasters": [
     "riotgames", "valorant", "rainbow6", "playapex", "rocketleague", "warframe",
     "worldoftanks", "eslcs", "lck", "lolesportstw", "ow_esports", "ow_esports_jp",
