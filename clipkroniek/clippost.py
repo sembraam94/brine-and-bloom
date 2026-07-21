@@ -1688,7 +1688,7 @@ def propose_review(strategy, history, slot, key, pool):
             continue
         cands.append(c)
         preview_keys.append(pkey)
-        previews.append({"n": len(cands), "url": url, "title": c.get("title"),
+        previews.append({"n": len(cands), "path": rawp, "url": url, "title": c.get("title"),
                          "broadcaster": c.get("broadcaster_name"), "game": game_label,
                          "views": c.get("view_count")})
 
