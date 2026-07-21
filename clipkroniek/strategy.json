@@ -7,7 +7,7 @@
   "cta": "Follow @clipkroniek for daily clips 🎮",
   "cadence": {
     "posts_per_week": 7,
-    "max_posts_per_day": 1
+    "max_posts_per_day": 2
   },
   "tolerance_minutes": 150,
   "jitter_minutes": 10,
