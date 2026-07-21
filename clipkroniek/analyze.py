@@ -546,6 +546,13 @@ def rotate_games(strategy, history, dry):
         return False
 
     add_key, add_name = top["key"], top["twitch_name"]
+    # The scanner guesses a Twitch category name and Twitch's catalog is full of
+    # near-identical titles (e.g. "Halo: Combat Evolved" 2001 vs "Halo: Campaign Evolved"
+    # remake). A pinned name is authoritative so a rotation can't drift onto the wrong game.
+    pinned = (cfg.get("pinned_names") or {}).get(add_key)
+    if pinned and pinned != add_name:
+        print(f"  [rotation] pinned name overrides scanner: {add_name!r} -> {pinned!r}")
+        add_name = pinned
     worst_slots = [s for s in strategy.get("slots", []) if s.get("game") == worst]
     targets = worst_slots[: max(1, len(worst_slots) // 2)] if share else worst_slots
     for s in targets:
