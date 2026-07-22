@@ -600,6 +600,62 @@
       "media_id": "18118588954680608",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-22-w2-11",
+      "date_utc": "2026-07-22T11:29:22.431349+00:00",
+      "local_date": "2026-07-22",
+      "weekday": 2,
+      "slot_hour": 11,
+      "game": "gta",
+      "region": "western",
+      "source": "twitch",
+      "curated": true,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "InquisitiveSteamyPidgeonPhilosoraptor-XlHL6TV1Qg9mk4FV",
+      "clip_url": "https://www.twitch.tv/vanillamace/clip/InquisitiveSteamyPidgeonPhilosoraptor-XlHL6TV1Qg9mk4FV",
+      "broadcaster": "vanillamace",
+      "creator": "yuppalondra",
+      "language": "en",
+      "clip_views": 482,
+      "clip_velocity": 82.71,
+      "duration_s": 11.9,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 9.5,
+        "audio_peak": 6.6,
+        "lead_in_s": 6.0,
+        "owner_cut": "whole"
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate the crash 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#10)",
+      "youtube": null,
+      "facecam": [
+        0.0,
+        0.0,
+        0.26,
+        0.32
+      ],
+      "captions": true,
+      "translated": false,
+      "credit": "@vanillamace",
+      "title": "wear your seatbelts!",
+      "hook": "",
+      "hashtags": [
+        "#gtaclips",
+        "#gtarp",
+        "#gta5",
+        "#grandtheftautov",
+        "#gtafunny"
+      ],
+      "media_id": "18087475205646230",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
