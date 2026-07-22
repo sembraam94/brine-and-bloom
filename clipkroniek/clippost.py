@@ -849,6 +849,42 @@ def _decide_trim(strategy, slot_key, raw_path, dur):
     return win, (win is not None), meta, tr
 
 
+def _countdown_plan(strategy, slot_key, trim, trim_meta, reel_dur):
+    """A 'wait for it' + 3-2-1 countdown that lands ON the clip's detected peak — the
+    retention hook that keeps a viewer past the first second (the whole ballgame on a
+    small account). It reuses the SAME peak the smart-trim already finds (audio energy +
+    the transcript's verbal-reaction moment), so it needs ZERO manual input; the owner's
+    Telegram cut overrides it. Run as an A/B (its own salt) among clips that HAVE a
+    confident peak with enough runway. Returns (peak_at_reel_s | None, fire_bool):
+      - peak_at is set whenever the clip is ELIGIBLE (a usable peak in the runway window),
+        so the analyzer has a matched control group of eligible-but-off posts;
+      - fire is whether to actually burn it (eligible AND the A/B arm is on)."""
+    cfg = strategy.get("countdown", {}) or {}
+    if not cfg.get("enabled", True) or cfg.get("mode", "off") == "off":
+        return None, False
+    # Peak in REEL-relative seconds: a trimmed clip centres on trim[2], so the peak sits
+    # at (peak - start) into the reel; an untrimmed clip keeps the raw source timestamp.
+    if trim and len(trim) >= 3 and trim[2] is not None:
+        peak_at = float(trim[2]) - float(trim[0])
+    else:
+        src = (trim_meta or {}).get("verbal_moment")
+        if src is None:
+            src = (trim_meta or {}).get("audio_peak")
+        peak_at = float(src) if src is not None else None
+    if peak_at is None:
+        return None, False
+    lo = float(cfg.get("min_peak_s", 4.0))                 # need runway for a 3s count
+    hi = min(float(cfg.get("max_peak_s", 12.0)), float(reel_dur) - 0.3)
+    if not (lo <= peak_at <= hi):
+        return None, False                                 # peak too early/late -> skip
+    if cfg.get("mode", "ab") == "always":
+        fire = True
+    else:                                                  # 'ab' -> stable 50/50 by slot
+        h = hashlib.md5((slot_key + "|" + str(cfg.get("salt", "countdown-v1"))).encode())
+        fire = int(h.hexdigest(), 16) % 2 == 0
+    return round(peak_at, 2), fire
+
+
 def _clean_drawtext(s):
     """Sanitize an on-screen hook to a short, ffmpeg-drawtext-safe ASCII string."""
     s = "".join(ch for ch in (s or "") if ch.isalnum() or ch in " !?.-")
@@ -885,6 +921,31 @@ def _drawtext(font, text, **opts):
     parts = [f"fontfile='{fe}'", f"text='{text}'"]
     parts += [f"{k}={v}" for k, v in opts.items()]
     return "drawtext=" + ":".join(parts)
+
+
+def _countdown_draws(font, peak_at, reel_dur, text="WAIT FOR IT"):
+    """Drawtext filters for the 'wait for it' hook: hold the promise, then a big 3-2-1
+    that lands right on `peak_at` (reel-relative seconds). Returns [] if there isn't room
+    for a 3s countdown. Pure (no ffmpeg call) so the timing is unit-testable."""
+    if not font or not peak_at:
+        return []
+    peak_at = min(float(peak_at), float(reel_dur))
+    if peak_at < 4.0:                                      # not enough runway
+        return []
+    txt = _clean_drawtext(text) or "WAIT FOR IT"
+    hold_end = peak_at - 3.0
+    draws = [_drawtext(font, txt, fontcolor="white", fontsize=64, borderw=6,
+                       bordercolor="black@0.9", box=1, boxcolor="black@0.5",
+                       boxborderw=22, x="(w-text_w)/2", y=430,
+                       enable=f"between(t\\,0.30\\,{hold_end:.2f})")]
+    for i, n in enumerate((3, 2, 1)):                      # 3:[p-3,p-2] 2:[p-2,p-1] 1:[p-1,p]
+        a = peak_at - 3.0 + i
+        b = (peak_at - 0.15) if n == 1 else (a + 1.0)
+        draws.append(_drawtext(font, str(n), fontcolor="yellow", fontsize=250,
+                               borderw=10, bordercolor="black",
+                               x="(w-text_w)/2", y="(h-text_h)/2-40",
+                               enable=f"between(t\\,{a:.2f}\\,{b:.2f})"))
+    return draws
 
 
 def _facecam_stack_graph(in_path, box):
@@ -938,7 +999,8 @@ def _facecam_stack_graph(in_path, box):
 
 def reformat_reel(in_path, out_path, strategy, slot, hook_text="", trim=None,
                   max_s=60, rank_label=None, cta=True, facecam=None,
-                  credit=None, captions_ass=None):
+                  credit=None, captions_ass=None, countdown_at=None,
+                  countdown_text="WAIT FOR IT"):
     """9:16 Reel: blurred fill + a zoom-cropped gameplay overlay (#13, gameplay
     fills more of the frame), optional smart-trim to the action (#12), a permanent
     @clipkroniek watermark + a last-2.5s follow CTA (#1), loudness-normalised audio
@@ -1002,6 +1064,8 @@ def reformat_reel(in_path, out_path, strategy, slot, hook_text="", trim=None,
         draws.append(_drawtext(font, _clean_drawtext(rank_label), fontcolor="yellow",
                                fontsize=96, borderw=8, bordercolor="black",
                                x="(w-text_w)/2", y=300))
+    if countdown_at:                           # 'wait for it' + 3-2-1 into the peak
+        draws += _countdown_draws(font, countdown_at, dur, countdown_text)
     vfilters = list(draws)
     if captions_ass:                           # burn animated captions LAST (on top)
         vfilters.append(f"ass=filename={captions_ass}:fontsdir=fonts")
@@ -2076,11 +2140,21 @@ def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
                   + (f" + {len(en_seg)} EN translation lines" if en_seg else ""))
     credit = _streamer_credit(clip)
 
+    # --- 'wait for it' + 3-2-1 countdown onto the detected peak (A/B) -----------
+    cd_at, cd_fire = _countdown_plan(strategy, key, trim, trim_meta, reel_dur)
+    cd_text = (strategy.get("countdown", {}) or {}).get("text", "WAIT FOR IT")
+    if cd_fire:
+        print(f"  countdown ON: '{cd_text}' + 3-2-1 landing @ {cd_at}s of the "
+              f"{round(reel_dur, 1)}s reel")
+    elif cd_at is not None:
+        print(f"  countdown: eligible (peak @ {cd_at}s) but A/B arm OFF this slot (control)")
+
     reel = os.path.join(tmp, f"ck_reel_{_safe_key(clip['id'])}.mp4")
     print("Reformatting to 9:16 Reel...")
     reformat_reel(raw, reel, strategy, slot, hook_text=hook, trim=trim,
                   max_s=reel_max, facecam=facecam, credit=credit,
-                  captions_ass=captions_ass)
+                  captions_ass=captions_ass,
+                  countdown_at=(cd_at if cd_fire else None), countdown_text=cd_text)
     r_dur = _probe(reel).get("duration_s")
     duration_s = r_dur or (trim[1] - trim[0] if trim else dur_src)
     print(f"Built reel: {reel} ({os.path.getsize(reel) // 1024} KB, {duration_s}s)")
@@ -2175,6 +2249,8 @@ def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
         "facecam": list(facecam) if facecam else None,
         "captions": bool(captions_ass),
         "translated": translated,
+        "countdown": bool(cd_fire),
+        "countdown_at": cd_at,
         "credit": credit,
         "title": clip.get("title"),
         "hook": hook,

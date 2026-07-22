@@ -61,7 +61,14 @@ strategy.json -> clippost.py -> Instagram Reel -> Insights -> analyze.py -.
    and burns it via ffmpeg libass (Anton font bundled in `fonts/`, Noto Sans CJK
    auto-installed for JP/KR) — 1-3 UPPERCASE words, the spoken word pops + highlights
    yellow in sync; on for all clips (`strategy.captions`). Plus a small **streamer
-   credit** burned top-left (`@twitch-login`).
+   credit** burned top-left (`@twitch-login`). Optional **"wait for it" + 3-2-1
+   countdown** (`countdown`, `_countdown_plan`/`_countdown_draws`) that HOLDS a promise
+   then counts down onto the clip's peak — anchored to the SAME audio-peak/verbal-moment
+   the smart-trim already computes, so it needs no manual input (the owner's Telegram cut
+   overrides it). It's an **A/B** (own salt, decorrelated from trim) among clips with a
+   usable peak in a runway window (`min_peak_s`..`max_peak_s`); `mode:"off"` by default
+   (arm with `"ab"`/`"always"`). Records `countdown` + `countdown_at`; analyzer adds a
+   `countdown:on/off` cell (control = eligible-but-arm-off).
 5. **Cover** (`build_cover`, #3) — a frame at the action peak in the 9:16 look with
    `CLIPKRONIEK #N — GAME` burned into the grid-safe centre. Episode number is on
    the COVER ONLY (never the caption). `cover_url` with a `thumb_offset` fallback.

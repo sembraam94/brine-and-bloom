@@ -357,6 +357,14 @@
     "transcript_window_s": 5,
     "min_source_s": 35
   },
+  "countdown": {
+    "enabled": true,
+    "mode": "off",
+    "text": "WAIT FOR IT",
+    "min_peak_s": 4.0,
+    "max_peak_s": 12.0,
+    "salt": "countdown-v1"
+  },
   "transcribe": {
     "enabled": true,
     "self_host": true,
