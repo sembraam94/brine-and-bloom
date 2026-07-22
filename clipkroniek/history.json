@@ -656,6 +656,64 @@
       "media_id": "18087475205646230",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-22-w2-20",
+      "date_utc": "2026-07-22T18:57:44.112892+00:00",
+      "local_date": "2026-07-22",
+      "weekday": 2,
+      "slot_hour": 20,
+      "game": "gta",
+      "region": "asian",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "DifferentGoldenTurtleOneHand-9gbIQR-EBmbSDptg",
+      "clip_url": "https://www.twitch.tv/mitsuki_mitsuu/clip/DifferentGoldenTurtleOneHand-9gbIQR-EBmbSDptg",
+      "broadcaster": "みつきさんです",
+      "creator": "もぷもっぷ",
+      "language": "ja",
+      "clip_views": 94,
+      "clip_velocity": 20.48,
+      "duration_s": 8.4,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "Japanese",
+        "verbal_moment": 5.9,
+        "audio_peak": null,
+        "lead_in_s": 6.0,
+        "owner_cut": "whole"
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate the air time 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#11)",
+      "youtube": null,
+      "facecam": [
+        0.0,
+        0.35,
+        0.22,
+        0.42
+      ],
+      "captions": true,
+      "translated": true,
+      "countdown": false,
+      "countdown_at": null,
+      "credit": "@mitsuki_mitsuu",
+      "title": "まさかの直立飛び",
+      "hook": "",
+      "hashtags": [
+        "#gtaroleplay",
+        "#gtaclips",
+        "#gta5rp",
+        "#gtafunny",
+        "#gtav"
+      ],
+      "media_id": "18109345724056184",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
