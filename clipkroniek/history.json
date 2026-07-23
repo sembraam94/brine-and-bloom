@@ -742,6 +742,64 @@
       "media_id": "18109345724056184",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-23-w3-10",
+      "date_utc": "2026-07-23T11:30:48.934650+00:00",
+      "local_date": "2026-07-23",
+      "weekday": 3,
+      "slot_hour": 10,
+      "game": "gta",
+      "region": "asian",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "DelightfulFitCarabeefTTours-QQCKXdZupIRpa7Yp",
+      "clip_url": "https://www.twitch.tv/cielxxx247/clip/DelightfulFitCarabeefTTours-QQCKXdZupIRpa7Yp",
+      "broadcaster": "しえるー月乃えるなー",
+      "creator": "Sin_idress",
+      "language": "ja",
+      "clip_views": 1100,
+      "clip_velocity": 54.47,
+      "duration_s": 30.1,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "Japanese",
+        "verbal_moment": 24.0,
+        "audio_peak": 24.8,
+        "lead_in_s": 8.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "What would YOU do in this situation? 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#12)",
+      "youtube": null,
+      "facecam": [
+        0.0,
+        0.6,
+        0.18,
+        0.38
+      ],
+      "captions": true,
+      "translated": true,
+      "countdown": false,
+      "countdown_at": null,
+      "credit": "@cielxxx247",
+      "title": "起床直後から、BJローンに賄賂を渡すかの選択を飼い犬から迫られるルナガレ社長",
+      "hook": "",
+      "hashtags": [
+        "#gtarp",
+        "#gta5rp",
+        "#gtaonline",
+        "#gtaclips",
+        "#japanrp"
+      ],
+      "media_id": "18605334970058683",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
