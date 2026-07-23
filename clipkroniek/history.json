@@ -800,6 +800,64 @@
       "media_id": "18605334970058683",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-23-w3-21",
+      "date_utc": "2026-07-23T20:49:23.421777+00:00",
+      "local_date": "2026-07-23",
+      "weekday": 3,
+      "slot_hour": 21,
+      "game": "valorant",
+      "region": "western",
+      "source": "twitch",
+      "curated": true,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "BlatantTalentedRavenPipeHype-aNPCfChzN3aJ3PsO",
+      "clip_url": "https://www.twitch.tv/gofns/clip/BlatantTalentedRavenPipeHype-aNPCfChzN3aJ3PsO",
+      "broadcaster": "GOFNS",
+      "creator": "enma_2308",
+      "language": "en",
+      "clip_views": 153,
+      "clip_velocity": 24.73,
+      "duration_s": 30.1,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 22.7,
+        "audio_peak": 26.4,
+        "lead_in_s": 5.0,
+        "owner_cut": "whole"
+      },
+      "cover": "cover_url",
+      "first_comment": "What do you think your reaction time is? 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#13)",
+      "youtube": null,
+      "facecam": [
+        0.75,
+        0.14,
+        0.25,
+        0.36
+      ],
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "credit": "@gofns",
+      "title": "FNS REACTION TIME",
+      "hook": "",
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#gofns"
+      ],
+      "media_id": "17947177209038675",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
