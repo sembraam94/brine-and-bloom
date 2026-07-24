@@ -944,6 +944,63 @@
       "media_id": "18072491441415354",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-24-w4-18",
+      "date_utc": "2026-07-24T18:11:20.109709+00:00",
+      "local_date": "2026-07-24",
+      "weekday": 4,
+      "slot_hour": 18,
+      "game": "gta",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "DepressedMotionlessTurtleBatChest-PQ0VNhsHGLlNW4WH",
+      "clip_url": "https://www.twitch.tv/pepe_the_rarest/clip/DepressedMotionlessTurtleBatChest-PQ0VNhsHGLlNW4WH",
+      "broadcaster": "Pepe_The_Rarest",
+      "creator": "BobbyBdennis",
+      "language": "en",
+      "clip_views": 52,
+      "clip_velocity": 104.0,
+      "duration_s": 30.0,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 16.0,
+        "audio_peak": 16.8,
+        "lead_in_s": 7.0,
+        "owner_cut": [
+          5.0,
+          27.0
+        ],
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate the chaos 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#15)",
+      "youtube": null,
+      "facecam": null,
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "credit": "@pepe_the_rarest",
+      "title": "Perfect Spikes",
+      "hook": "",
+      "hashtags": [
+        "#gtarp",
+        "#gta5clips",
+        "#gtaonline",
+        "#nopixel",
+        "#gtaclips"
+      ],
+      "media_id": "18009140369945052",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
