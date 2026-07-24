@@ -886,6 +886,64 @@
       "media_id": "17947177209038675",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-24-w4-09",
+      "date_utc": "2026-07-24T11:21:00.241730+00:00",
+      "local_date": "2026-07-24",
+      "weekday": 4,
+      "slot_hour": 9,
+      "game": "valorant",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "ExcitedFastPuddingSoBayed-NS4dsGWZYXczTXoK",
+      "clip_url": "https://www.twitch.tv/joshseki/clip/ExcitedFastPuddingSoBayed-NS4dsGWZYXczTXoK",
+      "broadcaster": "joshseki",
+      "creator": "AloeOKay",
+      "language": "en",
+      "clip_views": 451,
+      "clip_velocity": 27.88,
+      "duration_s": 19.8,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 15.9,
+        "audio_peak": 15.4,
+        "lead_in_s": 8.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#14)",
+      "youtube": null,
+      "facecam": [
+        0.0,
+        0.07,
+        0.23,
+        0.36
+      ],
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "credit": "@joshseki",
+      "title": "just call me JY Papi",
+      "hook": "",
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#valorantclip"
+      ],
+      "media_id": "18072491441415354",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
