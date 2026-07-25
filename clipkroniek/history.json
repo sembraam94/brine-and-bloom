@@ -1092,6 +1092,64 @@
       "media_id": "17956084602193723",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-25-w5-20",
+      "date_utc": "2026-07-25T20:34:29.278832+00:00",
+      "local_date": "2026-07-25",
+      "weekday": 5,
+      "slot_hour": 20,
+      "game": "valorant",
+      "region": "asian",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "FuriousDifficultLegSaltBae-egSIZ1BatULWP9yV",
+      "clip_url": "https://www.twitch.tv/samoago/clip/FuriousDifficultLegSaltBae-egSIZ1BatULWP9yV",
+      "broadcaster": "SamoAgo",
+      "creator": "翅膀ツバサ_ユイ",
+      "language": "zh",
+      "clip_views": 351,
+      "clip_velocity": 189.59,
+      "duration_s": 22.6,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "Chinese",
+        "verbal_moment": 10.5,
+        "audio_peak": 9.8,
+        "lead_in_s": 6.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Could you pull this off on your first try? 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#17)",
+      "youtube": null,
+      "facecam": [
+        0.01,
+        0.01,
+        0.17,
+        0.32
+      ],
+      "captions": false,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "credit": "@samoago",
+      "title": "第一次狙擊就上手",
+      "hook": "",
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#operatorvalorant"
+      ],
+      "media_id": "18136421416584965",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
