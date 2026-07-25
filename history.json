@@ -468,6 +468,26 @@
         "follows": 0
       },
       "measured_at": "2026-07-25T06:37:44.708140+00:00"
+    },
+    {
+      "slot_key": "2026-206-w5-1108",
+      "date_utc": "2026-07-25T10:50:33.138411+00:00",
+      "local_date": "2026-07-25",
+      "weekday": 5,
+      "slot_hour": 11,
+      "format": "carousel",
+      "theme": "technique",
+      "title": "technique-dry-brine-salt-rest-for-crispy-skin",
+      "hashtags": [
+        "#DryBrine",
+        "#CrispyChickenSkin",
+        "#RoastChickenTechnique",
+        "#CookingTips",
+        "#WeeknightDinner"
+      ],
+      "media_id": "17914194759422481",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
