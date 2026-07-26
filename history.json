@@ -388,7 +388,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-25T06:37:44.708140+00:00"
+      "measured_at": "2026-07-26T07:09:46.395744+00:00"
     },
     {
       "slot_key": "2026-194-w0-1934",
@@ -407,7 +407,7 @@
       ],
       "media_id": "18170340997440435",
       "metrics": {},
-      "measured_at": "2026-07-25T06:37:44.708140+00:00"
+      "measured_at": "2026-07-26T07:09:46.395744+00:00"
     },
     {
       "slot_key": "2026-195-w1-1837",
@@ -437,7 +437,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-25T06:37:44.708140+00:00"
+      "measured_at": "2026-07-26T07:09:46.395744+00:00"
     },
     {
       "slot_key": "2026-197-w3-1217",
@@ -467,7 +467,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-25T06:37:44.708140+00:00"
+      "measured_at": "2026-07-26T07:09:46.395744+00:00"
     },
     {
       "slot_key": "2026-206-w5-1108",
@@ -486,8 +486,18 @@
         "#WeeknightDinner"
       ],
       "media_id": "17914194759422481",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 1,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 2,
+        "profile_visits": 0,
+        "follows": 0
+      },
+      "measured_at": "2026-07-26T07:09:46.395744+00:00"
     }
   ]
 }
