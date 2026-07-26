@@ -365,6 +365,16 @@
     "max_peak_s": 12.0,
     "salt": "countdown-v1"
   },
+  "early_velocity": {
+    "enabled": true,
+    "mode": "ab",
+    "salt": "ev-v1",
+    "snapshot_h": 0.5,
+    "max_age_h": 24,
+    "prefetch": 20,
+    "pool_size": 8,
+    "r2_prefix": "tracker/"
+  },
   "transcribe": {
     "enabled": true,
     "self_host": true,

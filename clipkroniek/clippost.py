@@ -445,6 +445,122 @@ def _broadcaster_recency_weight(history, name):
     return 1.0
 
 
+def _r2_get_json(key):
+    """Read a JSON object from R2 (None if absent/unreadable). Same client the review
+    state uses; reused here to read the clip tracker's live state."""
+    try:
+        b = _r2_client().get_object(Bucket=env("R2_BUCKET"), Key=key)["Body"].read()
+        return json.loads(b.decode("utf-8"))
+    except Exception:
+        return None
+
+
+def _early_velocity_arm(strategy, slot_key):
+    """A/B arm for the 30-min-top-performer experiment. 'ab' -> stable ~50/50 by a hash
+    of slot_key (own salt, independent of the trim/countdown splits); 'always'/'off' too.
+    Returns True when THIS slot should try to source a 30-min top performer."""
+    cfg = strategy.get("early_velocity", {}) or {}
+    if not cfg.get("enabled", True) or cfg.get("mode", "off") == "off":
+        return False
+    if cfg.get("mode") == "always":
+        return True
+    h = hashlib.md5((slot_key + "|" + str(cfg.get("salt", "ev-v1"))).encode())
+    return int(h.hexdigest(), 16) % 2 == 0
+
+
+def discover_early_velocity(strategy, slot, history):
+    """A/B TREATMENT pool: clips that were TOP PERFORMERS in their first ~30 minutes.
+    Sources candidates from the clip tracker's 0.5h snapshots (tracker/tracking.json),
+    because the tracker analysis showed 30-min velocity rank predicts the 24h winner
+    (rho~0.5, 1.75x lift). Filters to the slot's game+region, keeps only clips that are
+    still repostable, ranks by their 30-min view count, and re-fetches current metadata
+    so the pool matches discover_clip's shape. Returns [] (=> caller falls back to normal
+    discovery) when the tracker has no fresh qualifying clip for this game+region, so a
+    slot is never darkened by the experiment."""
+    cfg = strategy.get("early_velocity", {}) or {}
+    if slot.get("source", "twitch") != "twitch":
+        return []                                        # tracker is Twitch-only
+    state = _r2_get_json(f"{cfg.get('r2_prefix', 'tracker/')}tracking.json")
+    if not state:
+        print("  [early-velocity] no tracker state on R2 — falling back to discovery")
+        return []
+
+    cid = env("TWITCH_CLIENT_ID")
+    token = twitch.get_app_token(cid, env("TWITCH_CLIENT_SECRET"), http)
+    try:
+        game_id = str(twitch.resolve_game_id(strategy["games"][slot["game"]], cid, token, http))
+    except Exception as e:
+        print(f"  [early-velocity] game resolve failed ({e}) — falling back")
+        return []
+    langs = _region_langs(strategy, slot["region"])
+    posted_ids = {p.get("clip_id") for p in history.get("posts", [])}
+    max_age_h = float(cfg.get("max_age_h", strategy.get("recency_hours", 24)))
+    snap_h = float(cfg.get("snapshot_h", 0.5))
+    now = now_utc()
+
+    # tracker records for this game+region that have a 30-min snapshot and are still fresh
+    cands = []
+    for k, rec in state.items():
+        if k in posted_ids or str(rec.get("game_id")) != game_id:
+            continue
+        if (rec.get("language") or "en") not in langs:
+            continue
+        ev = next((s.get("views") for s in rec.get("snapshots", [])
+                   if abs(float(s.get("target_h", -1)) - snap_h) < 1e-6
+                   and s.get("views") is not None), None)
+        if ev is None:
+            continue
+        created = _parse_ts(rec.get("created_at"))
+        age_h = (now - created).total_seconds() / 3600.0 if created else None
+        if age_h is None or age_h > max_age_h:
+            continue
+        cands.append((k, float(ev), max(age_h, 0.5)))
+    if not cands:
+        return []
+
+    # rank by 30-min views; re-fetch a head of them (some may be deleted/too long)
+    cands.sort(key=lambda t: t[1], reverse=True)
+    head = cands[:int(cfg.get("prefetch", 20))]
+    current = twitch.get_clips_by_id([c[0] for c in head], cid, token, http)
+
+    curated_ids = set()
+    try:
+        logins = _curated_logins(strategy, slot)
+        if logins:
+            curated_ids = {str(v) for v in
+                           twitch.resolve_user_ids(logins, cid, token, http).values()}
+    except Exception:
+        pass
+    min_d = float(strategy.get("min_duration_s", 5))
+    max_d = float(strategy.get("max_duration_s", 60))
+    min_v = int(strategy.get("min_view_count", 50))
+
+    pool = []
+    for k, ev, age_h in head:
+        cl = current.get(k)
+        if not cl:                                       # deleted since we tracked it
+            continue
+        dur = cl.get("duration")
+        if dur is not None and (float(dur) < min_d or float(dur) > max_d):
+            continue
+        if int(cl.get("view_count") or 0) < min_v:
+            continue
+        cl["age_hours"] = round(age_h, 2)
+        cl["velocity"] = round(float(cl.get("view_count") or 0) / max(age_h, 0.5), 2)
+        cl["source"] = "twitch"
+        cl["is_curated"] = str(cl.get("broadcaster_id")) in curated_ids
+        cl["early_views_30m"] = int(ev)                  # what earned it into this pool
+        pool.append(cl)
+    pool.sort(key=lambda c: c.get("early_views_30m", 0), reverse=True)
+    pool = pool[:int(cfg.get("pool_size", 8))]
+    if pool:
+        top = pool[0]
+        print(f"  [early-velocity] {len(pool)} fast-starters | top: "
+              f"{top.get('early_views_30m')} views @30min, {top.get('view_count')} now | "
+              f"{top.get('broadcaster_name')} | {(top.get('title') or '')[:40]}")
+    return pool
+
+
 def discover_clip(strategy, slot, history):
     """Ranked POOL (not just the top clip) of not-yet-posted candidates for this
     slot, so the Claude judge (#7) can pick and main can fall back on a download
@@ -1766,16 +1882,18 @@ def _already_posted(slot_key):
         return False                    # 404 (or transient) -> treat as not-yet-posted
 
 
-def propose_review(strategy, history, slot, key, pool):
+def propose_review(strategy, history, slot, key, pool, early_velocity=False):
     """PROPOSE step: send the top candidates to the owner's phone and stash a pending
     decision in R2. The fulfill step posts the owner's pick (or auto-picks after the
-    window). ANY failure falls back to an autonomous post now, so a slot is never lost."""
+    window). ANY failure falls back to an autonomous post now, so a slot is never lost.
+    `early_velocity` records which A/B arm this pool came from, carried into the pending
+    state so the fulfill step tags the post correctly."""
     hr = strategy.get("human_review", {}) or {}
     ncand = max(2, int(hr.get("candidates", 3)))
     window = int(hr.get("respond_window_min", 30))
     if not r2_configured():
         print("  human-review needs R2 — falling back to autonomous.")
-        return _produce_and_post(strategy, history, slot, key, pool)
+        return _produce_and_post(strategy, history, slot, key, pool, early_velocity=early_velocity)
     if _already_posted(key):
         print("  slot already posted (durable marker) — skipping (guards a lost git push).")
         return
@@ -1807,16 +1925,16 @@ def propose_review(strategy, history, slot, key, pool):
     if len(cands) < 2:
         print("  <2 previewable candidates — falling back to autonomous post.")
         delete_from_r2(preview_keys)
-        return _produce_and_post(strategy, history, slot, key, pool)
+        return _produce_and_post(strategy, history, slot, key, pool, early_velocity=early_velocity)
 
     baseline = telegram.send_candidates(previews, f"{game_label} {slot.get('region', '')}".strip())
     if baseline is None:
         print("  Telegram send failed — falling back to autonomous post.")
         delete_from_r2(preview_keys)
-        return _produce_and_post(strategy, history, slot, key, pool)
+        return _produce_and_post(strategy, history, slot, key, pool, early_velocity=early_velocity)
 
     state = {"key": key, "slot": slot, "pool": cands, "preview_keys": preview_keys,
-             "baseline_update_id": baseline,
+             "baseline_update_id": baseline, "early_velocity": bool(early_velocity),
              "deadline_utc": (now_utc() + datetime.timedelta(minutes=window)).isoformat(),
              "created_utc": now_utc().isoformat()}
     try:
@@ -1824,7 +1942,7 @@ def propose_review(strategy, history, slot, key, pool):
     except Exception as e:
         print(f"  could not save pending ({e}) — falling back to autonomous post.")
         delete_from_r2(preview_keys)
-        return _produce_and_post(strategy, history, slot, key, pool)
+        return _produce_and_post(strategy, history, slot, key, pool, early_velocity=early_velocity)
     print(f"  proposed {len(cands)} clips to Telegram; {window}m window "
           f"(deadline {state['deadline_utc']}).")
 
@@ -1871,7 +1989,8 @@ def fulfill_reviews(strategy, history, dry=False):
         try:
             _produce_and_post(strategy, history, state["slot"], slot_key, pool,
                               dry=dry, chosen_index=chosen, human_desc=human_desc,
-                              trim_override=cut)
+                              trim_override=cut,
+                              early_velocity=bool(state.get("early_velocity")))
         except (Exception, SystemExit) as e:          # leave pending -> retry / deadline fallback
             print(f"  fulfill: post attempt failed ({e}) — keeping pending for retry.")
             telegram.send_message("⚠️ That post attempt failed; I'll retry shortly.")
@@ -1947,13 +2066,31 @@ def main():
           f"region={slot['region']} source={slot.get('source', 'twitch')}")
 
     repost_url = (os.environ.get("CLIP_URL") or "").strip()
+    ev_used = False
     if repost_url:
         pool = _clip_from_url(repost_url)
         c0 = pool[0]
         print(f"CLIP_URL override — reposting {c0.get('title')!r} by "
               f"{c0.get('broadcaster_name')} ({c0.get('duration')}s, {c0.get('view_count')} views)")
     else:
-        pool = discover_clip(strategy, slot, history)
+        # A/B: on the treatment arm, source the pool from clips that were TOP PERFORMERS
+        # in their first 30 min (tracker snapshots); empty -> fall back to normal discovery.
+        pool = []
+        if _early_velocity_arm(strategy, key):
+            try:
+                ev_pool = discover_early_velocity(strategy, slot, history)
+            except Exception as e:                    # never let the experiment darken a slot
+                print(f"[{BRAND_NAME}] early-velocity discovery errored ({e}) — normal discovery")
+                ev_pool = []
+            if ev_pool:
+                pool, ev_used = ev_pool, True
+                print(f"[{BRAND_NAME}] A/B EARLY-VELOCITY arm — pool = 30-min top "
+                      f"performers ({len(pool)} clips)")
+            else:
+                print(f"[{BRAND_NAME}] A/B early-velocity arm ON but no fresh fast-starter "
+                      f"for {slot['game']}/{slot['region']} — using normal discovery")
+        if not pool:
+            pool = discover_clip(strategy, slot, history)
     if not pool:
         # A rotated-in game can have (almost) no clips yet — a launch wave the scanner
         # flagged before the game actually took off. Don't let that dark a slot: retry
@@ -1975,7 +2112,7 @@ def main():
 
     hr = strategy.get("human_review", {}) or {}
     if hr.get("enabled") and telegram.configured() and not (force or dry or discover_only):
-        propose_review(strategy, history, slot, key, pool)
+        propose_review(strategy, history, slot, key, pool, early_velocity=ev_used)
         return
     # PICK_INDEX forces a specific pool rank (0 = top-ranked) instead of letting Claude
     # judge — used when the owner wants the highest-momentum clip regardless of title.
@@ -1983,15 +2120,17 @@ def main():
     _idx = int(_pi) if _pi.isdigit() else (0 if repost_url else None)
     _produce_and_post(strategy, history, slot, key, pool, dry=dry,
                       discover_only=discover_only, chosen_index=_idx,
-                      human_desc=(os.environ.get("HUMAN_DESC") or "").strip() or None)
+                      human_desc=(os.environ.get("HUMAN_DESC") or "").strip() or None,
+                      early_velocity=ev_used)
 
 
 def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
                       discover_only=False, human_desc=None, chosen_index=None,
-                      trim_override=None):
+                      trim_override=None, early_velocity=False):
     """Build and publish ONE post from `pool`. Normally Claude picks; in the human-in-
     the-loop path `chosen_index` (the owner's pick) is forced and `human_desc` (what the
-    owner said the clip is about) grounds a sharper caption."""
+    owner said the clip is about) grounds a sharper caption. `early_velocity` tags whether
+    the pool came from the 30-min-top-performer A/B arm (recorded for the analyzer)."""
     # #7: let Claude judge the metadata and pick; fall back to the top-ranked clip.
     ai = call_claude(pool, slot, strategy, human_desc=human_desc, chosen_index=chosen_index)
     pick = chosen_index if chosen_index is not None else ai.get("pick_index", 0)
@@ -2251,6 +2390,8 @@ def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
         "translated": translated,
         "countdown": bool(cd_fire),
         "countdown_at": cd_at,
+        "early_velocity": bool(early_velocity),
+        "early_views_30m": clip.get("early_views_30m"),
         "credit": credit,
         "title": clip.get("title"),
         "hook": hook,

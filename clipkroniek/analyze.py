@@ -299,6 +299,11 @@ def ab_readout(history):
             keys.append("countdown:on")
         elif p.get("countdown_at") is not None:
             keys.append("countdown:off")
+        # early-velocity A/B: on = pool sourced from 30-min top performers, off = normal.
+        if p.get("early_velocity") is True:
+            keys.append("ev:on")
+        elif p.get("early_velocity") is False:
+            keys.append("ev:off")
         for k in keys:
             groups.setdefault(k, []).append(p)
 
@@ -338,9 +343,10 @@ def call_strategist(strategy, readout, followers):
         "'Clipkroniek' (reposts trending game clips WITH creator credit). Goal: reach "
         "that converts to FOLLOWS. You get an A/B readout keyed by region "
         "(western=English clips, asian=Asian-language clips), game, source, format, "
-        "hour, curation, trim (smart-trim on/off), and countdown (a 'wait for it' + "
+        "hour, curation, trim (smart-trim on/off), countdown (a 'wait for it' + "
         "3-2-1 hook onto the clip's peak, on/off — compared only among clips that had a "
-        "usable peak). How to read it:\n"
+        "usable peak), and ev (early-velocity: on = the clip was a TOP PERFORMER in its "
+        "first 30 min on Twitch, off = normal discovery). How to read it:\n"
         "- REGION is the primary experiment. IGNORE any cell with posts < 8 — it is "
         "noise; draw no conclusions from it.\n"
         "- The curation cell (curated vs general) is CONFOUNDED (curated clips exist "
@@ -353,8 +359,9 @@ def call_strategist(strategy, readout, followers):
         "Write a 'learnings' paragraph (UNDER 150 words) that the CAPTION WRITER and "
         "clip selector read before EVERY post — make it ACTIONABLE for them: which "
         "hook/caption styles and search keywords convert, what region/game/hour/format "
-        "to favour or drop, and whether to keep or flip the smart-trim and countdown "
-        "tests (does avg_retention rise on countdown:on vs countdown:off?). If data "
+        "to favour or drop, and whether to keep or flip the smart-trim, countdown, and "
+        "early-velocity tests (does views_per_reach / avg_retention rise on ev:on vs "
+        "ev:off, i.e. do Twitch-proven fast-starters do better on IG?). If data "
         "is thin (most cells < 8 posts) say so and advise holding. Return ONLY the "
         "learnings text — no JSON, no preamble."
     )

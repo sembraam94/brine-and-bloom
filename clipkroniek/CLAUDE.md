@@ -35,6 +35,14 @@ strategy.json -> clippost.py -> Instagram Reel -> Insights -> analyze.py -.
    (`prune_broadcasters`) are dropped. If nothing qualifies, an **escalation ladder**
    widens 24h→48h→(western) more EU langs→best-available so the account never goes
    dark. Asian slots also top up from `asian_streamers` (#10).
+   **Early-velocity A/B** (`early_velocity`, `discover_early_velocity`): on the treatment
+   arm (~50% by slot hash, own salt), the pool is instead sourced from clips that were
+   **top performers in their first ~30 min** — read from the clip tracker's 0.5h snapshots
+   (`tracker/tracking.json`), filtered to the slot's game+region, re-fetched via
+   `get_clips_by_id`, ranked by 30-min views. Tests the tracker finding (30-min velocity
+   predicts the 24h winner) on IG. Empty (no fresh fast-starter for this game+region) →
+   falls back to normal discovery, so a slot is never darkened. Records `early_velocity`
+   + `early_views_30m`; analyzer adds an `ev:on/off` cell.
 2. **Judge + write** (`call_claude`, `claude-sonnet-4-6`, #7) — the pool's top-8
    METADATA (no video) goes to Claude, which PICKS the most viral-looking gameplay
    clip (skips reaction/gambling/drama titles) and writes the SEO caption (#19a),
