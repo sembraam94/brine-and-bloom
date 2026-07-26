@@ -480,6 +480,8 @@ def discover_early_velocity(strategy, slot, history):
     cfg = strategy.get("early_velocity", {}) or {}
     if slot.get("source", "twitch") != "twitch":
         return []                                        # tracker is Twitch-only
+    if not r2_configured():
+        return []                                        # no R2 -> can't read tracker; fall back
     state = _r2_get_json(f"{cfg.get('r2_prefix', 'tracker/')}tracking.json")
     if not state:
         print("  [early-velocity] no tracker state on R2 — falling back to discovery")
@@ -523,12 +525,16 @@ def discover_early_velocity(strategy, slot, history):
     head = cands[:int(cfg.get("prefetch", 20))]
     current = twitch.get_clips_by_id([c[0] for c in head], cid, token, http)
 
-    curated_ids = set()
+    curated_ids, prune_ids = set(), set()
     try:
         logins = _curated_logins(strategy, slot)
         if logins:
             curated_ids = {str(v) for v in
                            twitch.resolve_user_ids(logins, cid, token, http).values()}
+        prune = strategy.get("prune_broadcasters") or []
+        if prune:                                        # same org/tournament drop as normal discovery
+            prune_ids = {str(v) for v in
+                         twitch.resolve_user_ids(prune, cid, token, http).values()}
     except Exception:
         pass
     min_d = float(strategy.get("min_duration_s", 5))
@@ -539,6 +545,8 @@ def discover_early_velocity(strategy, slot, history):
     for k, ev, age_h in head:
         cl = current.get(k)
         if not cl:                                       # deleted since we tracked it
+            continue
+        if str(cl.get("broadcaster_id")) in prune_ids:   # org/tournament channel — never post
             continue
         dur = cl.get("duration")
         if dur is not None and (float(dur) < min_d or float(dur) > max_d):
@@ -2390,7 +2398,8 @@ def _produce_and_post(strategy, history, slot, key, pool, *, dry=False,
         "translated": translated,
         "countdown": bool(cd_fire),
         "countdown_at": cd_at,
-        "early_velocity": bool(early_velocity),
+        "early_velocity": bool(early_velocity),          # per-protocol: pool actually from tracker
+        "early_velocity_arm": _early_velocity_arm(strategy, key),  # ITT: random assignment (unbiased)
         "early_views_30m": clip.get("early_views_30m"),
         "credit": credit,
         "title": clip.get("title"),

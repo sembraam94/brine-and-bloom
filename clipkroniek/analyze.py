@@ -299,10 +299,19 @@ def ab_readout(history):
             keys.append("countdown:on")
         elif p.get("countdown_at") is not None:
             keys.append("countdown:off")
-        # early-velocity A/B: on = pool sourced from 30-min top performers, off = normal.
+        # early-velocity A/B. Two views:
+        #  - ev_arm = the RANDOM ~50/50 assignment -> the UNBIASED (intention-to-treat)
+        #    comparison, since arm:on that fell back to normal discovery is identical to
+        #    control; diluted but not confounded.
+        #  - ev = whether the pool ACTUALLY came from the tracker -> confounded (only fires
+        #    on tracker-covered game/region/hours), so descriptive only.
+        if p.get("early_velocity_arm") is True:
+            keys.append("ev_arm:on")
+        elif p.get("early_velocity_arm") is False:
+            keys.append("ev_arm:off")
         if p.get("early_velocity") is True:
             keys.append("ev:on")
-        elif p.get("early_velocity") is False:
+        elif p.get("early_velocity") is False and p.get("early_velocity_arm") is not None:
             keys.append("ev:off")
         for k in keys:
             groups.setdefault(k, []).append(p)
@@ -345,8 +354,11 @@ def call_strategist(strategy, readout, followers):
         "(western=English clips, asian=Asian-language clips), game, source, format, "
         "hour, curation, trim (smart-trim on/off), countdown (a 'wait for it' + "
         "3-2-1 hook onto the clip's peak, on/off — compared only among clips that had a "
-        "usable peak), and ev (early-velocity: on = the clip was a TOP PERFORMER in its "
-        "first 30 min on Twitch, off = normal discovery). How to read it:\n"
+        "usable peak), and early-velocity (posting clips that were TOP PERFORMERS in their "
+        "first 30 min on Twitch). For early-velocity use the ev_arm:on vs ev_arm:off cells "
+        "— that is the UNBIASED random A/B. IGNORE ev:on vs ev:off for judging the test: "
+        "ev:on only fires on tracker-covered game/region/hours so it is CONFOUNDED by slot "
+        "composition (it will look better even if the treatment does nothing). How to read it:\n"
         "- REGION is the primary experiment. IGNORE any cell with posts < 8 — it is "
         "noise; draw no conclusions from it.\n"
         "- The curation cell (curated vs general) is CONFOUNDED (curated clips exist "
@@ -360,8 +372,9 @@ def call_strategist(strategy, readout, followers):
         "clip selector read before EVERY post — make it ACTIONABLE for them: which "
         "hook/caption styles and search keywords convert, what region/game/hour/format "
         "to favour or drop, and whether to keep or flip the smart-trim, countdown, and "
-        "early-velocity tests (does views_per_reach / avg_retention rise on ev:on vs "
-        "ev:off, i.e. do Twitch-proven fast-starters do better on IG?). If data "
+        "early-velocity tests (does views_per_reach / avg_retention rise on ev_arm:on vs "
+        "ev_arm:off — the unbiased cells — i.e. do Twitch-proven fast-starters do better "
+        "on IG? do NOT judge it on ev:on/ev:off). If data "
         "is thin (most cells < 8 posts) say so and advise holding. Return ONLY the "
         "learnings text — no JSON, no preamble."
     )

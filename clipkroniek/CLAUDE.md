@@ -38,11 +38,14 @@ strategy.json -> clippost.py -> Instagram Reel -> Insights -> analyze.py -.
    **Early-velocity A/B** (`early_velocity`, `discover_early_velocity`): on the treatment
    arm (~50% by slot hash, own salt), the pool is instead sourced from clips that were
    **top performers in their first ~30 min** — read from the clip tracker's 0.5h snapshots
-   (`tracker/tracking.json`), filtered to the slot's game+region, re-fetched via
-   `get_clips_by_id`, ranked by 30-min views. Tests the tracker finding (30-min velocity
-   predicts the 24h winner) on IG. Empty (no fresh fast-starter for this game+region) →
-   falls back to normal discovery, so a slot is never darkened. Records `early_velocity`
-   + `early_views_30m`; analyzer adds an `ev:on/off` cell.
+   (`tracker/tracking.json`), filtered to the slot's game+region (same `prune_broadcasters`
+   org/tournament drop as normal discovery), re-fetched via `get_clips_by_id`, ranked by
+   30-min views. Tests the tracker finding (30-min velocity predicts the 24h winner) on IG.
+   Empty pool OR any error OR no R2 → falls back to normal discovery, so a slot is never
+   darkened. Records `early_velocity` (fired) + `early_velocity_arm` (random assignment) +
+   `early_views_30m`. Analyzer: **`ev_arm:on/off`** = the UNBIASED (intention-to-treat)
+   cells to judge the test; `ev:on/off` (actually-sourced) is confounded by tracker
+   coverage — descriptive only.
 2. **Judge + write** (`call_claude`, `claude-sonnet-4-6`, #7) — the pool's top-8
    METADATA (no video) goes to Claude, which PICKS the most viral-looking gameplay
    clip (skips reaction/gambling/drama titles) and writes the SEO caption (#19a),
