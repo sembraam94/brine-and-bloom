@@ -1178,6 +1178,68 @@
       "media_id": "18136421416584965",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-26-w6-10",
+      "date_utc": "2026-07-26T10:59:07.105312+00:00",
+      "local_date": "2026-07-26",
+      "weekday": 6,
+      "slot_hour": 10,
+      "game": "valorant",
+      "region": "asian",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "IgnorantCalmMinkSSSsss-eldFQrT6sFLn3lUZ",
+      "clip_url": "https://www.twitch.tv/bbbb87/clip/IgnorantCalmMinkSSSsss-eldFQrT6sFLn3lUZ",
+      "broadcaster": "世誠",
+      "creator": "醜狗熊",
+      "language": "zh",
+      "clip_views": 206,
+      "clip_velocity": 11.9,
+      "duration_s": 17.7,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "Chinese",
+        "verbal_moment": 5.2,
+        "audio_peak": 1.2,
+        "lead_in_s": 6.0,
+        "owner_cut": [
+          1.0,
+          15.0
+        ],
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate his aim 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#18)",
+      "youtube": null,
+      "facecam": [
+        0.07,
+        0.09,
+        0.15,
+        0.2
+      ],
+      "captions": true,
+      "translated": true,
+      "countdown": false,
+      "countdown_at": null,
+      "credit": "@bbbb87",
+      "title": "阿狗精彩時刻",
+      "hook": "",
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valorantfails",
+        "#valoranthighlights"
+      ],
+      "media_id": "17868647334582093",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
