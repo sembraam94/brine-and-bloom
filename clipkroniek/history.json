@@ -1240,6 +1240,37 @@
       "media_id": "17868647334582093",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "top3-2026-07-26",
+      "date_utc": "2026-07-26T12:42:13.456117+00:00",
+      "local_date": "2026-07-26",
+      "weekday": 6,
+      "slot_hour": 14,
+      "game": "gta+valorant",
+      "region": "mixed",
+      "source": "compilation",
+      "format": "top3",
+      "clip_id": "top3-2026-07-26",
+      "clip_ids": [
+        "OilyDirtyBaguetteAMPEnergy-vW8FnWGmrEGvjqau",
+        "OilyDirtyBaguetteAMPEnergy-vW8FnWGmrEGvjqau",
+        "FuriousDifficultLegSaltBae-egSIZ1BatULWP9yV"
+      ],
+      "duration_s": 26.25,
+      "cover": "cover_url",
+      "first_comment": "Which clip gets your #1 vote? 👇\n\nBest-of Grand Theft Auto V + VALORANT clips every day — drop a follow 🎮",
+      "youtube": null,
+      "hashtags": [
+        "#gtarp",
+        "#gta6",
+        "#gtaonline",
+        "#gtaclips",
+        "#nopixel"
+      ],
+      "media_id": "18175926562424529",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
