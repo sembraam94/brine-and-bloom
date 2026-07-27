@@ -498,6 +498,26 @@
         "follows": 0
       },
       "measured_at": "2026-07-27T08:01:04.862638+00:00"
+    },
+    {
+      "slot_key": "2026-208-w0-1931",
+      "date_utc": "2026-07-27T19:04:54.459736+00:00",
+      "local_date": "2026-07-27",
+      "weekday": 0,
+      "slot_hour": 19,
+      "format": "carousel",
+      "theme": "sauce",
+      "title": "3-1-1-anchovy-caper-brown-butter-sauce-versatile",
+      "hashtags": [
+        "#BrownButterSauce",
+        "#HomemadeSauce",
+        "#WeeknightDinner",
+        "#CookingTips",
+        "#AnchocySauce"
+      ],
+      "media_id": "17906451978284950",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
