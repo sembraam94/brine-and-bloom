@@ -1318,6 +1318,66 @@
         "views": 114,
         "ig_reels_avg_watch_time": 8651
       }
+    },
+    {
+      "slot_key": "2026-07-27-w0-21",
+      "date_utc": "2026-07-27T22:43:24.239561+00:00",
+      "local_date": "2026-07-28",
+      "weekday": 0,
+      "slot_hour": 21,
+      "game": "gta",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "MoldyDrabTapirOneHand-yoG5xetbX1rV1R32",
+      "clip_url": "https://www.twitch.tv/sheriffeli/clip/MoldyDrabTapirOneHand-yoG5xetbX1rV1R32",
+      "broadcaster": "SheriffEli",
+      "creator": "Sha1yen",
+      "language": "en",
+      "clip_views": 81,
+      "clip_velocity": 26.92,
+      "duration_s": 25.9,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 15.3,
+        "audio_peak": 8.0,
+        "lead_in_s": 5.0,
+        "owner_cut": "whole"
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate the delivery 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#20)",
+      "youtube": {
+        "id": "njVRTPdEssQ",
+        "url": "https://youtu.be/njVRTPdEssQ",
+        "privacy": "public"
+      },
+      "facecam": null,
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": true,
+      "early_velocity_arm": true,
+      "early_views_30m": 81,
+      "credit": "SheriffEli",
+      "title": "I will dropkick that babeh",
+      "hook": "",
+      "hashtags": [
+        "#gtarp",
+        "#gta5",
+        "#gtaclips",
+        "#grandtheftautov",
+        "#nopixel"
+      ],
+      "media_id": "18106717898101613",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
