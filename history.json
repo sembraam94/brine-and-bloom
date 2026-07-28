@@ -518,6 +518,26 @@
       "media_id": "17906451978284950",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-209-w1-1837",
+      "date_utc": "2026-07-28T16:53:59.331774+00:00",
+      "local_date": "2026-07-28",
+      "weekday": 1,
+      "slot_hour": 18,
+      "format": "carousel",
+      "theme": "marinade",
+      "title": "4-1-1-chipotle-orange-lamb-chop-marinade",
+      "hashtags": [
+        "#marinaderecipe",
+        "#lambchops",
+        "#chipotlemarinade",
+        "#weeknightdinner",
+        "#homecookingtips"
+      ],
+      "media_id": "18117093244856109",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
