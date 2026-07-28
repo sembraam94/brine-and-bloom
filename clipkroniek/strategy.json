@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "updated": "2026-07-21",
+  "version": 3,
+  "updated": "2026-07-28",
   "account_start_date": "2025-10-10",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Daily reposts of the best FRESH GTA V and VALORANT clips (with creator credit). Western/English-first audience; running a geo A/B (Western vs Asian-language source clips) to learn which converts. Optimize for reach and shares.",
@@ -42,7 +42,8 @@
   "games": {
     "gta": "Grand Theft Auto V",
     "valorant": "VALORANT",
-    "halo_campaign_evolved": "Halo: Campaign Evolved"
+    "halo_campaign_evolved": "Halo: Campaign Evolved",
+    "splatoon_raiders": "Splatoon RAIDERS"
   },
   "reddit_subreddits": {
     "gta": [
@@ -536,18 +537,19 @@
       "weekday": 0,
       "hour": 21,
       "minute": 18,
-      "game": "gta",
+      "game": "splatoon_raiders",
       "region": "western",
       "source": "twitch",
-      "note": "Mon - GTA western, US-evening slot (23:18 CET ~= 17:18 EST) - timing A/B vs the EU-evening slots"
+      "note": "western splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
     },
     {
       "weekday": 1,
       "hour": 9,
       "minute": 48,
-      "game": "gta",
+      "game": "splatoon_raiders",
       "region": "western",
-      "source": "twitch"
+      "source": "twitch",
+      "note": "western splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
     },
     {
       "weekday": 1,
@@ -571,18 +573,19 @@
       "weekday": 2,
       "hour": 20,
       "minute": 8,
-      "game": "gta",
+      "game": "splatoon_raiders",
       "region": "asian",
       "source": "twitch",
-      "note": "Wed - GTA Asian-source A/B probe (Twitch)"
+      "note": "asian splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
     },
     {
       "weekday": 3,
       "hour": 10,
       "minute": 27,
-      "game": "gta",
+      "game": "splatoon_raiders",
       "region": "asian",
-      "source": "twitch"
+      "source": "twitch",
+      "note": "asian splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
     },
     {
       "weekday": 3,
@@ -605,18 +608,19 @@
       "weekday": 4,
       "hour": 18,
       "minute": 23,
-      "game": "gta",
+      "game": "splatoon_raiders",
       "region": "western",
       "source": "twitch",
-      "note": "Fri - GTA western (Twitch)"
+      "note": "western splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
     },
     {
       "weekday": 5,
       "hour": 11,
       "minute": 18,
-      "game": "gta",
+      "game": "splatoon_raiders",
       "region": "western",
-      "source": "twitch"
+      "source": "twitch",
+      "note": "western splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
     },
     {
       "weekday": 5,
@@ -639,16 +643,16 @@
       "weekday": 6,
       "hour": 19,
       "minute": 3,
-      "game": "gta",
+      "game": "splatoon_raiders",
       "region": "western",
       "source": "twitch",
-      "note": "Sun - GTA western (Twitch)"
+      "note": "western splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
     }
   ],
   "caption_strategy": "Lead with a curiosity/hype hook that makes a non-follower stop. Name the game plainly for search. Keep it 1-2 short lines. Always credit the streamer/clipper. End with the follow CTA. No generic mega-tags.",
   "hashtag_strategy": "4-5 niche tags matching the game (e.g. #gtarp #gta6 #nopixel for GTA; #valorant #valorantclips for VALORANT). Vary two per post. Avoid #gaming/#viral mega-tags.",
-  "learnings": "Data is too thin to draw conclusions — nearly every cell is under 8 posts, and zero follows or profile visits have been recorded across all 5 posts live so far. The funnel is leaking at the very first step (visits_per_reach = 0.0 everywhere), meaning captions and hooks are not compelling viewers to tap the profile at all. The one directional signal worth noting: GTA retention (0.33) is noticeably weaker than Valorant (0.62) and Twitch singles (0.58), and the compilation format cratered at 0.17 — avoid compilations and prioritise single Twitch clips. For captions, your immediate focus is profile-tap triggers: end every caption with a direct CTA (\"Follow for daily clips 🎮\") and open with a reaction hook (\"bro actually did this 😭\"). Keep the smart-trim test running but do not read it yet. Hold all region, hour, and game conclusions until cells hit 8+ posts — likely another 2–3 weeks at current cadence.",
-  "next_review": "2026-07-28",
+  "learnings": "Data is still thin — most cells remain under 8 posts and zero follows or profile visits have been recorded across all 16 posts. The funnel is stalling at reach→visit (visits_per_reach = 0.0 everywhere), so the priority stays on forcing profile taps. The only actionable quality signal is retention: western clips hold at 0.51 vs asian at 0.37, and the one compilation posted collapsed to 0.17 — keep posting single Twitch clips in western/English only until Asian cells hit 8+. GTA retention (0.42) lags behind Valorant (0.46) and western-GTA specifically recovers to 0.51, so lean Valorant or western-GTA over generic GTA. Caption writers: open every post with a visceral reaction hook (\"bro actually did WHAT 💀\", \"no way this happened\") and close with \"Follow @clipkroniek for daily clips 🎮\" — the profile CTA is non-negotiable. Use hashtags #GTA6, #VALORANT, #Splatoon, #gaming, #clipkroniek. Smart-trim on shows higher retention (0.52 vs 0.44) but only 3 posts — keep the test running, do not flip yet. Early-velocity (ev_arm) cells are too sparse to read — hold. Countdown test: insufficient data, hold.",
+  "next_review": "2026-08-04",
   "discover_pages": 8,
   "game_hashtags": {
     "halo_campaign_evolved": [
@@ -658,6 +662,14 @@
       "#haloremake",
       "#fpsgaming",
       "#tactical"
+    ],
+    "splatoon_raiders": [
+      "#splatoon",
+      "#splatoonraiders",
+      "#inkling",
+      "#coopshooter",
+      "#switch2",
+      "#colorful"
     ]
   }
 }
