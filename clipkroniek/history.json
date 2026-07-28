@@ -1369,6 +1369,64 @@
       "media_id": "18106717898101613",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-28-w1-09",
+      "date_utc": "2026-07-28T09:47:06.144808+00:00",
+      "local_date": "2026-07-28",
+      "weekday": 1,
+      "slot_hour": 9,
+      "game": "splatoon_raiders",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "BusyCloudyDragonThunBeast-pCfhjmEME3ePTYYq",
+      "clip_url": "https://www.twitch.tv/cyyuvtuber/clip/BusyCloudyDragonThunBeast-pCfhjmEME3ePTYYq",
+      "broadcaster": "CyYuVtuber",
+      "creator": "taymae1999",
+      "language": "en",
+      "clip_views": 50,
+      "clip_velocity": 5.24,
+      "duration_s": 13.0,
+      "trimmed": true,
+      "trim": [
+        36.12,
+        49.12
+      ],
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 43.4,
+        "audio_peak": 44.6,
+        "lead_in_s": 8.0
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#21)",
+      "youtube": null,
+      "facecam": null,
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": true,
+      "early_views_30m": null,
+      "credit": "@cyyuvtuber",
+      "title": "Cy-Who?",
+      "hook": "",
+      "hashtags": [
+        "#splatoon",
+        "#splatoonraiders",
+        "#inkling",
+        "#switch2",
+        "#clipkroniek"
+      ],
+      "media_id": "18327166135279007",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
