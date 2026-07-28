@@ -1,6 +1,6 @@
 {
-  "version": 6,
-  "updated": "2026-07-21",
+  "version": 7,
+  "updated": "2026-07-28",
   "account_start_date": "2026-06-20",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Cooking tips, recipes, and marinades with AI-styled ingredient photography. Audience is Europe-first, US a strong second. Goal: grow followers fast-but-safe by making every post highly shareable (sent to a friend) and saveable.",
@@ -12,45 +12,44 @@
   "jitter_minutes": 12,
   "slots": [
     {
-      "weekday": 3,
-      "hour": 12,
-      "minute": 23,
-      "format": "carousel",
-      "theme": "sauce",
-      "note": "Thu ~12:23 — previously used slot, retained for consistency. Sauce kept as primary theme; no data differentiates themes so holding best-branded option. Minute jittered."
-    },
-    {
       "weekday": 1,
       "hour": 18,
-      "minute": 44,
+      "minute": 37,
       "format": "carousel",
       "theme": "marinade",
-      "note": "Tue ~18:44 — previously used slot, retained. Marinade kept; brand-core theme with strong recipe utility, likely to attract saves once non-follower reach improves. Minute jittered."
+      "note": "Tue ~18:37 — best-reach slot (w1-18 avg 2.2) retained and kept as anchor. Marinade is highest-reach theme (2.2). Minute re-jittered."
     },
     {
-      "weekday": 5,
-      "hour": 11,
-      "minute": 8,
+      "weekday": 3,
+      "hour": 12,
+      "minute": 51,
       "format": "carousel",
-      "theme": "technique",
-      "note": "Sat ~11:08 — weekend slot retained. Technique has 3 posts with zero engagement but so does every theme; no statistical basis to retire it yet. Hold and monitor one more week before dropping. Minute jittered."
+      "theme": "sauce",
+      "note": "Thu ~12:51 — solid midweek lunchtime slot (w3-12 avg 2.0), retained. Sauce is brand-core and visually shareable; keep producing to build library. Minute re-jittered."
     },
     {
       "weekday": 0,
       "hour": 19,
-      "minute": 31,
+      "minute": 14,
+      "format": "carousel",
+      "theme": "marinade",
+      "note": "Mon ~19:14 — evening slot retained for weekday spread. Adding a second marinade slot since it leads on reach; doubling down to generate more signal on the top theme. Minute re-jittered."
+    },
+    {
+      "weekday": 5,
+      "hour": 11,
+      "minute": 42,
       "format": "carousel",
       "theme": "sauce",
-      "note": "Mon ~19:31 — second sauce slot retained. All slots return identical reach (2.0) so no slot is worse than another; distributing across Mon+Thu gives weekday spread. Minute jittered."
+      "note": "Sat ~11:08 previously used; shifting minute. Replacing technique with a second sauce slot: technique has 4 posts with identical near-zero engagement as other themes but marginally lowest reach (1.8) and fewest visual-shareability cues. With all metrics flat, lean toward most brand-legible themes for cold-start phase."
     }
   ],
   "content_plan": {
-    "sauce": "A versatile sauce, glaze, or dressing built around a single memorable ratio. Slide 1: hero shot of finished sauce — glossy, richly coloured, on a clean minimal surface, absolutely no text, numbers, or labels anywhere on the image. Slide 2: sauce shown in context — spooned over protein or pooling on a wooden board, purely photographic. Slides 3-4: the same sauce applied to two visually distinct foods (e.g. charred chicken AND roasted cauliflower) to signal versatility and prompt DM sends of 'which would you use this on?'. Final slide: extreme close-up of sauce texture. ALL ratios, quantities, ingredient lists, and usage ideas live in the caption only — never on the image.",
-    "marinade": "One complete marinade built around a single memorable ratio. Slide 1: bold hero shot of marinated protein at its most visually striking — deeply coloured, glistening, no text on image. Slide 2: clean flat-lay of raw ingredients arranged aesthetically, nothing labelled or annotated. Slides 3-4: sequential process shots — protein submerging into marinade, then the vivid colour transformation after marinating — purely visual contrast, zero overlaid text. Final slide: finished plated dish in beautiful light. ALL ratios, marinating times, substitution tips, save CTAs, and send prompts belong in the caption only.",
-    "technique": "One practical, slightly surprising kitchen technique that produces a visible, dramatic result. Slide 1: the 'after' outcome at its most striking — peak visual payoff, no text. Slide 2: tight close-up of the key physical action (knife angle, fold, crust formation) — purely photographic. Slides 3-4: visual contrast showing the difference the technique makes using only the difference in the food itself, no labels or overlaid text. Final slide: clean beauty shot of the finished result. ALL explanatory language, the rule being demonstrated, surprising fact, and send prompts go in the caption only."
+    "marinade": "One complete marinade centred on a single protein or occasion. Slide 1: hero shot of marinated, deeply coloured, glistening protein on a clean dark or neutral surface — absolutely no text, numbers, or labels anywhere on the image. Slide 2: aesthetic flat-lay of raw ingredients grouped loosely by colour or texture — purely photographic, nothing annotated. Slides 3-4: visual process contrast — protein submerging into the marinade bath, then the vivid colour and sheen transformation after marinating — zero overlaid text or graphics. Final slide: finished plated dish in warm directional light, garnished but not cluttered. ALL ratios, times, substitution tips, and any step-by-step information belong in the caption exclusively.",
+    "sauce": "A versatile sauce, glaze, or dressing built around one central flavour profile. Slide 1: hero shot of finished sauce — glossy, richly coloured, in a small bowl or pooled on a clean surface, absolutely no text or labels on the image. Slide 2: sauce poured or spooned in motion — purely photographic, capturing sheen and viscosity. Slides 3-4: the sauce applied to two visually distinct foods to signal versatility (e.g. over charred chicken AND roasted vegetables) — no text overlays. Final slide: extreme close-up of sauce texture and colour. ALL ratios, quantities, ingredient lists, usage ideas, and save or send prompts belong in the caption only."
   },
-  "caption_strategy": "Every caption must front-load a search-friendly hook in the first line (e.g. 'The marinade ratio that works on anything'). Follow with the full practical payload — ratios, quantities, steps, substitutions — since this is the information people save and share. End with a send prompt framed as a question or gift ('Send this to someone who always asks you for your sauce recipe'). Use natural cooking-keyword language throughout (marinate, glaze, umami, caramelise) so the caption surfaces in Instagram search. Keep tone warm and knowledgeable, not listicle-generic. Always include an explicit save CTA ('Save this before you meal-prep'). Total caption length: 150-300 words.",
-  "hashtag_strategy": "Use exactly 4-5 hashtags, placed at the end of the caption or in the first comment. Prioritise mid-size cooking-specific tags (300k-3M posts) over giant generic ones where the account will be invisible. Rotate across: one ingredient-specific tag (e.g. #MisoMarinade), one technique/method tag (e.g. #HomemadeSauce), one meal-context tag (e.g. #WeeknightDinner), and one broad discovery tag (e.g. #CookingTips). Avoid tags above 10M posts entirely at this account size. Refresh the tag set weekly based on which posts attract any non-follower reach above the current 2.0 baseline.",
-  "learnings": "All 12 posts return identical reach (2.0) and zero sends, saves, or follows across every theme and slot — this is almost certainly organic floor reach (likely followers/close connections only), not algorithm distribution. No theme or slot is statistically better. Priority action: captions must be aggressively search-optimised and save-baiting since that is the only lever available before the account earns algorithmic reach. Hold cadence at 4/week — do not increase. Do not retire any theme yet; with uniform zero-engagement data, theme differences are noise. Reassess after next 8 posts.",
-  "next_review": "2026-07-28"
+  "caption_strategy": "Every caption must open with a strong search-friendly first line that names the dish, marinade, or sauce explicitly (e.g. 'Garlic-miso chicken marinade — 3 ingredients') so it surfaces in keyword search. Follow immediately with the full recipe or ratio in plain text, since all numbers and quantities are forbidden on images. Use a mid-caption soft CTA that triggers a send ('Send this to someone who needs a weeknight dinner upgrade') and close with a save prompt ('Save so you have it when you need it'). Write in a direct, knowledgeable but warm tone — no filler phrases. Keep paragraphs short; use line breaks for readability. Aim for 150-280 characters before the 'more' cut so the hook is fully visible.",
+  "hashtag_strategy": "Use 3-5 hashtags maximum, placed at the end of the caption after a line break. Prioritise mid-size food-specific tags (100k-2M posts) over giant generic ones: for example #marinaderecipe, #saucegame, #homecookingtips, #weeknightdinner, #foodtechnique. Rotate one hyper-niche tag per post (e.g. #misomarinade, #chimichurrisauce) to capture intent-driven search. Avoid mega-tags like #food or #recipe — they provide no discoverability lift at this account size. Hashtags are a minor lever; keyword density in the caption body matters far more for 2026 Instagram search ranking.",
+  "learnings": "All 13 posts show near-identical, near-zero engagement across every theme and slot — this is a cold-start signal problem, not a content quality problem. The account has 1 follower and reaches only 1.7-2.2 accounts per post, meaning almost no non-follower distribution yet. Priority actions: (1) Make captions aggressively keyword-rich from the very first line to capture search traffic. (2) Every post needs an explicit send CTA — sends are the #1 growth signal. (3) Hold cadence at 4/week; do not ramp until reach climbs above ~10 per post. (4) Retire technique theme — lowest reach, lowest shareability cues; double down on marinade and sauce.",
+  "next_review": "2026-08-04"
 }
