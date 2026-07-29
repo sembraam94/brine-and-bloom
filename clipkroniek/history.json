@@ -1531,6 +1531,64 @@
       "media_id": "18146280544510230",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-29-w2-20",
+      "date_utc": "2026-07-29T18:55:03.729071+00:00",
+      "local_date": "2026-07-29",
+      "weekday": 2,
+      "slot_hour": 20,
+      "game": "splatoon_raiders",
+      "region": "asian",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "ElegantPlacidPassionfruitOSfrog-0YksAhyKMtKD2iYC",
+      "clip_url": "https://www.twitch.tv/akira_mnps/clip/ElegantPlacidPassionfruitOSfrog-0YksAhyKMtKD2iYC",
+      "broadcaster": "akira_mnps",
+      "creator": "うに助",
+      "language": "ja",
+      "clip_views": 268,
+      "clip_velocity": 5.67,
+      "duration_s": 11.0,
+      "trimmed": true,
+      "trim": [
+        6.9,
+        17.9
+      ],
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "Japanese",
+        "verbal_moment": 6.5,
+        "audio_peak": 12.9,
+        "lead_in_s": 6.0
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#23)",
+      "youtube": null,
+      "facecam": null,
+      "captions": true,
+      "translated": true,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": false,
+      "early_views_30m": null,
+      "credit": "@akira_mnps",
+      "title": "明日(今日)撮影(スマイルの電話頼り)",
+      "hook": "",
+      "hashtags": [
+        "#splatoonraiders",
+        "#splatoon",
+        "#switch2",
+        "#inkling",
+        "#clipkroniek"
+      ],
+      "media_id": "18083715119214771",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
