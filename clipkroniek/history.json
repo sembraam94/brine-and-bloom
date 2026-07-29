@@ -1475,6 +1475,62 @@
         "views": 49,
         "ig_reels_avg_watch_time": 4752
       }
+    },
+    {
+      "slot_key": "2026-07-29-w2-11",
+      "date_utc": "2026-07-29T11:53:06.311820+00:00",
+      "local_date": "2026-07-29",
+      "weekday": 2,
+      "slot_hour": 11,
+      "game": "halo_campaign_evolved",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "BenevolentMiniatureWeaselDBstyle-tp3170uDSi7YaEss",
+      "clip_url": "https://www.twitch.tv/baso/clip/BenevolentMiniatureWeaselDBstyle-tp3170uDSi7YaEss",
+      "broadcaster": "Baso",
+      "creator": "maerriou",
+      "language": "de",
+      "clip_views": 117,
+      "clip_velocity": 7.55,
+      "duration_s": 13.9,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "German",
+        "verbal_moment": 6.5,
+        "audio_peak": 2.2,
+        "lead_in_s": 6.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Could you pull this off? 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#22)",
+      "youtube": null,
+      "facecam": null,
+      "captions": true,
+      "translated": true,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": true,
+      "early_velocity_arm": true,
+      "early_views_30m": 18,
+      "credit": "@baso",
+      "title": "Peek-A-Baso",
+      "hook": "",
+      "hashtags": [
+        "#haloclips",
+        "#haloremaster",
+        "#fpsclips",
+        "#halomoments",
+        "clipkroniek"
+      ],
+      "media_id": "18146280544510230",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
