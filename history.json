@@ -407,7 +407,7 @@
       ],
       "media_id": "18170340997440435",
       "metrics": {},
-      "measured_at": "2026-07-29T07:18:17.517961+00:00"
+      "measured_at": "2026-07-30T07:11:45.089935+00:00"
     },
     {
       "slot_key": "2026-195-w1-1837",
@@ -467,7 +467,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-29T07:18:17.517961+00:00"
+      "measured_at": "2026-07-30T07:11:45.089935+00:00"
     },
     {
       "slot_key": "2026-206-w5-1108",
@@ -497,7 +497,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-29T07:18:17.517961+00:00"
+      "measured_at": "2026-07-30T07:11:45.089935+00:00"
     },
     {
       "slot_key": "2026-208-w0-1931",
@@ -527,7 +527,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-07-29T07:18:17.517961+00:00"
+      "measured_at": "2026-07-30T07:11:45.089935+00:00"
     },
     {
       "slot_key": "2026-209-w1-1837",
@@ -546,8 +546,18 @@
         "#homecookingtips"
       ],
       "media_id": "18117093244856109",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 1,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 3,
+        "profile_visits": 0,
+        "follows": 0
+      },
+      "measured_at": "2026-07-30T07:11:45.089935+00:00"
     }
   ]
 }
