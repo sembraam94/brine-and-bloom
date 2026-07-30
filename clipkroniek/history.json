@@ -1664,6 +1664,67 @@
       "media_id": "18003600425955652",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-07-30-w3-21",
+      "date_utc": "2026-07-30T22:11:44.264970+00:00",
+      "local_date": "2026-07-31",
+      "weekday": 3,
+      "slot_hour": 21,
+      "game": "valorant",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "LittleSolidHeronNinjaGrumpy-c8DMCdBl2KPIvjgX",
+      "clip_url": "https://www.twitch.tv/shanks_ttv/clip/LittleSolidHeronNinjaGrumpy-c8DMCdBl2KPIvjgX",
+      "broadcaster": "shanks_ttv",
+      "creator": "mobin_ct",
+      "language": "en",
+      "clip_views": 398,
+      "clip_velocity": 79.53,
+      "duration_s": 12.1,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 8.8,
+        "audio_peak": null,
+        "lead_in_s": 8.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#25)",
+      "youtube": null,
+      "facecam": [
+        0.757,
+        0.115,
+        0.196,
+        0.295
+      ],
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": true,
+      "early_velocity_arm": true,
+      "early_views_30m": 173,
+      "credit": "@shanks_ttv",
+      "title": "SNOT ROCKET 3",
+      "hook": "",
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#clipkroniek"
+      ],
+      "media_id": "17893622346595800",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
