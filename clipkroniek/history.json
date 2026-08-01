@@ -1849,6 +1849,67 @@
         "views": 0,
         "ig_reels_avg_watch_time": 0
       }
+    },
+    {
+      "slot_key": "2026-08-01-w5-11",
+      "date_utc": "2026-08-01T11:59:11.996116+00:00",
+      "local_date": "2026-08-01",
+      "weekday": 5,
+      "slot_hour": 11,
+      "game": "splatoon_raiders",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "PeppyFrailGerbilLeeroyJenkins-vcPGFu9g8Kj6PULt",
+      "clip_url": "https://www.twitch.tv/cathbait/clip/PeppyFrailGerbilLeeroyJenkins-vcPGFu9g8Kj6PULt",
+      "broadcaster": "CathBait",
+      "creator": "CathBait",
+      "language": "en",
+      "clip_views": 95,
+      "clip_velocity": 4.75,
+      "duration_s": 27.3,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 25.6,
+        "audio_peak": 10.1,
+        "lead_in_s": 5.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this reaction 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#27)",
+      "youtube": null,
+      "facecam": [
+        0.0,
+        0.73,
+        0.21,
+        0.27
+      ],
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": false,
+      "early_views_30m": null,
+      "credit": "@cathbait",
+      "title": "TILTTTTTT",
+      "hook": "",
+      "hashtags": [
+        "#splatoon",
+        "#splatoonraiders",
+        "#inkling",
+        "#switch2",
+        "#clipkroniek"
+      ],
+      "media_id": "17994126602991034",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
