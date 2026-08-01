@@ -588,6 +588,26 @@
         "follows": 0
       },
       "measured_at": "2026-08-01T07:01:49.570079+00:00"
+    },
+    {
+      "slot_key": "2026-213-w5-1142",
+      "date_utc": "2026-08-01T11:10:17.254476+00:00",
+      "local_date": "2026-08-01",
+      "weekday": 5,
+      "slot_hour": 11,
+      "format": "carousel",
+      "theme": "sauce",
+      "title": "3-1-1-tamarind-date-ginger-sauce-versatile",
+      "hashtags": [
+        "#tamarindsauce",
+        "#saucegame",
+        "#homecookingtips",
+        "#weeknightdinner",
+        "#versatilecondiment"
+      ],
+      "media_id": "17884456458458113",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
