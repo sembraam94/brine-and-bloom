@@ -1985,6 +1985,67 @@
       "media_id": "18101642519264427",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-08-02-w6-10",
+      "date_utc": "2026-08-02T10:55:40.202097+00:00",
+      "local_date": "2026-08-02",
+      "weekday": 6,
+      "slot_hour": 10,
+      "game": "valorant",
+      "region": "asian",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "MuddyStormyDumplingsRiPepperonis-JG4DDC5lu1EU6iEF",
+      "clip_url": "https://www.twitch.tv/gunguno/clip/MuddyStormyDumplingsRiPepperonis-JG4DDC5lu1EU6iEF",
+      "broadcaster": "冠賢",
+      "creator": "福利熊抱抱",
+      "language": "zh",
+      "clip_views": 1493,
+      "clip_velocity": 106.4,
+      "duration_s": 9.63,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "Chinese",
+        "verbal_moment": 5.0,
+        "audio_peak": 3.1,
+        "lead_in_s": 5.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#29)",
+      "youtube": null,
+      "facecam": [
+        0.0,
+        0.15,
+        0.15,
+        0.22
+      ],
+      "captions": true,
+      "translated": true,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": true,
+      "early_velocity_arm": true,
+      "early_views_30m": 520,
+      "credit": "@gunguno",
+      "title": "放狗 開小獎",
+      "hook": "",
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#clipkroniek"
+      ],
+      "media_id": "18104374775273369",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
