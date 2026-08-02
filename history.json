@@ -407,7 +407,7 @@
       ],
       "media_id": "18170340997440435",
       "metrics": {},
-      "measured_at": "2026-08-01T07:01:49.570079+00:00"
+      "measured_at": "2026-08-02T07:07:11.915526+00:00"
     },
     {
       "slot_key": "2026-195-w1-1837",
@@ -497,7 +497,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-01T07:01:49.570079+00:00"
+      "measured_at": "2026-08-02T07:07:11.915526+00:00"
     },
     {
       "slot_key": "2026-208-w0-1931",
@@ -527,7 +527,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-01T07:01:49.570079+00:00"
+      "measured_at": "2026-08-02T07:07:11.915526+00:00"
     },
     {
       "slot_key": "2026-209-w1-1837",
@@ -557,7 +557,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-01T07:01:49.570079+00:00"
+      "measured_at": "2026-08-02T07:07:11.915526+00:00"
     },
     {
       "slot_key": "2026-211-w3-1251",
@@ -587,7 +587,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-01T07:01:49.570079+00:00"
+      "measured_at": "2026-08-02T07:07:11.915526+00:00"
     },
     {
       "slot_key": "2026-213-w5-1142",
@@ -606,8 +606,18 @@
         "#versatilecondiment"
       ],
       "media_id": "17884456458458113",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 0,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 0,
+        "profile_visits": 0,
+        "follows": 0
+      },
+      "measured_at": "2026-08-02T07:07:11.915526+00:00"
     }
   ]
 }
