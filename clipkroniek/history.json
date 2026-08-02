@@ -2046,6 +2046,37 @@
       "media_id": "18104374775273369",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "top3-2026-08-02",
+      "date_utc": "2026-08-02T12:38:08.150071+00:00",
+      "local_date": "2026-08-02",
+      "weekday": 6,
+      "slot_hour": 14,
+      "game": "valorant",
+      "region": "mixed",
+      "source": "compilation",
+      "format": "top3",
+      "clip_id": "top3-2026-08-02",
+      "clip_ids": [
+        "HelplessAnimatedFungusRiPepperonis-icMzJOTP_arTe_4J",
+        "MuddyStormyDumplingsRiPepperonis-JG4DDC5lu1EU6iEF",
+        "InquisitiveBoredDelicataTwitchRaid-J6Au9Wh8ispdZse6"
+      ],
+      "duration_s": 25.66,
+      "cover": "cover_url",
+      "first_comment": "Which clip gets your #1 vote? 👇\n\nBest-of VALORANT clips every day — drop a follow 🎮",
+      "youtube": null,
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#radiant"
+      ],
+      "media_id": "18603923221030987",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
