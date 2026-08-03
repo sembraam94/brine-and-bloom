@@ -618,6 +618,26 @@
         "follows": 0
       },
       "measured_at": "2026-08-03T07:56:21.154965+00:00"
+    },
+    {
+      "slot_key": "2026-215-w0-1914",
+      "date_utc": "2026-08-03T18:24:59.221447+00:00",
+      "local_date": "2026-08-03",
+      "weekday": 0,
+      "slot_hour": 19,
+      "format": "carousel",
+      "theme": "marinade",
+      "title": "3-2-1-smoked-paprika-buttermilk-marinade-for-chicken-thighs",
+      "hashtags": [
+        "#buttermilkchicken",
+        "#marinaderecipe",
+        "#homecookingtips",
+        "#weeknightdinner",
+        "#smokedpaprika"
+      ],
+      "media_id": "18106017620276231",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
