@@ -2180,6 +2180,69 @@
       "media_id": "18105046271331669",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-08-03-w0-21",
+      "date_utc": "2026-08-03T20:48:54.099007+00:00",
+      "local_date": "2026-08-03",
+      "weekday": 0,
+      "slot_hour": 21,
+      "game": "splatoon_raiders",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "RoughPlumpTrollBabyRage-tF48F2nnCf1Wr0_C",
+      "clip_url": "https://www.twitch.tv/ntear/clip/RoughPlumpTrollBabyRage-tF48F2nnCf1Wr0_C",
+      "broadcaster": "Ntear",
+      "creator": "Ntear",
+      "language": "en",
+      "clip_views": 71,
+      "clip_velocity": 1.59,
+      "duration_s": 13.0,
+      "trimmed": true,
+      "trim": [
+        33.0,
+        46.0
+      ],
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 41.0,
+        "audio_peak": null,
+        "lead_in_s": 8.0
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#32)",
+      "youtube": null,
+      "facecam": [
+        0.72,
+        0.66,
+        0.26,
+        0.3
+      ],
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": false,
+      "early_views_30m": null,
+      "credit": "@ntear",
+      "title": "Pizza with Spiders! 🍕🕷️",
+      "hook": "",
+      "hashtags": [
+        "#splatoonraiders",
+        "#splatoon",
+        "#switch2",
+        "#inkling",
+        "#clipkroniek"
+      ],
+      "media_id": "18061682933757948",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
