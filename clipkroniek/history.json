@@ -2124,6 +2124,62 @@
         "views": 19,
         "ig_reels_avg_watch_time": 5274
       }
+    },
+    {
+      "slot_key": "2026-08-03-w0-10",
+      "date_utc": "2026-08-03T13:35:02.445310+00:00",
+      "local_date": "2026-08-03",
+      "weekday": 0,
+      "slot_hour": 10,
+      "game": "halo_campaign_evolved",
+      "region": "western",
+      "source": "twitch",
+      "curated": true,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "BlushingAbrasiveShieldItsBoshyTime-5cLw7wC_7MtDtPpQ",
+      "clip_url": "https://www.twitch.tv/maximilian_dood/clip/BlushingAbrasiveShieldItsBoshyTime-5cLw7wC_7MtDtPpQ",
+      "broadcaster": "Maximilian_DOOD",
+      "creator": "chandler55",
+      "language": "en",
+      "clip_views": 270,
+      "clip_velocity": 51.42,
+      "duration_s": 21.4,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": false,
+        "language": "English",
+        "verbal_moment": null,
+        "audio_peak": 18.3,
+        "lead_in_s": 8.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#31)",
+      "youtube": null,
+      "facecam": null,
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": false,
+      "early_views_30m": null,
+      "credit": "@maximilian_dood",
+      "title": "jerma",
+      "hook": "",
+      "hashtags": [
+        "#haloclips",
+        "#haloce",
+        "#fpsclips",
+        "#halomoments",
+        "#fpsgaming"
+      ],
+      "media_id": "18105046271331669",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
