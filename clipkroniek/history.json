@@ -2318,6 +2318,69 @@
       "media_id": "18096947060368593",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-08-04-w1-18",
+      "date_utc": "2026-08-04T18:43:21.896933+00:00",
+      "local_date": "2026-08-04",
+      "weekday": 1,
+      "slot_hour": 18,
+      "game": "halo_campaign_evolved",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "CloudySmoothWrenDogFace-6hOicHg_iSsACjOX",
+      "clip_url": "https://www.twitch.tv/coney/clip/CloudySmoothWrenDogFace-6hOicHg_iSsACjOX",
+      "broadcaster": "CONEY",
+      "creator": "ModemMT",
+      "language": "en",
+      "clip_views": 130,
+      "clip_velocity": 3.32,
+      "duration_s": 6.52,
+      "trimmed": true,
+      "trim": [
+        0.0,
+        6.51
+      ],
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 33.1,
+        "audio_peak": 1.51,
+        "lead_in_s": 6.0
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#34)",
+      "youtube": null,
+      "facecam": [
+        0.82,
+        0.75,
+        0.18,
+        0.25
+      ],
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": true,
+      "early_views_30m": null,
+      "credit": "@coney",
+      "title": "THEVOICES",
+      "hook": "",
+      "hashtags": [
+        "#haloclips",
+        "#haloce",
+        "#halomcc",
+        "#fpsgaming",
+        "#halomovement"
+      ],
+      "media_id": "18072797279423975",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
