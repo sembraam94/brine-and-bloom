@@ -638,6 +638,26 @@
       "media_id": "18106017620276231",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-216-w1-1822",
+      "date_utc": "2026-08-04T17:05:47.383716+00:00",
+      "local_date": "2026-08-04",
+      "weekday": 1,
+      "slot_hour": 18,
+      "format": "carousel",
+      "theme": "marinade",
+      "title": "3-1-1-soy-sesame-gochujang-marinade-for-skirt-steak",
+      "hashtags": [
+        "#marinaderecipe",
+        "#skirtsteakrecipe",
+        "#weeknightcooking",
+        "#gochujangrecipes",
+        "#brineandbloom"
+      ],
+      "media_id": "17880078789618182",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
