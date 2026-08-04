@@ -1,6 +1,6 @@
 {
-  "version": 3,
-  "updated": "2026-07-28",
+  "version": 4,
+  "updated": "2026-08-04",
   "account_start_date": "2025-10-10",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Daily reposts of the best FRESH GTA V and VALORANT clips (with creator credit). Western/English-first audience; running a geo A/B (Western vs Asian-language source clips) to learn which converts. Optimize for reach and shares.",
@@ -43,7 +43,8 @@
     "gta": "Grand Theft Auto V",
     "valorant": "VALORANT",
     "halo_campaign_evolved": "Halo: Campaign Evolved",
-    "splatoon_raiders": "Splatoon RAIDERS"
+    "splatoon_raiders": "Splatoon RAIDERS",
+    "marvel_tokon_fighting_souls": "MARVEL TŌKON: Fighting Souls"
   },
   "reddit_subreddits": {
     "gta": [
@@ -537,19 +538,19 @@
       "weekday": 0,
       "hour": 21,
       "minute": 18,
-      "game": "splatoon_raiders",
+      "game": "marvel_tokon_fighting_souls",
       "region": "western",
       "source": "twitch",
-      "note": "western splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
+      "note": "western marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
     },
     {
       "weekday": 1,
       "hour": 9,
       "minute": 48,
-      "game": "splatoon_raiders",
+      "game": "marvel_tokon_fighting_souls",
       "region": "western",
       "source": "twitch",
-      "note": "western splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
+      "note": "western marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
     },
     {
       "weekday": 1,
@@ -573,19 +574,19 @@
       "weekday": 2,
       "hour": 20,
       "minute": 8,
-      "game": "splatoon_raiders",
+      "game": "marvel_tokon_fighting_souls",
       "region": "asian",
       "source": "twitch",
-      "note": "asian splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
+      "note": "asian marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
     },
     {
       "weekday": 3,
       "hour": 10,
       "minute": 27,
-      "game": "splatoon_raiders",
+      "game": "marvel_tokon_fighting_souls",
       "region": "asian",
       "source": "twitch",
-      "note": "asian splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
+      "note": "asian marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
     },
     {
       "weekday": 3,
@@ -608,19 +609,19 @@
       "weekday": 4,
       "hour": 18,
       "minute": 23,
-      "game": "splatoon_raiders",
+      "game": "marvel_tokon_fighting_souls",
       "region": "western",
       "source": "twitch",
-      "note": "western splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
+      "note": "western marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
     },
     {
       "weekday": 5,
       "hour": 11,
       "minute": 18,
-      "game": "splatoon_raiders",
+      "game": "marvel_tokon_fighting_souls",
       "region": "western",
       "source": "twitch",
-      "note": "western splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
+      "note": "western marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
     },
     {
       "weekday": 5,
@@ -643,16 +644,16 @@
       "weekday": 6,
       "hour": 19,
       "minute": 3,
-      "game": "splatoon_raiders",
+      "game": "marvel_tokon_fighting_souls",
       "region": "western",
       "source": "twitch",
-      "note": "western splatoon_raiders (rotated in 2026-07-28: July 23 Switch 2 exclusive; cooperative inking gam)"
+      "note": "western marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
     }
   ],
   "caption_strategy": "Lead with a curiosity/hype hook that makes a non-follower stop. Name the game plainly for search. Keep it 1-2 short lines. Always credit the streamer/clipper. End with the follow CTA. No generic mega-tags.",
   "hashtag_strategy": "4-5 niche tags matching the game (e.g. #gtarp #gta6 #nopixel for GTA; #valorant #valorantclips for VALORANT). Vary two per post. Avoid #gaming/#viral mega-tags.",
-  "learnings": "Data is still thin — most cells remain under 8 posts and zero follows or profile visits have been recorded across all 16 posts. The funnel is stalling at reach→visit (visits_per_reach = 0.0 everywhere), so the priority stays on forcing profile taps. The only actionable quality signal is retention: western clips hold at 0.51 vs asian at 0.37, and the one compilation posted collapsed to 0.17 — keep posting single Twitch clips in western/English only until Asian cells hit 8+. GTA retention (0.42) lags behind Valorant (0.46) and western-GTA specifically recovers to 0.51, so lean Valorant or western-GTA over generic GTA. Caption writers: open every post with a visceral reaction hook (\"bro actually did WHAT 💀\", \"no way this happened\") and close with \"Follow @clipkroniek for daily clips 🎮\" — the profile CTA is non-negotiable. Use hashtags #GTA6, #VALORANT, #Splatoon, #gaming, #clipkroniek. Smart-trim on shows higher retention (0.52 vs 0.44) but only 3 posts — keep the test running, do not flip yet. Early-velocity (ev_arm) cells are too sparse to read — hold. Countdown test: insufficient data, hold.",
-  "next_review": "2026-08-04",
+  "learnings": "Data still extremely thin — zero follows or profile visits across 25 posts, so retention remains the only signal. **Prioritise western single-clip Twitch posts**: western retention (0.465) beats asian (0.316), and asian cells still sit below 8 posts so draw no conclusions there. **Valorant outperforms GTA on retention** (twitch|valorant 0.496 vs twitch|gta 0.422) and reaches higher (113 vs 86) — favour Valorant clips; GTA is acceptable western-only. Drop Splatoon Raiders immediately: reach collapses to ~30 and retention is 0.226. Hour 18 shows the highest reach (116) with solid retention (0.472); hour 11 also punches above average on views_per_reach (1.307) — schedule into those slots first. **Caption writers**: open with a visceral reaction hook (\"bro ACTUALLY did this 💀\", \"no way this is real\"), close every post with \"Follow @clipkroniek for daily clips 🎮\" — forcing profile taps is the entire job right now. Use #Valorant #GTA6 #Halo #gaming #clipkroniek. Smart-trim: trim:off leads on retention (0.415 vs 0.426 trim:on, 5 posts only) — gap is negligible, hold the test. Early-velocity: ev_arm:on (4 posts, retention 0.429) vs ev_arm:off (4 posts, retention 0.261) shows a promising gap but n=4 each — hold, do not conclude. Marvel Tokon and Halo have zero qualifying data yet; keep posting and reassess at 8+ posts.",
+  "next_review": "2026-08-11",
   "discover_pages": 8,
   "game_hashtags": {
     "halo_campaign_evolved": [
@@ -670,6 +671,14 @@
       "#coopshooter",
       "#switch2",
       "#colorful"
+    ],
+    "marvel_tokon_fighting_souls": [
+      "#fgc",
+      "#marceltokonfightingsouls",
+      "#arcworks",
+      "#tagfighter",
+      "#marvelgames",
+      "#fightinggame"
     ]
   }
 }
