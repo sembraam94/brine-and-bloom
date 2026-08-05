@@ -2409,6 +2409,67 @@
       "media_id": "18072797279423975",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-08-05-w2-11",
+      "date_utc": "2026-08-05T11:49:42.919014+00:00",
+      "local_date": "2026-08-05",
+      "weekday": 2,
+      "slot_hour": 11,
+      "game": "halo_campaign_evolved",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "KathishSweetPuddingKeepo-Fev1EcYbVPH9R6YP",
+      "clip_url": "https://www.twitch.tv/alyek/clip/KathishSweetPuddingKeepo-Fev1EcYbVPH9R6YP",
+      "broadcaster": "Alyek",
+      "creator": "Alyek",
+      "language": "en",
+      "clip_views": 53,
+      "clip_velocity": 9.95,
+      "duration_s": 25.9,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 8.1,
+        "audio_peak": 5.9,
+        "lead_in_s": 4.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Could you pull this off? 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#35)",
+      "youtube": null,
+      "facecam": [
+        0.01,
+        0.1,
+        0.22,
+        0.42
+      ],
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": false,
+      "early_views_30m": null,
+      "credit": "@alyek",
+      "title": "when they dont let you ride the pelican",
+      "hook": "",
+      "hashtags": [
+        "#haloclips",
+        "#halocampaign",
+        "#fpsclips",
+        "#haloce",
+        "#fpsgaming"
+      ],
+      "media_id": "17959259415193505",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
