@@ -2470,6 +2470,67 @@
       "media_id": "17959259415193505",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-08-05-w2-20",
+      "date_utc": "2026-08-05T20:02:06.327781+00:00",
+      "local_date": "2026-08-05",
+      "weekday": 2,
+      "slot_hour": 20,
+      "game": "valorant",
+      "region": "asian",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "NiceSourBisonShazBotstix-TtHk7kI-1izeeSzL",
+      "clip_url": "https://www.twitch.tv/mayj0501/clip/NiceSourBisonShazBotstix-TtHk7kI-1izeeSzL",
+      "broadcaster": "梅婕",
+      "creator": "英雄聯盟2",
+      "language": "zh",
+      "clip_views": 529,
+      "clip_velocity": 1058.0,
+      "duration_s": 27.4,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "Chinese",
+        "verbal_moment": 8.5,
+        "audio_peak": 6.3,
+        "lead_in_s": 6.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this play 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#36)",
+      "youtube": null,
+      "facecam": [
+        0.82,
+        0.55,
+        0.18,
+        0.45
+      ],
+      "captions": true,
+      "translated": true,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": false,
+      "early_views_30m": null,
+      "credit": "@mayj0501",
+      "title": "謝謝沒倢我去睡嘍",
+      "hook": "",
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#valorantasia"
+      ],
+      "media_id": "18135094861564685",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
