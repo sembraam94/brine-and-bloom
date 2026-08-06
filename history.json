@@ -407,7 +407,7 @@
       ],
       "media_id": "18170340997440435",
       "metrics": {},
-      "measured_at": "2026-08-05T07:13:46.909951+00:00"
+      "measured_at": "2026-08-06T07:15:28.395434+00:00"
     },
     {
       "slot_key": "2026-195-w1-1837",
@@ -497,7 +497,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-05T07:13:46.909951+00:00"
+      "measured_at": "2026-08-06T07:15:28.395434+00:00"
     },
     {
       "slot_key": "2026-208-w0-1931",
@@ -527,7 +527,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-05T07:13:46.909951+00:00"
+      "measured_at": "2026-08-06T07:15:28.395434+00:00"
     },
     {
       "slot_key": "2026-209-w1-1837",
@@ -557,7 +557,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-05T07:13:46.909951+00:00"
+      "measured_at": "2026-08-06T07:15:28.395434+00:00"
     },
     {
       "slot_key": "2026-211-w3-1251",
@@ -587,7 +587,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-05T07:13:46.909951+00:00"
+      "measured_at": "2026-08-06T07:15:28.395434+00:00"
     },
     {
       "slot_key": "2026-213-w5-1142",
@@ -617,7 +617,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-05T07:13:46.909951+00:00"
+      "measured_at": "2026-08-06T07:15:28.395434+00:00"
     },
     {
       "slot_key": "2026-215-w0-1914",
@@ -647,7 +647,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-05T07:13:46.909951+00:00"
+      "measured_at": "2026-08-06T07:15:28.395434+00:00"
     },
     {
       "slot_key": "2026-216-w1-1822",
@@ -666,8 +666,18 @@
         "#brineandbloom"
       ],
       "media_id": "17880078789618182",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 1,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 1,
+        "profile_visits": 0,
+        "follows": 0
+      },
+      "measured_at": "2026-08-06T07:15:28.395434+00:00"
     }
   ]
 }
