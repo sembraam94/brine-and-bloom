@@ -2559,6 +2559,67 @@
       "media_id": "18135094861564685",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-08-06-w3-10",
+      "date_utc": "2026-08-06T11:56:07.044875+00:00",
+      "local_date": "2026-08-06",
+      "weekday": 3,
+      "slot_hour": 10,
+      "game": "valorant",
+      "region": "asian",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "EnjoyableExquisitePineappleDuDudu-sq7AnkRd_6HSllQH",
+      "clip_url": "https://www.twitch.tv/idoce_69/clip/EnjoyableExquisitePineappleDuDudu-sq7AnkRd_6HSllQH",
+      "broadcaster": "idoce_69",
+      "creator": "末宇",
+      "language": "zh",
+      "clip_views": 3314,
+      "clip_velocity": 173.0,
+      "duration_s": 26.0,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "Chinese",
+        "verbal_moment": 8.0,
+        "audio_peak": 8.9,
+        "lead_in_s": 6.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this reaction 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#37)",
+      "youtube": null,
+      "facecam": [
+        0.74,
+        0.34,
+        0.26,
+        0.37
+      ],
+      "captions": true,
+      "translated": true,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": false,
+      "early_views_30m": null,
+      "credit": "@idoce_69",
+      "title": "真繃不住",
+      "hook": "",
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#valorantasia"
+      ],
+      "media_id": "18132589906617509",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
