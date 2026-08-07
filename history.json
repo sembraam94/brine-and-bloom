@@ -678,6 +678,26 @@
         "follows": 0
       },
       "measured_at": "2026-08-07T05:55:50.749897+00:00"
+    },
+    {
+      "slot_key": "2026-219-w4-1908",
+      "date_utc": "2026-08-07T18:05:00.647717+00:00",
+      "local_date": "2026-08-07",
+      "weekday": 4,
+      "slot_hour": 19,
+      "format": "carousel",
+      "theme": "marinade",
+      "title": "4-2-1-beer-mustard-brown-sugar-marinade-for-pork-tenderloin",
+      "hashtags": [
+        "#marinaderecipe",
+        "#porkrecipes",
+        "#weeknightcooking",
+        "#easymeatmarinade",
+        "#brineandbloom"
+      ],
+      "media_id": "18120484294808994",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
