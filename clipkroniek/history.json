@@ -2658,6 +2658,69 @@
         "views": 116,
         "ig_reels_avg_watch_time": 8504
       }
+    },
+    {
+      "slot_key": "2026-08-07-w4-09",
+      "date_utc": "2026-08-07T09:31:10.314008+00:00",
+      "local_date": "2026-08-07",
+      "weekday": 4,
+      "slot_hour": 9,
+      "game": "valorant",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "AbrasiveVenomousKuduPipeHype-dcl19aosqyqlSato",
+      "clip_url": "https://www.twitch.tv/sliggytv/clip/AbrasiveVenomousKuduPipeHype-dcl19aosqyqlSato",
+      "broadcaster": "Sliggytv",
+      "creator": "aautumn_hann",
+      "language": "en",
+      "clip_views": 3488,
+      "clip_velocity": 306.29,
+      "duration_s": 13.0,
+      "trimmed": true,
+      "trim": [
+        9.54,
+        22.54
+      ],
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 16.7,
+        "audio_peak": 18.1,
+        "lead_in_s": 8.0
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#38)",
+      "youtube": null,
+      "facecam": [
+        0.83,
+        0.06,
+        0.17,
+        0.28
+      ],
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": false,
+      "early_views_30m": null,
+      "credit": "@sliggytv",
+      "title": "unlucky unfake",
+      "hook": "",
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#valorantclutch"
+      ],
+      "media_id": "17891907387405678",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
