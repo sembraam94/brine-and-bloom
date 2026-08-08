@@ -2796,6 +2796,67 @@
       "media_id": "18349625806173997",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-08-08-w5-11",
+      "date_utc": "2026-08-08T10:51:58.968767+00:00",
+      "local_date": "2026-08-08",
+      "weekday": 5,
+      "slot_hour": 11,
+      "game": "marvel_tokon_fighting_souls",
+      "region": "western",
+      "source": "twitch",
+      "curated": true,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "CuriousCautiousCakeKippa-LGVh-U8sUGqQ38Be",
+      "clip_url": "https://www.twitch.tv/maximilian_dood/clip/CuriousCautiousCakeKippa-LGVh-U8sUGqQ38Be",
+      "broadcaster": "Maximilian_DOOD",
+      "creator": "Brunty023",
+      "language": "en",
+      "clip_views": 88,
+      "clip_velocity": 26.45,
+      "duration_s": 15.05,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 10.0,
+        "audio_peak": 2.3,
+        "lead_in_s": 5.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this Peni play 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#40)",
+      "youtube": null,
+      "facecam": [
+        0.01,
+        0.59,
+        0.21,
+        0.39
+      ],
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": false,
+      "early_views_30m": null,
+      "credit": "@maximilian_dood",
+      "title": "Peni really did that...",
+      "hook": "",
+      "hashtags": [
+        "#marveltokonfightingsouls",
+        "#fightinggame",
+        "#fgc",
+        "#maximiliandood",
+        "#marvelgames"
+      ],
+      "media_id": "18074898470390056",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
