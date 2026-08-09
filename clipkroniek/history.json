@@ -3004,6 +3004,37 @@
       "media_id": "18174605035425528",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "top3-2026-08-09",
+      "date_utc": "2026-08-09T11:59:47.095574+00:00",
+      "local_date": "2026-08-09",
+      "weekday": 6,
+      "slot_hour": 13,
+      "game": "valorant",
+      "region": "mixed",
+      "source": "compilation",
+      "format": "top3",
+      "clip_id": "top3-2026-08-09",
+      "clip_ids": [
+        "AbrasiveVenomousKuduPipeHype-dcl19aosqyqlSato",
+        "NiceSourBisonShazBotstix-TtHk7kI-1izeeSzL",
+        "WildRamshackleCaribouWutFace-ZMjnx8K0PP3zb2vF"
+      ],
+      "duration_s": 28.99,
+      "cover": "cover_url",
+      "first_comment": "Which clip gets your #1 vote? 👇\n\nBest-of VALORANT clips every day — drop a follow 🎮",
+      "youtube": null,
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#radiant"
+      ],
+      "media_id": "17902004310514098",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
