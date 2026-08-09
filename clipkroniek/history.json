@@ -2941,6 +2941,69 @@
       "media_id": "18115559798313053",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-08-09-w6-10",
+      "date_utc": "2026-08-09T09:47:08.604971+00:00",
+      "local_date": "2026-08-09",
+      "weekday": 6,
+      "slot_hour": 10,
+      "game": "valorant",
+      "region": "asian",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "WildRamshackleCaribouWutFace-ZMjnx8K0PP3zb2vF",
+      "clip_url": "https://www.twitch.tv/lazvell/clip/WildRamshackleCaribouWutFace-ZMjnx8K0PP3zb2vF",
+      "broadcaster": "Lazvell",
+      "creator": "tsukicosan",
+      "language": "ja",
+      "clip_views": 403,
+      "clip_velocity": 25.83,
+      "duration_s": 10.0,
+      "trimmed": true,
+      "trim": [
+        45.26,
+        55.26
+      ],
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "Japanese",
+        "verbal_moment": 47.5,
+        "audio_peak": 52.1,
+        "lead_in_s": 5.0
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this ACE 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#42)",
+      "youtube": null,
+      "facecam": [
+        0.01,
+        0.34,
+        0.21,
+        0.27
+      ],
+      "captions": false,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": true,
+      "early_velocity_arm": true,
+      "early_views_30m": 230,
+      "credit": "@lazvell",
+      "title": "10 bullets ACE / 2026.08.08",
+      "hook": "",
+      "hashtags": [
+        "#valorant",
+        "#valorantclips",
+        "#valorantmoments",
+        "#valoranthighlights",
+        "#valorantace"
+      ],
+      "media_id": "18174605035425528",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
