@@ -708,6 +708,26 @@
         "follows": 0
       },
       "measured_at": "2026-08-09T05:28:39.243701+00:00"
+    },
+    {
+      "slot_key": "2026-221-w6-1033",
+      "date_utc": "2026-08-09T09:06:06.401253+00:00",
+      "local_date": "2026-08-09",
+      "weekday": 6,
+      "slot_hour": 10,
+      "format": "carousel",
+      "theme": "quick-dinner",
+      "title": "quick-dinner-spiced-ground-beef-flatbread-skillet",
+      "hashtags": [
+        "#flatbreadrecipe",
+        "#quickdinnerideas",
+        "#groundbeefrecipe",
+        "#weeknightcooking",
+        "#brineandbloom"
+      ],
+      "media_id": "17915575236429669",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
