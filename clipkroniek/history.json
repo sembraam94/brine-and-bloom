@@ -3082,6 +3082,67 @@
         "views": 147,
         "ig_reels_avg_watch_time": 11822
       }
+    },
+    {
+      "slot_key": "2026-08-10-w0-10",
+      "date_utc": "2026-08-10T08:51:17.167796+00:00",
+      "local_date": "2026-08-10",
+      "weekday": 0,
+      "slot_hour": 10,
+      "game": "halo_campaign_evolved",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "PiercingBlitheConsoleOSfrog-AgiRKAx9ihASig7Z",
+      "clip_url": "https://www.twitch.tv/bull1112/clip/PiercingBlitheConsoleOSfrog-AgiRKAx9ihASig7Z",
+      "broadcaster": "Bull1112",
+      "creator": "Anonymous_Tree_117",
+      "language": "en",
+      "clip_views": 76,
+      "clip_velocity": 1.64,
+      "duration_s": 11.0,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "English",
+        "verbal_moment": 0.0,
+        "audio_peak": 2.8,
+        "lead_in_s": 3.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#44)",
+      "youtube": null,
+      "facecam": [
+        0.0,
+        0.0,
+        0.16,
+        0.22
+      ],
+      "captions": true,
+      "translated": false,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": false,
+      "early_views_30m": null,
+      "credit": "@bull1112",
+      "title": "Ahhh yes the barrel roll 🤣",
+      "hook": "",
+      "hashtags": [
+        "#haloclips",
+        "#haloce",
+        "#fpsgaming",
+        "#halomoments",
+        "#haloevolved"
+      ],
+      "media_id": "17904970776311218",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
