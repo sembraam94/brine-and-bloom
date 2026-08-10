@@ -3143,6 +3143,67 @@
       "media_id": "17904970776311218",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-08-10-w0-21",
+      "date_utc": "2026-08-10T21:03:14.224098+00:00",
+      "local_date": "2026-08-10",
+      "weekday": 0,
+      "slot_hour": 21,
+      "game": "marvel_tokon_fighting_souls",
+      "region": "western",
+      "source": "twitch",
+      "curated": true,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "SpikyCourteousAppleOhMyDog-R74LHMKvYJuM3jXo",
+      "clip_url": "https://www.twitch.tv/rubius/clip/SpikyCourteousAppleOhMyDog-R74LHMKvYJuM3jXo",
+      "broadcaster": "Rubius",
+      "creator": "KingRuby95",
+      "language": "es",
+      "clip_views": 1365,
+      "clip_velocity": 57.88,
+      "duration_s": 23.6,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "Spanish",
+        "verbal_moment": 0.0,
+        "audio_peak": 9.3,
+        "lead_in_s": 3.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this combo 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#45)",
+      "youtube": null,
+      "facecam": [
+        0.0,
+        0.08,
+        0.22,
+        0.28
+      ],
+      "captions": true,
+      "translated": true,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": false,
+      "early_views_30m": null,
+      "credit": "@rubius",
+      "title": "El \"combo\" improvisado de la victoria de Rubius",
+      "hook": "",
+      "hashtags": [
+        "#marveltokonfightingsouls",
+        "#fightinggame",
+        "#fgc",
+        "#marvelgames",
+        "#clipkroniek"
+      ],
+      "media_id": "18439629280135438",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
