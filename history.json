@@ -407,7 +407,7 @@
       ],
       "media_id": "18170340997440435",
       "metrics": {},
-      "measured_at": "2026-08-09T05:28:39.243701+00:00"
+      "measured_at": "2026-08-10T05:54:34.069522+00:00"
     },
     {
       "slot_key": "2026-195-w1-1837",
@@ -527,7 +527,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-09T05:28:39.243701+00:00"
+      "measured_at": "2026-08-10T05:54:34.069522+00:00"
     },
     {
       "slot_key": "2026-209-w1-1837",
@@ -557,7 +557,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-09T05:28:39.243701+00:00"
+      "measured_at": "2026-08-10T05:54:34.069522+00:00"
     },
     {
       "slot_key": "2026-211-w3-1251",
@@ -587,7 +587,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-09T05:28:39.243701+00:00"
+      "measured_at": "2026-08-10T05:54:34.069522+00:00"
     },
     {
       "slot_key": "2026-213-w5-1142",
@@ -617,7 +617,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-09T05:28:39.243701+00:00"
+      "measured_at": "2026-08-10T05:54:34.069522+00:00"
     },
     {
       "slot_key": "2026-215-w0-1914",
@@ -647,7 +647,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-09T05:28:39.243701+00:00"
+      "measured_at": "2026-08-10T05:54:34.069522+00:00"
     },
     {
       "slot_key": "2026-216-w1-1822",
@@ -677,7 +677,7 @@
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-09T05:28:39.243701+00:00"
+      "measured_at": "2026-08-10T05:54:34.069522+00:00"
     },
     {
       "slot_key": "2026-219-w4-1908",
@@ -697,17 +697,17 @@
       ],
       "media_id": "18120484294808994",
       "metrics": {
-        "reach": 0,
+        "reach": 1,
         "likes": 0,
         "comments": 0,
         "saved": 0,
         "shares": 0,
         "total_interactions": 0,
-        "views": 0,
+        "views": 1,
         "profile_visits": 0,
         "follows": 0
       },
-      "measured_at": "2026-08-09T05:28:39.243701+00:00"
+      "measured_at": "2026-08-10T05:54:34.069522+00:00"
     },
     {
       "slot_key": "2026-221-w6-1033",
@@ -726,8 +726,18 @@
         "#brineandbloom"
       ],
       "media_id": "17915575236429669",
-      "metrics": {},
-      "measured_at": null
+      "metrics": {
+        "reach": 1,
+        "likes": 0,
+        "comments": 0,
+        "saved": 0,
+        "shares": 0,
+        "total_interactions": 0,
+        "views": 1,
+        "profile_visits": 0,
+        "follows": 0
+      },
+      "measured_at": "2026-08-10T05:54:34.069522+00:00"
     }
   ]
 }
