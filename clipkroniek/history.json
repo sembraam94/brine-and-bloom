@@ -3279,6 +3279,67 @@
       "media_id": "18156207781498013",
       "metrics": {},
       "measured_at": null
+    },
+    {
+      "slot_key": "2026-08-11-w1-18",
+      "date_utc": "2026-08-11T17:37:44.323765+00:00",
+      "local_date": "2026-08-11",
+      "weekday": 1,
+      "slot_hour": 18,
+      "game": "halo_campaign_evolved",
+      "region": "western",
+      "source": "twitch",
+      "curated": false,
+      "format": "single",
+      "subreddit": null,
+      "author": null,
+      "clip_id": "InnocentSpookyAirGuitarUnSane-E9W2lki7UvjT0F5K",
+      "clip_url": "https://www.twitch.tv/kokomia/clip/InnocentSpookyAirGuitarUnSane-E9W2lki7UvjT0F5K",
+      "broadcaster": "Kokomia",
+      "creator": "Kokomia",
+      "language": "es",
+      "clip_views": 71,
+      "clip_velocity": 3.76,
+      "duration_s": 14.0,
+      "trimmed": false,
+      "trim": null,
+      "trim_hint": {
+        "transcript_used": true,
+        "language": "Spanish",
+        "verbal_moment": 8.0,
+        "audio_peak": null,
+        "lead_in_s": 5.0,
+        "skipped_short_source": true
+      },
+      "cover": "cover_url",
+      "first_comment": "Rate this AI moment 1-10 👇\n\nDaily best-of gaming clips — drop a follow 🎮 (#47)",
+      "youtube": null,
+      "facecam": [
+        0.72,
+        0.66,
+        0.26,
+        0.3
+      ],
+      "captions": true,
+      "translated": true,
+      "countdown": false,
+      "countdown_at": null,
+      "early_velocity": false,
+      "early_velocity_arm": false,
+      "early_views_30m": null,
+      "credit": "@kokomia",
+      "title": "La unica IA",
+      "hook": "",
+      "hashtags": [
+        "#haloclips",
+        "#haloevolved",
+        "#fpsclips",
+        "#halo",
+        "#fpsgaming"
+      ],
+      "media_id": "18111534541991181",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
