@@ -1,6 +1,6 @@
 {
-  "version": 4,
-  "updated": "2026-08-04",
+  "version": 5,
+  "updated": "2026-08-11",
   "account_start_date": "2025-10-10",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Daily reposts of the best FRESH GTA V and VALORANT clips (with creator credit). Western/English-first audience; running a geo A/B (Western vs Asian-language source clips) to learn which converts. Optimize for reach and shares.",
@@ -44,7 +44,8 @@
     "valorant": "VALORANT",
     "halo_campaign_evolved": "Halo: Campaign Evolved",
     "splatoon_raiders": "Splatoon RAIDERS",
-    "marvel_tokon_fighting_souls": "MARVEL TŌKON: Fighting Souls"
+    "marvel_tokon_fighting_souls": "MARVEL TŌKON: Fighting Souls",
+    "hell_let_loose_vietnam": "Hell Let Loose: Vietnam"
   },
   "reddit_subreddits": {
     "gta": [
@@ -592,18 +593,19 @@
       "weekday": 3,
       "hour": 21,
       "minute": 22,
-      "game": "valorant",
+      "game": "hell_let_loose_vietnam",
       "region": "western",
       "source": "twitch",
-      "note": "Thu - VALORANT western, US-evening slot (23:22 CET ~= 17:22 EST) - timing A/B. Kept <=23:30 so the narrowed :07/:37 cron catches it before the Thu->Fri weekday boundary."
+      "note": "western hell_let_loose_vietnam (rotated in 2026-08-11: August release of hardcore 50v50 multiplayer shoot)"
     },
     {
       "weekday": 4,
       "hour": 9,
       "minute": 39,
-      "game": "valorant",
+      "game": "hell_let_loose_vietnam",
       "region": "western",
-      "source": "twitch"
+      "source": "twitch",
+      "note": "western hell_let_loose_vietnam (rotated in 2026-08-11: August release of hardcore 50v50 multiplayer shoot)"
     },
     {
       "weekday": 4,
@@ -627,18 +629,19 @@
       "weekday": 5,
       "hour": 20,
       "minute": 15,
-      "game": "valorant",
+      "game": "hell_let_loose_vietnam",
       "region": "asian",
       "source": "twitch",
-      "note": "Sat - VALORANT Asian-source A/B probe (Twitch)"
+      "note": "asian hell_let_loose_vietnam (rotated in 2026-08-11: August release of hardcore 50v50 multiplayer shoot)"
     },
     {
       "weekday": 6,
       "hour": 10,
       "minute": 41,
-      "game": "valorant",
+      "game": "hell_let_loose_vietnam",
       "region": "asian",
-      "source": "twitch"
+      "source": "twitch",
+      "note": "asian hell_let_loose_vietnam (rotated in 2026-08-11: August release of hardcore 50v50 multiplayer shoot)"
     },
     {
       "weekday": 6,
@@ -652,8 +655,8 @@
   ],
   "caption_strategy": "Lead with a curiosity/hype hook that makes a non-follower stop. Name the game plainly for search. Keep it 1-2 short lines. Always credit the streamer/clipper. End with the follow CTA. No generic mega-tags.",
   "hashtag_strategy": "4-5 niche tags matching the game (e.g. #gtarp #gta6 #nopixel for GTA; #valorant #valorantclips for VALORANT). Vary two per post. Avoid #gaming/#viral mega-tags.",
-  "learnings": "Data still extremely thin — zero follows or profile visits across 25 posts, so retention remains the only signal. **Prioritise western single-clip Twitch posts**: western retention (0.465) beats asian (0.316), and asian cells still sit below 8 posts so draw no conclusions there. **Valorant outperforms GTA on retention** (twitch|valorant 0.496 vs twitch|gta 0.422) and reaches higher (113 vs 86) — favour Valorant clips; GTA is acceptable western-only. Drop Splatoon Raiders immediately: reach collapses to ~30 and retention is 0.226. Hour 18 shows the highest reach (116) with solid retention (0.472); hour 11 also punches above average on views_per_reach (1.307) — schedule into those slots first. **Caption writers**: open with a visceral reaction hook (\"bro ACTUALLY did this 💀\", \"no way this is real\"), close every post with \"Follow @clipkroniek for daily clips 🎮\" — forcing profile taps is the entire job right now. Use #Valorant #GTA6 #Halo #gaming #clipkroniek. Smart-trim: trim:off leads on retention (0.415 vs 0.426 trim:on, 5 posts only) — gap is negligible, hold the test. Early-velocity: ev_arm:on (4 posts, retention 0.429) vs ev_arm:off (4 posts, retention 0.261) shows a promising gap but n=4 each — hold, do not conclude. Marvel Tokon and Halo have zero qualifying data yet; keep posting and reassess at 8+ posts.",
-  "next_review": "2026-08-11",
+  "learnings": "Data still very thin — zero follows or profile visits across 35 posts, so **retention is the only signal**. Favour **Valorant** above all: twitch|valorant leads retention (0.52) and reach (113) among cells with ≥8 posts; GTA is acceptable western-only (retention 0.42). **Drop Splatoon Raiders** — reach ~29, retention 0.27, both disqualifying. Halo and Marvel Tokon are below 8 posts each; keep posting, reassess next cycle. **Western single-clip Twitch posts** remain the only statistically usable format — hold everything else. For hours, only hour:10 clears 8 posts (retention 0.39, shares notable at 0.003); treat evening slots (20–21) as exploratory. **Caption writers**: open with visceral reaction hook (\"bro actually did this 💀 / no way this is real\"), close every post with \"Follow @clipkroniek for daily clips 🎮 #Valorant #GTA #HaloEvolved #gaming\". Smart-trim: trim:on shows higher retention (0.47 vs 0.42) but only 8 posts — hold the test, lean trim:off. Early-velocity: ev_arm:on (retention 0.43, 7 posts) vs ev_arm:off (retention 0.39, 10 posts) — marginal gap, keep running but do not conclude yet.",
+  "next_review": "2026-08-18",
   "discover_pages": 8,
   "game_hashtags": {
     "halo_campaign_evolved": [
@@ -679,6 +682,13 @@
       "#tagfighter",
       "#marvelgames",
       "#fightinggame"
+    ],
+    "hell_let_loose_vietnam": [
+      "#hellletloose",
+      "#vietnam",
+      "#50v50",
+      "#squadshooter",
+      "#hardcore"
     ]
   }
 }
