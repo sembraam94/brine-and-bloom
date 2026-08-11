@@ -738,6 +738,26 @@
         "follows": 0
       },
       "measured_at": "2026-08-11T05:33:57.103607+00:00"
+    },
+    {
+      "slot_key": "2026-223-w1-1817",
+      "date_utc": "2026-08-11T17:32:11.257254+00:00",
+      "local_date": "2026-08-11",
+      "weekday": 1,
+      "slot_hour": 18,
+      "format": "carousel",
+      "theme": "technique",
+      "title": "technique-building-a-fond-and-deglazing-for-pan-sauce",
+      "hashtags": [
+        "#pansauce",
+        "#cookingtechnique",
+        "#homecooking",
+        "#easyrecipes",
+        "#deglazing"
+      ],
+      "media_id": "18132068392636245",
+      "metrics": {},
+      "measured_at": null
     }
   ]
 }
