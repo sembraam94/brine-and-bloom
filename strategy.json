@@ -1,6 +1,6 @@
 {
-  "version": 8,
-  "updated": "2026-08-04",
+  "version": 9,
+  "updated": "2026-08-11",
   "account_start_date": "2026-06-20",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Cooking tips, recipes, and marinades with AI-styled ingredient photography. Audience is Europe-first, US a strong second. Goal: grow followers fast-but-safe by making every post highly shareable (sent to a friend) and saveable.",
@@ -14,42 +14,43 @@
     {
       "weekday": 1,
       "hour": 18,
-      "minute": 22,
+      "minute": 17,
       "format": "carousel",
-      "theme": "marinade",
-      "note": "Tue ~18h — best slot by reach (w1-18 avg 2.0, 5 posts). Marinade is co-leader on reach and brand-core. Retained as primary anchor."
+      "theme": "technique",
+      "note": "Tue ~18h — w1-18 is the strongest confirmed slot (avg reach 1.8, 6 posts). Technique leads on reach (1.8, 4 posts) and hasn't been featured in this slot before; diversifies away from marinade overload while testing technique's ceiling."
     },
     {
       "weekday": 2,
       "hour": 12,
-      "minute": 47,
+      "minute": 51,
       "format": "carousel",
       "theme": "quick-dinner",
-      "note": "Wed ~12h — w2-12 shows avg 2.0 reach on limited data (1 post). Quick-dinner has 2 posts at 2.0 reach and is a high save/send theme category; expanding to generate more signal. Lunchtime suits browse-and-save behaviour."
+      "note": "Wed ~12h — w2-12 shows 2.0 reach on 1 post; small sample but highest reach observed. Lunchtime browse-and-save behaviour suits quick-dinner save-bait. Need more posts here to confirm."
+    },
+    {
+      "weekday": 3,
+      "hour": 12,
+      "minute": 38,
+      "format": "carousel",
+      "theme": "marinade",
+      "note": "Thu ~12h — w3-12 avg reach 1.7 on 3 posts, solid mid-week slot. Marinade is brand-core and still the most-posted theme; keeping one weekly slot to maintain signal without overcrowding."
     },
     {
       "weekday": 4,
-      "hour": 19,
-      "minute": 8,
-      "format": "carousel",
-      "theme": "marinade",
-      "note": "Fri ~19h — w4-19 shows 2.0 reach (1 post). Friday evening is a strong save-for-weekend-cooking moment; marinade is ideal. Doubles down on top-reach theme."
-    },
-    {
-      "weekday": 6,
       "hour": 10,
-      "minute": 33,
+      "minute": 44,
       "format": "carousel",
-      "theme": "quick-dinner",
-      "note": "Sun ~10h — weekend morning, audience plans meals. Quick-dinner is save-bait for weeknight planning. Avoids the weak w5-11 Saturday slot (avg reach 1.5, 4 posts) by shifting to Sunday."
+      "theme": "technique",
+      "note": "Fri ~10h — w5-10 showed 2.0 reach (1 post, adjacent Saturday morning slot used as proxy). Friday morning browse before weekend cooking suits technique save-bait. Replaces weak w4-19 slot (reach dropped to 1.5 on 2 posts)."
     }
   ],
   "content_plan": {
-    "marinade": "One complete marinade built around a single protein or seasonal occasion. Slide 1: hero shot of the marinated, deeply coloured, glistening protein on a clean dark or neutral surface — pure food photography, zero text, numbers, or labels anywhere on the image. Slide 2: aesthetic flat-lay of raw marinade ingredients grouped loosely by colour and texture — purely photographic, nothing annotated. Slides 3-4: visual process contrast — protein submerging into the marinade, then the vivid colour and sheen transformation after marinating — no overlaid text or graphics of any kind. Final slide: finished plated dish in warm directional light, garnished but not cluttered. ALL ratios, quantities, timing, substitution tips, and step information belong in the caption exclusively.",
-    "quick-dinner": "A complete weeknight dinner built around one hero ingredient that comes together fast. Slide 1: hero shot of the finished dish plated beautifully — rich colour, clean surface, pure food photography with absolutely no text, numbers, or labels on the image. Slide 2: flat-lay of the raw ingredients loosely arranged by colour — purely photographic. Slides 3-4: a two-beat visual sequence showing one key technique moment (e.g. sear in pan, sauce going in) followed by the finished result — no text overlays of any kind. Final slide: close-up of texture and colour detail that makes the dish feel craveable and achievable. ALL ingredient quantities, timing, steps, swaps, and any written information belong in the caption only."
+    "technique": "One foundational cooking technique relevant to home cooks — e.g. how to build a fond, reverse-sear, bloom spices, or emulsify a pan sauce. Slide 1: hero shot of the dramatic visual payoff of the technique (e.g. a perfectly seared crust, a glossy emulsified sauce) — pure food photography, zero text, numbers, labels, or graphics anywhere on the image. Slide 2: flat-lay or close-up of the key tools or ingredients that make the technique work — purely photographic, nothing annotated. Slides 3-4: two-beat before/after visual sequence showing the technique mid-action and the finished result — no text overlays of any kind. Final slide: close-up detail of the texture, colour, or finish that makes the result unmistakably worth the technique. ALL explanations, ratios, timing, troubleshooting tips, and step-by-step instructions belong in the caption exclusively.",
+    "quick-dinner": "A complete weeknight dinner built around one hero ingredient that comes together fast. Slide 1: hero shot of the finished dish plated beautifully — rich colour, clean surface, pure food photography with absolutely no text, numbers, or labels on the image. Slide 2: flat-lay of the raw ingredients loosely arranged by colour — purely photographic. Slides 3-4: a two-beat visual sequence showing one key technique moment (e.g. sear in pan, sauce going in) followed by the finished result — no text overlays of any kind. Final slide: close-up of texture and colour detail that makes the dish feel craveable and achievable. ALL ingredient quantities, timing, steps, swaps, and any written information belong in the caption only.",
+    "marinade": "One complete marinade built around a single protein or seasonal occasion. Slide 1: hero shot of the marinated, deeply coloured, glistening protein on a clean dark or neutral surface — pure food photography, zero text, numbers, or labels anywhere on the image. Slide 2: aesthetic flat-lay of raw marinade ingredients grouped loosely by colour and texture — purely photographic, nothing annotated. Slides 3-4: visual process contrast — protein submerging into the marinade, then the vivid colour and sheen transformation after marinating — no overlaid text or graphics of any kind. Final slide: finished plated dish in warm directional light, garnished but not cluttered. ALL ratios, quantities, timing, substitution tips, and step information belong in the caption exclusively."
   },
-  "caption_strategy": "Open every caption with a one-line hook that names the exact dish and a tangible benefit (e.g. 'This 5-ingredient chipotle chicken marinade is the reason your meal prep actually tastes good'). Follow with 3-5 short numbered or line-broken steps or tips so the caption is genuinely useful and save-worthy on its own — all quantities, ratios, and timings live here, never on the image. End with a direct, low-friction send prompt ('Send this to whoever needs it this week') and a save prompt ('Save it before the weekend'). Write conversationally in second person. Use keyword-rich phrasing naturally throughout (e.g. 'easy marinade recipe', 'quick weeknight dinner') to aid search discovery. Keep total caption length between 150-280 words.",
-  "hashtag_strategy": "Use exactly 4-5 hashtags per post. Prioritise mid-size search-intent tags (300k-3M posts) that match the exact dish or technique, e.g. #marinaderecipe, #quickdinnerideas, #weeknightcooking, #easyrecipes. Add one niche brand-adjacent tag (#brineandbloom or #marinadeszn) to build a searchable library. Avoid mega-generic tags (#food, #cooking) — they bury a small account. Place hashtags at the end of the caption, not in a comment. Rotate 2-3 tags per post to avoid pattern penalties; only the dish-specific tag should stay constant.",
-  "learnings": "All engagement metrics are zero across 17 posts and all themes and slots — this is a reach floor problem, not a content-quality problem. The account is barely being indexed. Priority actions: (1) Sauce is the weakest theme by reach (1.5 avg, 6 posts) — retire it; redirect those slots to marinade and quick-dinner which both hold 2.0 reach. (2) Avoid Saturday 11h (w5-11, avg 1.5, 4 posts) — consistently worst slot. (3) Caption keyword density and save/send CTAs are the single highest-leverage lever right now; apply them rigorously every post. (4) Hold cadence at 4/week — do not increase until at least one post registers a non-zero save or send.",
-  "next_review": "2026-08-11"
+  "caption_strategy": "Every caption must open with a search-friendly hook sentence that names the dish or technique explicitly (e.g. 'This lemon-herb chicken marinade is the reason your weeknight dinners taste restaurant-quality') — Instagram indexes caption keywords for discovery. Follow with a save-prompt in the first three lines ('Save this before you forget it'). Then deliver genuine value: full ingredient quantities, ratios, timing, and step-by-step method in plain prose or a tight numbered list — all textual information that cannot appear on images must live here. Close with a conversational question to prompt comments ('What protein would you try this on?'). Keep total caption length 150–300 words; avoid emoji clutter but use 2–3 strategically to break up text.",
+  "hashtag_strategy": "Use exactly 4–5 hashtags placed at the end of the caption after a line break. Prioritise one mid-size niche tag directly matching the theme (e.g. #marinaderecipe, #cookingtechnique, #quickdinner), one slightly broader food tag (#homecooking or #weeknightdinner), one evergreen search tag (#easyrecipes or #cookingathome), and optionally one seasonal or ingredient-specific tag for discoverability. Avoid mega tags above 50M posts — they bury young accounts instantly. Rotate and track which combinations correlate with reach improvements as data accumulates.",
+  "learnings": "All engagement metrics (sends, saves, follows) remain at zero across 21 posts and all themes — the account has no meaningful signal yet beyond raw reach. Reach differences are small (1.0–2.0) and most slot data is thin (1–3 posts). Key actions: stop over-indexing on marinade (8 posts, no differentiation in engagement); rotate in technique which ties for highest reach (1.8) with more headroom. Retire sauce — lowest reach (1.5), 6 posts, zero engagement. Hold cadence at 4/week; do NOT increase until sends or saves register above zero. Prioritise search-keyword-rich captions and save-prompts as the primary lever since reach-to-follow conversion is also zero.",
+  "next_review": "2026-08-18"
 }
