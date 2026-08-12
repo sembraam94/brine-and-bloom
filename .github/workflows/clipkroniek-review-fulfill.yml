@@ -8,10 +8,14 @@
 name: Clipkroniek — review fulfill
 
 on:
-  schedule:
-    - cron: "*/10 7-13 * * *"     # morning slot window (UTC)
-    - cron: "*/10 15-23 * * *"    # evening slot window (UTC)
-    - cron: "*/10 0-2 * * *"      # catch late-window replies past midnight
+  # ⏸ POSTING PAUSED 2026-07-26 at the owner's request ("stop all posting for now").
+  # Crons off so a pending review can never be fulfilled into a live post.
+  # TO RESUME: uncomment the crons below AND set "paused": false in strategy.json.
+  #
+  # schedule:
+  #   - cron: "*/10 7-13 * * *"     # morning slot window (UTC)
+  #   - cron: "*/10 15-23 * * *"    # evening slot window (UTC)
+  #   - cron: "*/10 0-2 * * *"      # catch late-window replies past midnight
   workflow_dispatch:
     inputs:
       ping:

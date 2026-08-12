@@ -1,5 +1,6 @@
 {
   "version": 5,
+  "paused": true,
   "updated": "2026-08-11",
   "account_start_date": "2025-10-10",
   "timezone": "Europe/Amsterdam",

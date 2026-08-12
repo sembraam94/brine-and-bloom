@@ -614,9 +614,11 @@ def main():
     # Went-dark alarm (#21): the poster's 'no clip found' days exit 0 (a green run),
     # so a silently-stopped account would never surface. If the newest post is older
     # than went_dark_hours, fail loudly so the failed Actions run emails the owner.
+    # Suppressed while strategy.paused is true — the account is dark ON PURPOSE, so the
+    # alarm would just fail this run (and email the owner) every day of the pause.
     posts = history.get("posts", [])
     newest = max((p.get("date_utc") for p in posts if p.get("date_utc")), default=None)
-    if posts and newest and not dry:
+    if posts and newest and not dry and not strategy.get("paused"):
         try:
             age_h = (now_utc() - datetime.datetime.fromisoformat(newest)).total_seconds() / 3600.0
         except Exception:

@@ -2033,6 +2033,16 @@ def main():
             print("telegram not configured — TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID missing.")
         return
 
+    # KILL SWITCH (owner request 2026-07-26): stop ALL publishing. Belt-and-braces with
+    # the commented-out crons — even a manual dispatch, a stray cron, a re-enabled
+    # workflow or a pending Telegram review cannot publish while this is true.
+    # DRY_RUN / DISCOVER_ONLY still work (they never publish), so testing is unaffected.
+    # To resume: set "paused": false in strategy.json AND re-enable the crons.
+    if strategy.get("paused") and not (dry or discover_only):
+        print(f"[{BRAND_NAME}] PAUSED (strategy.paused=true) — not posting anything. "
+              "Set paused=false in strategy.json + re-enable the crons to resume.")
+        return
+
     if os.environ.get("REVIEW_FULFILL") == "1":
         fulfill_reviews(strategy, history, dry=dry)
         return
