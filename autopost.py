@@ -1114,6 +1114,15 @@ def main():
     dry = os.environ.get("DRY_RUN") == "1"
     force = os.environ.get("FORCE") == "1"
 
+    # KILL SWITCH (owner request 2026-07-26): stop ALL publishing. Belt-and-braces with
+    # the commented-out cron in post.yml — even a manual dispatch or a re-enabled
+    # workflow cannot publish while this is true. DRY_RUN still works (never publishes).
+    # To resume: set "paused": false in strategy.json AND re-enable the cron.
+    if strategy.get("paused") and not dry:
+        print(f"[{BRAND_NAME}] PAUSED (strategy.paused=true) — not posting anything. "
+              "Set paused=false in strategy.json + re-enable the cron to resume.")
+        return
+
     if force:
         slot, key = forced_slot(strategy)
         print("FORCE=1 — bypassing the schedule for this run.")
