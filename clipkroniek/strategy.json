@@ -1,7 +1,7 @@
 {
-  "version": 5,
+  "version": 6,
   "paused": true,
-  "updated": "2026-08-11",
+  "updated": "2026-08-18",
   "account_start_date": "2025-10-10",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Daily reposts of the best FRESH GTA V and VALORANT clips (with creator credit). Western/English-first audience; running a geo A/B (Western vs Asian-language source clips) to learn which converts. Optimize for reach and shares.",
@@ -46,7 +46,8 @@
     "halo_campaign_evolved": "Halo: Campaign Evolved",
     "splatoon_raiders": "Splatoon RAIDERS",
     "marvel_tokon_fighting_souls": "MARVEL TŌKON: Fighting Souls",
-    "hell_let_loose_vietnam": "Hell Let Loose: Vietnam"
+    "hell_let_loose_vietnam": "Hell Let Loose: Vietnam",
+    "arc_raiders": "ARC Raiders"
   },
   "reddit_subreddits": {
     "gta": [
@@ -540,19 +541,19 @@
       "weekday": 0,
       "hour": 21,
       "minute": 18,
-      "game": "marvel_tokon_fighting_souls",
+      "game": "arc_raiders",
       "region": "western",
       "source": "twitch",
-      "note": "western marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
+      "note": "western arc_raiders (rotated in 2026-08-18: Recent 2026 launch, free-to-play extraction shoote)"
     },
     {
       "weekday": 1,
       "hour": 9,
       "minute": 48,
-      "game": "marvel_tokon_fighting_souls",
+      "game": "arc_raiders",
       "region": "western",
       "source": "twitch",
-      "note": "western marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
+      "note": "western arc_raiders (rotated in 2026-08-18: Recent 2026 launch, free-to-play extraction shoote)"
     },
     {
       "weekday": 1,
@@ -576,19 +577,19 @@
       "weekday": 2,
       "hour": 20,
       "minute": 8,
-      "game": "marvel_tokon_fighting_souls",
+      "game": "arc_raiders",
       "region": "asian",
       "source": "twitch",
-      "note": "asian marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
+      "note": "asian arc_raiders (rotated in 2026-08-18: Recent 2026 launch, free-to-play extraction shoote)"
     },
     {
       "weekday": 3,
       "hour": 10,
       "minute": 27,
-      "game": "marvel_tokon_fighting_souls",
+      "game": "arc_raiders",
       "region": "asian",
       "source": "twitch",
-      "note": "asian marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
+      "note": "asian arc_raiders (rotated in 2026-08-18: Recent 2026 launch, free-to-play extraction shoote)"
     },
     {
       "weekday": 3,
@@ -612,19 +613,19 @@
       "weekday": 4,
       "hour": 18,
       "minute": 23,
-      "game": "marvel_tokon_fighting_souls",
+      "game": "arc_raiders",
       "region": "western",
       "source": "twitch",
-      "note": "western marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
+      "note": "western arc_raiders (rotated in 2026-08-18: Recent 2026 launch, free-to-play extraction shoote)"
     },
     {
       "weekday": 5,
       "hour": 11,
       "minute": 18,
-      "game": "marvel_tokon_fighting_souls",
+      "game": "arc_raiders",
       "region": "western",
       "source": "twitch",
-      "note": "western marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
+      "note": "western arc_raiders (rotated in 2026-08-18: Recent 2026 launch, free-to-play extraction shoote)"
     },
     {
       "weekday": 5,
@@ -648,16 +649,16 @@
       "weekday": 6,
       "hour": 19,
       "minute": 3,
-      "game": "marvel_tokon_fighting_souls",
+      "game": "arc_raiders",
       "region": "western",
       "source": "twitch",
-      "note": "western marvel_tokon_fighting_souls (rotated in 2026-08-04: Arc System Works fighting game launching early Aug)"
+      "note": "western arc_raiders (rotated in 2026-08-18: Recent 2026 launch, free-to-play extraction shoote)"
     }
   ],
   "caption_strategy": "Lead with a curiosity/hype hook that makes a non-follower stop. Name the game plainly for search. Keep it 1-2 short lines. Always credit the streamer/clipper. End with the follow CTA. No generic mega-tags.",
   "hashtag_strategy": "4-5 niche tags matching the game (e.g. #gtarp #gta6 #nopixel for GTA; #valorant #valorantclips for VALORANT). Vary two per post. Avoid #gaming/#viral mega-tags.",
-  "learnings": "Data still very thin — zero follows or profile visits across 35 posts, so **retention is the only signal**. Favour **Valorant** above all: twitch|valorant leads retention (0.52) and reach (113) among cells with ≥8 posts; GTA is acceptable western-only (retention 0.42). **Drop Splatoon Raiders** — reach ~29, retention 0.27, both disqualifying. Halo and Marvel Tokon are below 8 posts each; keep posting, reassess next cycle. **Western single-clip Twitch posts** remain the only statistically usable format — hold everything else. For hours, only hour:10 clears 8 posts (retention 0.39, shares notable at 0.003); treat evening slots (20–21) as exploratory. **Caption writers**: open with visceral reaction hook (\"bro actually did this 💀 / no way this is real\"), close every post with \"Follow @clipkroniek for daily clips 🎮 #Valorant #GTA #HaloEvolved #gaming\". Smart-trim: trim:on shows higher retention (0.47 vs 0.42) but only 8 posts — hold the test, lean trim:off. Early-velocity: ev_arm:on (retention 0.43, 7 posts) vs ev_arm:off (retention 0.39, 10 posts) — marginal gap, keep running but do not conclude yet.",
-  "next_review": "2026-08-18",
+  "learnings": "Data is still extremely thin (zero follows/visits across all posts; 29 total posts in the primary experiment), so **retention remains the only actionable signal**. Among cells with ≥8 posts: **Valorant** is the clear lead game — twitch|valorant hits retention 0.493 and reach 109, the best combination available; prioritise it in every scheduling slot possible. **Western region** (retention 0.446) comfortably beats **Asian** (0.378) — keep Asian slots but treat them as secondary. **GTA** retention (0.414) is acceptable filler. **Drop Splatoon Raiders immediately** — retention 0.272 and reach ~29 are disqualifying. **Halo** (retention 0.481, saves 0.003) and **Hell Let Loose / Arc Raiders** have no data yet — post and reassess. Hours 9 and 21 show best retention (0.457–0.460) among sub-8 cells; watch as they accumulate. **Smart-trim**: trim:on (retention 0.436) edges trim:off (0.422) but only 5 posts — hold test, default trim:off for now. **Early-velocity**: ev_arm:on (retention 0.436, views/reach 1.302) vs ev_arm:off (retention 0.425, views/reach 1.248) — slight positive signal but 7 vs 12 posts; keep running, do not conclude. **Caption writers**: open with visceral reaction hook (\"bro actually did this 💀 / there is no way\"), name the creator prominently, close with \"Follow @clipkroniek for daily clips 🎮 #Valorant #ArcRaiders #HaloEvolved #gaming\". Use search-friendly keywords in first line. No countdown data yet — keep testing.",
+  "next_review": "2026-08-25",
   "discover_pages": 8,
   "game_hashtags": {
     "halo_campaign_evolved": [
@@ -690,6 +691,14 @@
       "#50v50",
       "#squadshooter",
       "#hardcore"
+    ],
+    "arc_raiders": [
+      "#arcraiders",
+      "#extractionshooter",
+      "#newrelease",
+      "#multiplayer",
+      "#pve",
+      "#gunplay"
     ]
   }
 }
