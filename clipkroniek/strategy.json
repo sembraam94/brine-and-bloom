@@ -1,7 +1,7 @@
 {
-  "version": 6,
+  "version": 7,
   "paused": true,
-  "updated": "2026-08-18",
+  "updated": "2026-08-25",
   "account_start_date": "2025-10-10",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Daily reposts of the best FRESH GTA V and VALORANT clips (with creator credit). Western/English-first audience; running a geo A/B (Western vs Asian-language source clips) to learn which converts. Optimize for reach and shares.",
@@ -657,8 +657,8 @@
   ],
   "caption_strategy": "Lead with a curiosity/hype hook that makes a non-follower stop. Name the game plainly for search. Keep it 1-2 short lines. Always credit the streamer/clipper. End with the follow CTA. No generic mega-tags.",
   "hashtag_strategy": "4-5 niche tags matching the game (e.g. #gtarp #gta6 #nopixel for GTA; #valorant #valorantclips for VALORANT). Vary two per post. Avoid #gaming/#viral mega-tags.",
-  "learnings": "Data is still extremely thin (zero follows/visits across all posts; 29 total posts in the primary experiment), so **retention remains the only actionable signal**. Among cells with ≥8 posts: **Valorant** is the clear lead game — twitch|valorant hits retention 0.493 and reach 109, the best combination available; prioritise it in every scheduling slot possible. **Western region** (retention 0.446) comfortably beats **Asian** (0.378) — keep Asian slots but treat them as secondary. **GTA** retention (0.414) is acceptable filler. **Drop Splatoon Raiders immediately** — retention 0.272 and reach ~29 are disqualifying. **Halo** (retention 0.481, saves 0.003) and **Hell Let Loose / Arc Raiders** have no data yet — post and reassess. Hours 9 and 21 show best retention (0.457–0.460) among sub-8 cells; watch as they accumulate. **Smart-trim**: trim:on (retention 0.436) edges trim:off (0.422) but only 5 posts — hold test, default trim:off for now. **Early-velocity**: ev_arm:on (retention 0.436, views/reach 1.302) vs ev_arm:off (retention 0.425, views/reach 1.248) — slight positive signal but 7 vs 12 posts; keep running, do not conclude. **Caption writers**: open with visceral reaction hook (\"bro actually did this 💀 / there is no way\"), name the creator prominently, close with \"Follow @clipkroniek for daily clips 🎮 #Valorant #ArcRaiders #HaloEvolved #gaming\". Use search-friendly keywords in first line. No countdown data yet — keep testing.",
-  "next_review": "2026-08-25",
+  "learnings": "Data remains very thin (zero follows/visits across all 18+ posts; no cell yet converts past reach). **Retention is still the only signal.** Among cells ≥8 posts: **Valorant** leads everything — twitch|Valorant retention 0.619, reach 110, shares firing; prioritise every available slot. **Hour 21** (retention 0.589) and **hour 10** (retention 0.456, highest shares 0.0044) are your best posting windows — favour them. **Western** (retention 0.45) beats **Asian** (0.419) but Asian|Valorant (retention 0.583) is a genuine bright spot — keep those Asian Valorant slots. **Halo** (retention 0.481, saves 0.003 — best save rate in the dataset) earns its slots; keep it. **Drop Splatoon Raiders** — retention 0.272, reach ~29, dead weight. **Arc Raiders and Hell Let Loose** are new with no data yet; post and hold judgment. **Smart-trim**: trim:off (retention 0.444, reach 77.8) beats trim:on (0.436, reach 47) — keep trim OFF as default, pause the test. **Early-velocity**: ev_arm:on (retention 0.475, views/reach 1.322) vs ev_arm:off (retention 0.425, views/reach 1.248) — positive directional signal on both metrics in the unbiased cells; keep running, do not conclude yet (6 vs 12 posts). **Caption writers**: open with visceral hook (\"bro said no 💀 / there is literally no way\"), credit creator in line 2, close with \"Follow @clipkroniek 🎮 #Valorant #HaloEvolved #ArcRaiders #gaming\" — put the game name in line 1 for search.",
+  "next_review": "2026-09-01",
   "discover_pages": 8,
   "game_hashtags": {
     "halo_campaign_evolved": [
