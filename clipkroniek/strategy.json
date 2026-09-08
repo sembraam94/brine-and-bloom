@@ -1,7 +1,7 @@
 {
-  "version": 8,
+  "version": 9,
   "paused": true,
-  "updated": "2026-09-01",
+  "updated": "2026-09-08",
   "account_start_date": "2025-10-10",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Daily reposts of the best FRESH GTA V and VALORANT clips (with creator credit). Western/English-first audience; running a geo A/B (Western vs Asian-language source clips) to learn which converts. Optimize for reach and shares.",
@@ -657,8 +657,8 @@
   ],
   "caption_strategy": "Lead with a curiosity/hype hook that makes a non-follower stop. Name the game plainly for search. Keep it 1-2 short lines. Always credit the streamer/clipper. End with the follow CTA. No generic mega-tags.",
   "hashtag_strategy": "4-5 niche tags matching the game (e.g. #gtarp #gta6 #nopixel for GTA; #valorant #valorantclips for VALORANT). Vary two per post. Avoid #gaming/#viral mega-tags.",
-  "learnings": "Data is still very thin — only `region:western` (7 posts) and a handful of cross-cells clear the ≥8 threshold, so nearly everything below is directional only; hold firm conclusions for another week of posts.\n\n**Retention is still the only usable signal.** No follows, visits, or shares have converted at scale. Prioritise clips that watch through. Among valid cells: **Valorant** (retention 0.539, shares firing, reach 115) remains the clear leader — front-load every caption with \"Valorant\" as the first word for search. **Asian-language Valorant** (retention 0.583, shares 0.006) punches above western; keep those slots. Hour 18 is a danger zone (retention 0.336, reach 11) — avoid it. Hours 9–10 and 20–21 all show retention ≥0.47; favour them. **Smart-trim**: trim:on (retention 0.58, 2 posts only) looks promising but is too thin to act on — keep running both arms. **Early-velocity**: ev_arm:on (retention 0.445, views/reach 1.309) vs ev_arm:off (retention 0.515, views/reach 1.270) — EV arm shows no retention lift in unbiased cells; keep running but do not prioritise EV clips yet. **Arc Raiders and Hell Let Loose** have no data; post and hold. **Caption formula**: open line 1 with game name + visceral hook (\"Valorant 😭 bro said no\"), credit creator line 2, close with \"Follow @clipkroniek 🎮 #Valorant #ArcRaiders #HaloEvolved #gaming.\"",
-  "next_review": "2026-09-08",
+  "learnings": "Data is still extremely thin — `ab_readout` is empty and no cell clears the ≥8-post threshold, so **hold all firm conclusions**. Arc Raiders only rotated in 2026-08-18, Hell Let Loose Vietnam on 2026-08-11, and Halo Campaign Evolved on 2026-07-21; none have meaningful readout yet. Do not drop or favour any game, hour, or region based on current numbers. For smart-trim, countdown, and early-velocity (judge only ev_arm:on vs ev_arm:off), keep both arms running and record every post's retention — that remains your only usable signal at this follower count (28). **Action now:** open every caption with the game name as word one for search discoverability (e.g. \"Arc Raiders 😳 bro just clutched the extract —\"), credit creator on line 2, close with \"Follow @clipkroniek 🎮 #ArcRaiders #HaloEvolved #HellLetLoose #gaming.\" Favour clips with a clear visual peak so countdown hooks are testable. Post consistently across all current slots and return when ≥8 posts per cell exist.",
+  "next_review": "2026-09-15",
   "discover_pages": 8,
   "game_hashtags": {
     "halo_campaign_evolved": [
