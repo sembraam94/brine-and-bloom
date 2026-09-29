@@ -1,7 +1,7 @@
 {
-  "version": 15,
+  "version": 16,
   "paused": true,
-  "updated": "2026-09-22",
+  "updated": "2026-09-29",
   "account_start_date": "2026-06-20",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Cooking tips, recipes, and marinades with AI-styled ingredient photography. Audience is Europe-first, US a strong second. Goal: grow followers fast-but-safe by making every post highly shareable (sent to a friend) and saveable.",
@@ -15,43 +15,43 @@
     {
       "weekday": 1,
       "hour": 18,
-      "minute": 23,
+      "minute": 17,
       "format": "carousel",
       "theme": "quick-dinner",
-      "note": "w1-18 is the highest-volume confirmed slot (7 posts, avg reach 1.7) — strongest and most reliable signal in the dataset. Anchoring quick-dinner here as the account's best-tested reach theme on its best-tested window."
+      "note": "w1-18 is the highest-volume confirmed slot (7 posts, avg reach 1.7) — most reliable signal in the dataset. Anchor the account's best-reach theme here."
     },
     {
       "weekday": 2,
       "hour": 12,
-      "minute": 44,
+      "minute": 51,
       "format": "carousel",
       "theme": "marinade",
-      "note": "w2-12 reached 2.0 on 1 post — highest single-slot reach observed. Sample is thin but promising; brand-core marinade theme earns continued testing here to build a reliable signal."
+      "note": "w2-12 reached 2.0 on 1 post — highest single-slot reach observed. Thin sample but promising; brand-core marinade theme earns continued testing to build signal."
     },
     {
       "weekday": 3,
       "hour": 12,
-      "minute": 31,
+      "minute": 38,
       "format": "carousel",
       "theme": "technique",
-      "note": "w3-12 avg reach 1.7 on 3 posts — confirmed mid-week lunchtime performer, tied for second-best volume slot. Technique carousels are natural save-bait; continuing this pairing to deepen the sample."
+      "note": "w3-12 avg reach 1.7 on 3 posts — confirmed mid-week lunchtime performer. Technique carousels are natural save-bait; continuing this pairing to deepen the sample."
     },
     {
       "weekday": 4,
       "hour": 10,
-      "minute": 52,
+      "minute": 44,
       "format": "carousel",
       "theme": "quick-dinner",
-      "note": "w5-10 reached 2.0 on 1 post. Proxying to Thursday morning as an adjacent browse window. Quick-dinner earns a second weekly slot as the account's highest-reach theme; sauce (avg reach 1.5, 6 posts, zero engagement lift) remains benched."
+      "note": "w5-10 reached 2.0 on 1 post; proxying to Thursday morning as an adjacent high-browse window. Quick-dinner earns a second slot as the account's highest-reach theme. Sauce (avg reach 1.5, 6 posts, zero engagement) remains retired."
     }
   ],
   "content_plan": {
     "quick-dinner": "A complete weeknight dinner built around one hero ingredient that comes together fast. Slide 1: hero shot of the finished dish — rich colour, glossy sauce, clean negative space, pure food photography with absolutely no text, numbers, or labels anywhere on the image. Slide 2: flat-lay of raw ingredients loosely arranged by colour and texture — purely photographic, nothing annotated. Slides 3–4: two-beat visual sequence showing one key technique moment (e.g. a vigorous sear, sauce reducing in pan) followed by the plated result — no text overlays of any kind. Final slide: tight close-up of texture and colour that makes the dish feel craveable and achievable. ALL ingredient quantities, timing, steps, swaps, and any written information belong in the caption only.",
     "marinade": "One complete marinade built around a single protein or seasonal occasion. Slide 1: hero shot of the marinated, deeply coloured, glistening protein on a clean dark or neutral surface — pure food photography, zero text, numbers, or labels anywhere. Slide 2: aesthetic flat-lay of raw marinade ingredients grouped loosely by colour and texture — purely photographic, nothing annotated. Slides 3–4: visual process contrast — protein submerging into the marinade liquid, then the vivid colour and sheen transformation after marinating — no overlaid text or graphics. Final slide: finished plated dish in warm directional light, garnished but not cluttered. ALL ratios, quantities, timing, substitution tips, and step information belong in the caption exclusively.",
-    "technique": "One foundational cooking technique relevant to home cooks — e.g. how to build a fond, reverse-sear, bloom spices, or emulsify a pan sauce. Slide 1: hero shot of the dramatic visual payoff of the technique (e.g. a perfectly seared crust, a glossy emulsified sauce) — pure food photography, zero text, numbers, labels, or graphics anywhere. Slide 2: flat-lay or close-up of the key tools or ingredients that make the technique work — purely photographic, nothing annotated. Slides 3–4: two-beat before/after visual sequence showing the technique mid-action and the finished result — no text overlays. Final slide: close-up detail of texture, colour, or finish that makes the result unmistakably worth the technique. ALL explanations, ratios, timing, troubleshooting tips, and step-by-step instructions belong in the caption exclusively."
+    "technique": "One foundational cooking technique relevant to home cooks — e.g. how to build a fond, reverse-sear, bloom spices, or emulsify a pan sauce. Slide 1: hero shot of the dramatic visual payoff of the technique (e.g. a perfectly seared crust, a glossy emulsified sauce) — pure food photography, zero text, numbers, labels, or graphics anywhere. Slide 2: flat-lay or close-up of the key tools or ingredients that make the technique work — purely photographic, nothing annotated. Slides 3–4: two-beat before/after visual sequence showing the technique mid-action and the finished result — no text overlays. Final slide: close-up detail of texture, colour, or finish that makes the result unmistakably worth learning the technique. ALL explanations, ratios, timing, troubleshooting tips, and step-by-step instructions belong in the caption exclusively."
   },
-  "caption_strategy": "All sends, saves, and follows are zero across every theme and slot after 22 posts — the account is reaching only 1–2 people per post, virtually all of whom are likely the account owner. This is a distribution problem, not a content problem yet. Prioritise search-discoverability in every caption: open with a keyword-rich first line (e.g. 'Easy 20-minute lemon garlic chicken marinade') so the post surfaces in Instagram search and Explore. Include a clear, specific save-prompt ('Save this before your next grocery run') and a share-prompt ('Send this to someone who always asks what to make for dinner'). Write in a warm, direct tone. Keep captions between 80–150 words: enough context to be useful, short enough to read in full. End with a single genuine question to invite comments.",
-  "hashtag_strategy": "Use 3–5 hashtags per post. Avoid massive generic tags (over 5M posts) where new accounts are invisible. Target a mix of one mid-size culinary tag (500K–2M posts, e.g. #marinaderecipe, #weeknightdinner), one smaller niche tag (under 300K, e.g. #brineandbloom, #homecookstips), and one seasonal or ingredient-specific tag (e.g. #chickenmarinade, #easypastasauce). Place hashtags at the end of the caption rather than in a comment. Rotate tags post-to-post to avoid repetition penalties. Do not treat hashtags as the primary growth lever — keyword-rich captions and saves/sends matter far more at this stage.",
-  "learnings": "All engagement metrics are zero across all 22 posts and all themes — reach is 1.0–2.0, consistent with posts being seen almost exclusively by the account owner. No theme or slot has proven superiority on the signals that matter (sends, saves, follows). Hold cadence at 4 posts/week; do not ramp. Priority action: confirm the account is set to Professional/Creator, that Insights are enabled, and that at least 3–5 real external accounts have been shown the content to seed genuine reach. Until non-follower reach registers, all slot and theme optimisation is premature. Focus captions on search keywords and explicit save/share prompts.",
-  "next_review": "2026-09-29"
+  "caption_strategy": "Every caption must earn a save or a send before it earns a like. Open with a single punchy hook sentence that names the dish or technique and the core benefit (speed, flavour payoff, a surprising trick) — make it search-friendly by including the ingredient or method name naturally. Follow with the full, usable recipe or technique breakdown in the body: quantities, ratios, timing, and swaps all belong here, never on the image. Close with a direct, low-friction CTA that prompts a share or save — e.g. 'Save this before your next grocery run' or 'Send this to the person who always asks what to make for dinner.' Use conversational but confident tone; avoid vague filler phrases. Keep total caption length to 150–250 words.",
+  "hashtag_strategy": "Use exactly 3–5 hashtags per post, placed at the end of the caption. Prioritise mid-size, ingredient- or technique-specific tags (e.g. #ChickenMarinade, #WeeknightDinner, #CookingTips) over massive generic tags where the account will be buried. Include one broad anchor tag (#HomeCooking or #EasyRecipes) and one niche tag tied to the specific dish or method. Rotate tags post to post to test which drive the most non-follower reach; do not repeat the exact same set two posts in a row. Avoid branded or invented hashtags with no search volume.",
+  "learnings": "All 22 posts show zero sends, saves, and follows — reach is real but nothing is converting. This is a caption and hook problem, not a slot or theme problem. Priority fix: rewrite captions to lead with a concrete benefit hook and close with an explicit save-or-send CTA every single post. Technique and quick-dinner carousels show the best reach (avg 1.7); double down on these. Retire sauce entirely (6 posts, lowest reach, no engagement). w0-19 (avg reach 1.3) and w6-10 (reach 1.0) are the weakest slots — dropped. Hold cadence at 4 posts/week until saves or sends register.",
+  "next_review": "2026-10-06"
 }
