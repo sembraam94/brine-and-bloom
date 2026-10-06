@@ -1,7 +1,7 @@
 {
-  "version": 12,
+  "version": 13,
   "paused": true,
-  "updated": "2026-09-29",
+  "updated": "2026-10-06",
   "account_start_date": "2025-10-10",
   "timezone": "Europe/Amsterdam",
   "brand_focus": "Daily reposts of the best FRESH GTA V and VALORANT clips (with creator credit). Western/English-first audience; running a geo A/B (Western vs Asian-language source clips) to learn which converts. Optimize for reach and shares.",
@@ -657,8 +657,8 @@
   ],
   "caption_strategy": "Lead with a curiosity/hype hook that makes a non-follower stop. Name the game plainly for search. Keep it 1-2 short lines. Always credit the streamer/clipper. End with the follow CTA. No generic mega-tags.",
   "hashtag_strategy": "4-5 niche tags matching the game (e.g. #gtarp #gta6 #nopixel for GTA; #valorant #valorantclips for VALORANT). Vary two per post. Avoid #gaming/#viral mega-tags.",
-  "learnings": "Data is still extremely thin — `ab_readout` is empty and no cell clears the ≥8-post threshold, so **hold all firm conclusions and keep every arm live**. Arc Raiders (rotated 2026-08-18) is brand-new and trending as a free-to-play extraction shooter — prioritise clips with clean escapes, clutch moments, or chaotic multi-squad wipes for maximum shareability. Hell Let Loose Vietnam (2026-08-11) suits cinematic, high-chaos squad plays. Halo Campaign Evolved (2026-07-21) benefits from nostalgia hooks. For all posts: open with game name as word one (e.g. \"Arc Raiders 😳 this extract should NOT have worked —\"), credit creator on line 2, close with \"Follow @clipkroniek 🎮\" plus relevant hashtags (#ArcRaiders #HaloEvolved #HellLetLooseVietnam #GamingClips). Log avg\\_retention every post — it remains your only usable quality signal. Keep smart-trim, countdown, and ev\\_arm:on/off all running; judge early-velocity exclusively on ev\\_arm:on vs ev\\_arm:off cells. Return once ≥8 posts per cell exist.",
-  "next_review": "2026-10-06",
+  "learnings": "Data is still extremely thin — `ab_readout` is empty and no cell clears the ≥8-post threshold, so hold all firm conclusions and keep every arm live. Arc Raiders is your freshest slot (rotated 2026-08-18, free-to-play extraction shooter) — prioritise clips showing clean extractions under fire, last-second squad wipes, or chaotic multi-team collisions; these drive shares. Hell Let Loose Vietnam suits slow-burn cinematic openers that erupt into chaos. Halo Campaign Evolved rewards nostalgia hooks referencing the original. Caption formula for every post: game name as word one (e.g. \"Arc Raiders 😳 this extract was COOKED —\"), creator credit line 2, close with \"Follow @clipkroniek 🎮\" + tight hashtags (#ArcRaiders #HaloEvolved #HellLetLooseVietnam #GamingClips #ClipOfTheDay). Log avg_retention on every post — it is your only reliable quality signal right now. Keep smart-trim, countdown, and ev_arm:on/off all running; judge early-velocity exclusively on ev_arm:on vs ev_arm:off cells, never on ev:on/off. Return once ≥8 posts per cell exist.",
+  "next_review": "2026-10-13",
   "discover_pages": 8,
   "game_hashtags": {
     "halo_campaign_evolved": [
